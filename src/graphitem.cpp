@@ -47,7 +47,7 @@ void GraphItem::paint(QPainter *p)
     if (maxV <= 0) {
         for (const QVariant &v : m_values)
             maxV = qMax(maxV, v.toReal());
-        maxV = qMax(maxV * 1.1, m_minSpan);
+        maxV = qMax(maxV * qreal(1.1), m_minSpan);
     }
 
     const int cap = qMax(m_capacity, n);
