@@ -235,9 +235,18 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
             }
     if (!bat.isEmpty()) {
         s.battCapacity = readAll(bat + QStringLiteral("/capacity")).trimmed().toInt();
-        s.battCurrentA = readAll(bat + QStringLiteral("/current_now")).trimmed().toLongLong() / 1e6;
-        s.battVoltageV = readAll(bat + QStringLiteral("/voltage_now")).trimmed().toLongLong() / 1e6;
-        const QByteArray t = readAll(bat + QStringLiteral("/temp")).trimmed();
+        // Standard sysfs first; older MediaTek exposes only CamelCase legacy
+        // names in different units (mA/mV instead of µA/µV).
+        const QByteArray cur = readAll(bat + QStringLiteral("/current_now")).trimmed();
+        s.battCurrentA = cur.isEmpty()
+            ? readAll(bat + QStringLiteral("/BatteryAverageCurrent")).trimmed().toLongLong() / 1e3
+            : cur.toLongLong() / 1e6;
+        const QByteArray vol = readAll(bat + QStringLiteral("/voltage_now")).trimmed();
+        s.battVoltageV = vol.isEmpty()
+            ? readAll(bat + QStringLiteral("/batt_vol")).trimmed().toLongLong() / 1e3
+            : vol.toLongLong() / 1e6;
+        QByteArray t = readAll(bat + QStringLiteral("/temp")).trimmed();
+        if (t.isEmpty()) t = readAll(bat + QStringLiteral("/batt_temp")).trimmed();
         s.battTempC = t.toInt() / 10.0;
         s.battStatus = QString::fromLatin1(readAll(bat + QStringLiteral("/status")).trimmed());
         s.battPowerW = qAbs(s.battCurrentA) * s.battVoltageV;

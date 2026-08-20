@@ -208,7 +208,8 @@ QVariantList SysMon::storageHardware() const
 
     const QDir blk(QStringLiteral("/sys/block"));
     for (const QString &name : blk.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-        const bool mmc = name.startsWith(QLatin1String("mmcblk")) && !name.contains(QLatin1Char('p'));
+        const bool mmc = name.startsWith(QLatin1String("mmcblk")) && !name.contains(QLatin1Char('p'))
+                         && !name.contains(QLatin1String("boot")) && !name.contains(QLatin1String("rpmb"));
         const bool sd = name.startsWith(QLatin1String("sd")) && name.size() == 3;
         if (!mmc && !sd)
             continue;
@@ -220,7 +221,8 @@ QVariantList SysMon::storageHardware() const
 
         if (mmc) {
             const QString type = rd(dev + QStringLiteral("type"));
-            m.insert(QStringLiteral("bus"), type.isEmpty() ? QStringLiteral("eMMC") : type.toUpper());
+            m.insert(QStringLiteral("bus"),
+                     type.isEmpty() || type == QLatin1String("MMC") ? QStringLiteral("eMMC") : type.toUpper());
             m.insert(QStringLiteral("vendor"), mmcVendor(rd(dev + QStringLiteral("manfid"))));
             m.insert(QStringLiteral("model"), rd(dev + QStringLiteral("name")));
             m.insert(QStringLiteral("serial"), rd(dev + QStringLiteral("serial")));
