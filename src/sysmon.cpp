@@ -700,6 +700,48 @@ QVariantMap SysMon::memoryDetail() const
         rows.append(r);
     }
     m.insert(QStringLiteral("rows"), rows);
+
+    // DDR type from the bootloader-populated device-tree property (big-endian).
+    // The LPDDR manufacturer (JEDEC MR5) is read into SMEM by the bootloader but
+    // is not surfaced to userspace on this platform.
+    QFile dt(QStringLiteral("/sys/firmware/devicetree/base/memory/ddr_device_type"));
+    if (dt.open(QIODevice::ReadOnly)) {
+        const QByteArray b = dt.read(4);
+        if (b.size() == 4) {
+            const quint32 code = (quint8(b[0]) << 24) | (quint8(b[1]) << 16)
+                               | (quint8(b[2]) << 8) | quint8(b[3]);
+            m.insert(QStringLiteral("ddrTypeCode"), code);
+            static const QHash<quint32, QString> names = {
+                {0, QStringLiteral("LPDDR1")}, {1, QStringLiteral("LPDDR2")},
+                {2, QStringLiteral("PCDDR2")}, {3, QStringLiteral("PCDDR3")},
+                {4, QStringLiteral("LPDDR3")}, {6, QStringLiteral("LPDDR4")},
+                {7, QStringLiteral("LPDDR4X")}, {8, QStringLiteral("LPDDR5")},
+                {9, QStringLiteral("LPDDR5X")} };
+            const QString nm = names.value(code);
+            if (!nm.isEmpty())
+                m.insert(QStringLiteral("ddrType"), nm);
+        }
+    }
+    // physical memory regions the kernel sees (#address-cells=2, #size-cells=2
+    // => 16 bytes/entry, big-endian). This is the address map, not the die layout.
+    QFile reg(QStringLiteral("/sys/firmware/devicetree/base/memory/reg"));
+    if (reg.open(QIODevice::ReadOnly)) {
+        const QByteArray r = reg.readAll();
+        QVariantList regions;
+        auto be64 = [](const QByteArray &d, int o) {
+            quint64 v = 0;
+            for (int i = 0; i < 8; ++i) v = (v << 8) | quint8(d[o + i]);
+            return v;
+        };
+        for (int o = 0; o + 16 <= r.size(); o += 16) {
+            QVariantMap e;
+            e.insert(QStringLiteral("base"), (double)be64(r, o));
+            e.insert(QStringLiteral("size"), (double)be64(r, o + 8));
+            regions.append(e);
+        }
+        if (!regions.isEmpty())
+            m.insert(QStringLiteral("regions"), regions);
+    }
     return m;
 }
 

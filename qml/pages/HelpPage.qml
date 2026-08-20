@@ -59,7 +59,11 @@ Page {
                 { t: qsTr("Virtual (VmSize)"), d: qsTr("Total address space reserved, most of it never backed by RAM. Almost always much larger than RSS.") },
                 { t: "Swap", d: qsTr("Process memory pushed out to swap/zram under pressure.") },
                 { t: qsTr("Available"), d: qsTr("RAM that can be handed out without swapping (MemAvailable) — the honest 'free' figure, unlike raw MemFree.") },
-                { t: qsTr("Cached"), d: qsTr("File contents kept in RAM to speed re-reads; reclaimable on demand.") }
+                { t: qsTr("Cached"), d: qsTr("File contents kept in RAM to speed re-reads; reclaimable on demand.") },
+                { t: qsTr("LPDDR"), d: qsTr("Low-Power DDR — the mobile DRAM standard. The type (e.g. LPDDR4X, LPDDR5) fixes the clock range, bus width and command set. Read here from the bootloader's device-tree entry.") },
+                { t: qsTr("Mode registers (MR5–MR8)"), d: qsTr("Small on-die registers a DRAM reports at boot: MR5 = manufacturer, MR6 = revision, MR8 = density and I/O width. The bootloader reads them into SMEM, but this platform does not surface them to software — so maker and organisation stay unknown.") },
+                { t: qsTr("Ranks / channels / banks"), d: qsTr("How the DRAM is built: a package holds one or more channels (independent buses), each channel one or more ranks (sets of dies selected together), each die a fixed number of banks. This organisation is a JEDEC/datasheet property of the part, not a runtime-readable value here.") },
+                { t: qsTr("Physical memory map"), d: qsTr("The address regions the kernel maps, carved around firmware-reserved areas. It reflects how RAM sits in the address space — not the chip's internal rank/channel layout.") }
             ]
         },
         {
@@ -206,7 +210,10 @@ Page {
                 { t: qsTr("VCONN"), d: qsTr("Power (on the unused CC2 pin) that feeds the active chip inside an electronically-marked cable, so it can answer identity queries.") },
                 { t: qsTr("e-marker"), d: qsTr("A chip built into higher-rated USB-C cables that declares the cable's current rating, data speed and a coarse length. Read over PD, not from the wires.") },
                 { t: qsTr("SOP / SOP′ / SOP″"), d: qsTr("PD packet targets: SOP addresses the device at the far end, SOP′/SOP″ address the cable's plugs (the e-markers). Discover Identity on SOP′ reads the cable.") },
-                { t: qsTr("TDR"), d: qsTr("Time-Domain Reflectometry: send a fast edge and time its reflection to compute cable length and locate faults. Needs PHY support; phone USB PHYs expose none, so length is not measurable here.") }
+                { t: qsTr("TDR"), d: qsTr("Time-Domain Reflectometry: send a fast edge and time its reflection to compute cable length and locate faults. Needs PHY support; phone USB PHYs expose none, so length is not measurable here.") },
+                { t: qsTr("Cable data on this device"), d: qsTr("The charger stack (qpnp-pdphy in the PMIC) exposes no cable node, so an e-marker's rating, length and speed cannot be read — Discover Identity/SOP′ is not surfaced. A mainline-tcpm kernel would show it. For real cable data, a dedicated USB-C PD analyzer / cable tester reads the e-marker independently of the phone.") },
+                { t: qsTr("Open-ended cable"), d: qsTr("USB-C detects an attachment from the far end's CC resistors. A cable with nothing plugged into its other end is electrically invisible — the port reports no partner.") },
+                { t: qsTr("Readable PD/Type-C state"), d: qsTr("What this device does expose — the CC current advertisement, PD/Type-C revision and VCONN — appears under Battery → Charging when a charger is attached.") }
             ]
         },
         {

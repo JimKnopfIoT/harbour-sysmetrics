@@ -99,9 +99,8 @@ function mem() {
     for (var i = 0; i < mrows.length; ++i)
         rows.push(row(mrows[i].key, sysmon.fmtBytes(mrows[i].bytes)))
     var used = sysmon.memTotal - sysmon.memAvailable
-    return { title: qsTr("RAM"), helpTopics: ["mem"], sections: [
+    var sections = [
         { title: qsTr("Summary"),
-          note: qsTr("RAM chip vendor/speed are not exposed by the kernel on ARM devices."),
           bars: [ { label: qsTr("Used"), value: used, max: sysmon.memTotal,
                     caption: sysmon.fmtBytes(used) + " / " + sysmon.fmtBytes(sysmon.memTotal) } ],
           rows: [
@@ -110,9 +109,34 @@ function mem() {
             row(qsTr("Cached"), sysmon.fmtBytes(sysmon.cached)),
             row(qsTr("Buffers"), sysmon.fmtBytes(sysmon.buffers)),
             row(qsTr("Swap used"), sysmon.fmtBytes(sysmon.swapUsed) + " / " + sysmon.fmtBytes(sysmon.swapTotal))
-          ]},
-        { title: qsTr("meminfo (full)"), rows: rows }
-    ]}
+          ]}
+    ]
+
+    // memory device: what is and isn't exposed for the DRAM itself
+    var devRows = []
+    if (d.ddrType)
+        devRows.push(row(qsTr("Type"), d.ddrType + (d.ddrTypeCode !== undefined ? "  (code " + d.ddrTypeCode + ")" : ""), {mono:true}))
+    else if (d.ddrTypeCode !== undefined)
+        devRows.push(row(qsTr("Type"), qsTr("DDR code %1 (unmapped)").arg(d.ddrTypeCode), {mono:true}))
+    devRows.push(row(qsTr("Manufacturer"), qsTr("not exposed — JEDEC MR5, read by the bootloader into SMEM, not surfaced here"), {active:false}))
+    devRows.push(row(qsTr("Organisation (ranks / channels / dies)"), qsTr("not exposed — a JEDEC/datasheet property of the die (MR5–MR8), not a runtime register here"), {active:false}))
+    sections.push({ title: qsTr("Memory device"),
+        note: qsTr("The DRAM type is read from the bootloader-populated device tree. The chip's maker and internal organisation are not exposed to software on this platform."),
+        rows: devRows })
+
+    // physical memory map (address regions the kernel sees — not the die layout)
+    var regs = d.regions || []
+    if (regs.length) {
+        var rrows = []
+        for (var r = 0; r < regs.length; ++r)
+            rrows.push(row("0x" + regs[r].base.toString(16), sysmon.fmtBytes(regs[r].size), {mono:true}))
+        sections.push({ title: qsTr("Physical memory map"),
+            note: qsTr("The address regions the kernel maps, carved around reserved firmware areas — this is the address layout, not the chip's rank/channel structure."),
+            rows: rrows })
+    }
+
+    sections.push({ title: qsTr("meminfo (full)"), rows: rows })
+    return { title: qsTr("RAM"), helpTopics: ["mem"], sections: sections }
 }
 
 function storage() {
@@ -589,16 +613,6 @@ function usb() {
             s.push({ title: title, rows: drows })
         }
     }
-    s.push({ title: qsTr("Cable — what this device exposes"),
-        note: qsTr("Cable rating, length and a cable check were all investigated. Concepts (PD, e-marker, TDR, CC …) are in the glossary — swipe left. These are the concrete findings on this hardware."),
-        rows: [
-            row(qsTr("e-marker (rating/length/speed)"), qsTr("not exposed — the charger stack (qpnp-pdphy in the PMIC) has no port0-cable node; Discover Identity/SOP′ is not surfaced. A mainline-tcpm kernel would show it.")),
-            row(qsTr("Cable length"), qsTr("not derivable — no e-marker length here, and no software TDR on the USB PHY.")),
-            row(qsTr("Open-ended cable"), qsTr("electrically invisible — with nothing on the far end the port reports no partner (confirmed on this device).")),
-            row(qsTr("Live PD/Type-C data"), qsTr("CC current, PD/Type-C revision and VCONN are read under Battery → Charging when a charger is attached.")),
-            row(qsTr("For real cable data"), qsTr("use a dedicated USB-C PD analyzer / cable tester — it reads the e-marker independently of the phone kernel."))
-        ]})
-
     return { title: qsTr("USB"), helpTopics: ["usb"], sections: s }
 }
 
