@@ -33,3 +33,6 @@ tools/
 
 # Local data / captures
 *.log
+
+# Tester screenshots / local media — never publish
+media/

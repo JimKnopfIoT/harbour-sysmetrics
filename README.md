@@ -12,6 +12,29 @@ Tested on a Sony Xperia 10 III. The hardware readouts are written to degrade
 gracefully on other devices — where a value is not exposed by the kernel, the
 app says so instead of guessing.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td><img src="screenshots/01.png" width="150"></td>
+    <td><img src="screenshots/02.png" width="150"></td>
+    <td><img src="screenshots/03.png" width="150"></td>
+    <td><img src="screenshots/04.png" width="150"></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/05.png" width="150"></td>
+    <td><img src="screenshots/06.png" width="150"></td>
+    <td><img src="screenshots/07.png" width="150"></td>
+    <td><img src="screenshots/08.png" width="150"></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/09.png" width="150"></td>
+    <td><img src="screenshots/10.png" width="150"></td>
+    <td><img src="screenshots/11.png" width="150"></td>
+    <td><img src="screenshots/12.png" width="150"></td>
+  </tr>
+</table>
+
 ## What it shows
 
 - **Processes** — a live list sorted by CPU, with a collapsible top-10 view. The
@@ -42,7 +65,7 @@ app says so instead of guessing.
     positioning sensors.
 - **Context glossary** — every detail page carries a swipe-left glossary that
   explains exactly the terms on that page.
-- **German translation** throughout.
+- **English and German**, switchable in Settings (or follow the system locale).
 
 ## Optional root mode
 

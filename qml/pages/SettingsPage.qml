@@ -68,6 +68,36 @@ Page {
                 onClicked: sysmon.paused = checked
             }
 
+            SectionHeader { text: qsTr("Language") }
+            ComboBox {
+                id: langCombo
+                width: page.width
+                label: qsTr("Language")
+                currentIndex: applang.language === "de" ? 1 : applang.language === "en" ? 2 : 0
+                menu: ContextMenu {
+                    MenuItem { text: qsTr("System default") }
+                    MenuItem { text: "Deutsch" }
+                    MenuItem { text: "English" }
+                }
+                onCurrentIndexChanged: {
+                    var v = currentIndex === 1 ? "de" : currentIndex === 2 ? "en" : "system"
+                    if (v !== applang.language) {
+                        applang.language = v
+                        langHint.visible = true
+                    }
+                }
+            }
+            Label {
+                id: langHint
+                visible: false
+                x: Theme.horizontalPageMargin
+                width: page.width - 2 * Theme.horizontalPageMargin
+                wrapMode: Text.Wrap
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: Diag.amber
+                text: qsTr("Restart the app to apply the language.")
+            }
+
             SectionHeader { text: qsTr("Root mode") }
             Label {
                 x: Theme.horizontalPageMargin

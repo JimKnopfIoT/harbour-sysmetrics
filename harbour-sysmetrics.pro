@@ -22,6 +22,7 @@ VERSION_HEADER_LINES = \
 INCLUDEPATH += src/generated
 
 HEADERS += \
+    src/applang.h \
     src/sampler.h \
     src/sysmon.h \
     src/procmodel.h \
