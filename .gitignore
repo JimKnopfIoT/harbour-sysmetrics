@@ -37,3 +37,6 @@ tools/*
 
 # Tester screenshots / local media — never publish
 media/
+
+# built binary (bare name)
+harbour-sysmetrics
