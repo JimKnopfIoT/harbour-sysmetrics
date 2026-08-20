@@ -71,10 +71,12 @@ app says so instead of guessing.
 
 A few things — inspecting foreign or sandboxed processes in full, and reading
 the charger handshake from the kernel ring buffer — need privileges the app does
-not have as a normal user. For those, an **optional** privileged helper can be
-run as a system service (`data/harbour-sysmetrics-helper.service`, installed but
-not enabled). It is strictly additive: the whole app builds and runs without it,
-and nothing leaves the device either way.
+not have as a normal user. For those, a switch in Settings (off by default)
+starts an **optional** privileged helper service
+(`data/harbour-sysmetrics-helper.service`, never enabled at boot; a polkit rule
+scopes the switch to exactly this unit). The helper exits by itself when the app
+is gone. It is strictly additive: the whole app builds and runs without it, and
+nothing leaves the device either way.
 
 ## Privacy
 

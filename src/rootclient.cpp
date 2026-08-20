@@ -1,5 +1,8 @@
 #include "rootclient.h"
 
+#include <QDBusConnection>
+#include <QDBusMessage>
+
 RootClient *RootClient::instance()
 {
     static RootClient *inst = new RootClient();
@@ -19,6 +22,23 @@ RootClient::RootClient(QObject *parent)
     });
     m_retry.start();
     probe();
+}
+
+void RootClient::setHelper(bool on)
+{
+    QDBusMessage call = QDBusMessage::createMethodCall(
+        QStringLiteral("org.freedesktop.systemd1"),
+        QStringLiteral("/org/freedesktop/systemd1"),
+        QStringLiteral("org.freedesktop.systemd1.Manager"),
+        on ? QStringLiteral("StartUnit") : QStringLiteral("StopUnit"));
+    call << QStringLiteral("harbour-sysmetrics-helper.service")
+         << QStringLiteral("replace");
+    const QDBusMessage reply = QDBusConnection::systemBus().call(call);
+    if (reply.type() == QDBusMessage::ErrorMessage)
+        qWarning("sysmetrics: %s helper failed: %s",
+                 on ? "start" : "stop", qPrintable(reply.errorMessage()));
+    else if (on)
+        QTimer::singleShot(1000, this, &RootClient::probe);
 }
 
 void RootClient::probe()
