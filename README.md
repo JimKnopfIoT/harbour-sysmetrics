@@ -109,6 +109,23 @@ GPLv3). Where the kernel or HAL does not expose a value, the app is honest about
 it rather than inventing one — a blank field means "not readable here", not
 "nothing there".
 
+## Unsupported or misbehaving hardware
+
+The hardware readouts are tuned on a Qualcomm device (Sony Xperia 10 III) and a
+MediaTek one. On other SoCs some values may be blank or wrong where the kernel
+exposes them under different paths. If you run different hardware and spot a
+readout that is missing or incorrect, run the bundled probe and share its output
+so support can be added:
+
+```sh
+sh tools/hw-probe.sh    # writes sysmetrics-hwprobe-<model>-<date>.txt
+```
+
+Attach that file to a [new issue](https://github.com/JimKnopfIoT/harbour-sysmetrics/issues),
+or send it to the developer. It contains only hardware/kernel capability
+information — CPU, GPU, camera, thermal and power-supply paths — and **no**
+serials, subscriber data or other personal information.
+
 ## License
 
 Licensed under the **GNU General Public License v3.0 or later** (see

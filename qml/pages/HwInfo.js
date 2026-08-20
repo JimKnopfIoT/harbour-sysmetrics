@@ -32,7 +32,7 @@ function cpu() {
     s.push({ title: qsTr("Processor"), rows: [
         row(qsTr("Architecture"), "ARMv" + d.architecture),
         row(qsTr("Cores"), d.count),
-        row("Hardware", d.hardware)
+        row("Hardware", d.hardware || d.machine || d.socName)
     ].concat(coreRows)})
 
     // governors: active highlighted, available-but-unused grayed
@@ -533,8 +533,15 @@ function camera() {
     for (var j = 0; j < nodes.length; ++j)
         nrows.push(row(nodes[j].node, nodes[j].label || qsTr("(unnamed)"), {mono:true}))
     if (nrows.length)
-        s.push({ title: qsTr("CAMSS V4L2 nodes"),
-            note: qsTr("Kernel camera-subsystem interfaces — not user-facing cameras."), rows: nrows })
+        s.push({ title: qsTr("Kernel video nodes"),
+            note: qsTr("Kernel V4L2 interfaces — control, JPEG and video-codec blocks, not user-facing cameras."), rows: nrows })
+
+    // MediaTek: sensors sit behind imgsensor/mtkcam, not in V4L2 like Qualcomm CAMSS
+    if (d.platform === "mediatek" && !cams.length)
+        s.push({ title: qsTr("Image sensors"),
+            note: qsTr("This is a MediaTek imgsensor/mtkcam stack. The image sensors are driven through the camera HAL, not exposed as V4L2 sensor sub-devices — so their models are not enumerable from sysfs. The video nodes above are the JPEG and video codecs."),
+            rows: [ row(qsTr("Sensor models"), qsTr("not exposed by the MediaTek kernel")) ] })
+
     return { title: qsTr("Camera"), helpTopics: ["camera"], sections: s }
 }
 

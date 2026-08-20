@@ -895,6 +895,19 @@ QVariantMap SysMon::graphicsDetail() const
             }
         }
     }
+    if (gpuModel.isEmpty()) {
+        // ARM Mali (e.g. MediaTek): model from the mali misc device
+        const QString gi = readTrim(QStringLiteral("/sys/class/misc/mali0/device/gpuinfo"));
+        if (!gi.isEmpty()) {
+            const QStringList p = gi.split(QLatin1Char(' '), QString::SkipEmptyParts);
+            QString model = p.value(0);
+            if (p.size() >= 3 && p.value(2) == QLatin1String("cores"))
+                model += QStringLiteral(" \u00B7 ") + p.value(1) + QStringLiteral(" cores");
+            else if (p.size() >= 2 && p.value(1).startsWith(QLatin1String("MP")))
+                model += QLatin1Char(' ') + p.value(1);
+            gpuModel = model;
+        }
+    }
     m.insert(QStringLiteral("gpuModel"), gpuModel);
     if (curHz > 0) m.insert(QStringLiteral("gpuCurMhz"), (int)(curHz / 1e6));
     if (maxHz > 0) m.insert(QStringLiteral("gpuMaxMhz"), (int)(maxHz / 1e6));
@@ -1176,7 +1189,7 @@ QVariantMap SysMon::cameraDetail() const
             const QString ln = name.toLower();
             if (ln.contains(QLatin1String("sensor"))) ++sensors;
             else if (ln.contains(QLatin1String("eeprom"))) ++eeproms;
-            else if (ln.contains(QLatin1String("flash"))) ++flashes;
+            else if (ln.contains(QLatin1String("flash")) || ln.contains(QLatin1String("led"))) ++flashes;
             else if (ln.contains(QLatin1String("isp"))) isp = true;
             else if (ln.contains(QLatin1String("cpas"))) cpas = true;
             QVariantMap sd;
@@ -1219,6 +1232,15 @@ QVariantMap SysMon::cameraDetail() const
             cameras.append(c);
         }
     }
+    // camera stack platform: Qualcomm CAMSS/camx vs MediaTek imgsensor/mtkcam
+    QString camPlatform;
+    const bool mtkCam = QFileInfo::exists(QStringLiteral("/proc/driver/camsensor"))
+                     || QFileInfo::exists(QStringLiteral("/sys/bus/platform/drivers/seninf"))
+                     || !QDir(QStringLiteral("/sys/module"))
+                             .entryList(QStringList() << QStringLiteral("imgsensor*"), QDir::Dirs).isEmpty();
+    if (mtkCam) camPlatform = QStringLiteral("mediatek");
+    else if (cpas) camPlatform = QStringLiteral("qualcomm");
+    m.insert(QStringLiteral("platform"), camPlatform);
     m.insert(QStringLiteral("cameras"), cameras);
     m.insert(QStringLiteral("captureNodes"), captureNodes);
     m.insert(QStringLiteral("subdevs"), subdevs);

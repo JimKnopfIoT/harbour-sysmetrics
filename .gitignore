@@ -29,7 +29,8 @@ docs/
 research/
 .claude/
 *.local.sh
-tools/
+tools/*
+!tools/hw-probe.sh
 
 # Local data / captures
 *.log
