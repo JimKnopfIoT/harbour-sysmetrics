@@ -1,6 +1,12 @@
 # harbour-sysmetrics
 
-**SysMetrics — an on-device system diagnostics and process monitor for Sailfish OS.**
+**SysMetrics is an on-device deep system and hardware diagnostics tool for Sailfish OS.** 
+
+Intended primarily for developers, testers and advanced users. Some features 
+require elevated privileges. It reads /proc, /sys and the system D-Bus locally 
+and shows what the device reports about itself. Everything runs on the device: 
+it collects nothing, transmits nothing, and has no network or cloud component. 
+The only data it ever shows is that of the phone it runs on.**
 
 SysMetrics is an htop-style monitor that also opens up every hardware subsystem
 of the phone on its own detail page. It reads `/proc`, `/sys` and the system
