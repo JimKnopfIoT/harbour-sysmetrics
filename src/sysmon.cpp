@@ -908,7 +908,56 @@ QVariantMap SysMon::graphicsDetail() const
             gpuModel = model;
         }
     }
+    // MediaTek Mali: clock and utilisation live in /proc (not devfreq/kgsl)
+    QString gpuDriver;
+    if (QFileInfo::exists(QStringLiteral("/sys/module/mali_kbase")))
+        gpuDriver = QStringLiteral("mali_kbase");
+    else if (QFileInfo::exists(QStringLiteral("/sys/module/mali")))
+        gpuDriver = QStringLiteral("mali");
+    auto slurp = [](const QString &p) -> QString {
+        QFile f(p);
+        return f.open(QIODevice::ReadOnly) ? QString::fromLatin1(f.readAll()) : QString();
+    };
+    auto numAfter = [](const QString &hay, const QString &key) -> qulonglong {
+        const int i = hay.indexOf(key);
+        if (i < 0) return 0;
+        int j = i + key.size();
+        while (j < hay.size() && !hay[j].isDigit()) ++j;
+        int k = j;
+        while (k < hay.size() && hay[k].isDigit()) ++k;
+        return hay.mid(j, k - j).toULongLong();
+    };
+    if (curHz <= 0) {
+        const qulonglong khz = numAfter(slurp(QStringLiteral("/proc/gpufreq/gpufreq_var_dump")),
+                                        QStringLiteral("g_cur_gpu_freq"));
+        if (khz > 0) curHz = (double)khz * 1000.0;               // kHz -> Hz
+    }
+    if (maxHz <= 0) {
+        const qulonglong khz = numAfter(slurp(QStringLiteral("/proc/gpufreq/gpufreq_opp_dump")),
+                                        QStringLiteral("freq ="));
+        if (khz > 0) maxHz = (double)khz * 1000.0;
+    }
+    if (curHz <= 0) {                                            // newer MTK GED (Hz)
+        const QString gf = readTrim(QStringLiteral("/sys/kernel/ged/hal/current_freqency"));
+        if (!gf.isEmpty()) curHz = gf.toDouble();
+    }
+    if (busy < 0) {
+        // /proc/mali/utilization: "gpu/cljs0/cljs1=67/0/0, ..."
+        const QString u = slurp(QStringLiteral("/proc/mali/utilization"));
+        const int eq = u.indexOf(QLatin1Char('='));
+        if (eq >= 0) {
+            int j = eq + 1, k = j;
+            while (k < u.size() && u[k].isDigit()) ++k;
+            if (k > j) busy = u.mid(j, k - j).toInt();
+        }
+    }
+    if (busy < 0) {
+        const QString gu = readTrim(QStringLiteral("/sys/kernel/ged/hal/gpu_utilization"));
+        if (!gu.isEmpty()) busy = gu.split(QLatin1Char(' ')).value(0).toInt();
+    }
+
     m.insert(QStringLiteral("gpuModel"), gpuModel);
+    if (!gpuDriver.isEmpty()) m.insert(QStringLiteral("gpuDriver"), gpuDriver);
     if (curHz > 0) m.insert(QStringLiteral("gpuCurMhz"), (int)(curHz / 1e6));
     if (maxHz > 0) m.insert(QStringLiteral("gpuMaxMhz"), (int)(maxHz / 1e6));
     if (busy >= 0) m.insert(QStringLiteral("gpuBusy"), busy);
@@ -931,6 +980,28 @@ QVariantMap SysMon::graphicsDetail() const
         d.insert(QStringLiteral("resolution"), modes.split(QLatin1Char('\n')).value(0));
         d.insert(QStringLiteral("enabled"), readTrim(cp + QStringLiteral("enabled")));
         displays.append(d);
+    }
+    if (displays.isEmpty()) {
+        // no DRM connector (older MediaTek): fall back to the framebuffer
+        const QString modes = readTrim(QStringLiteral("/sys/class/graphics/fb0/modes"));
+        QString res;
+        for (int i = 0; i + 1 < modes.size(); ++i) {
+            if (modes[i].isDigit()) {
+                int a = i; while (a < modes.size() && modes[a].isDigit()) ++a;
+                if (a < modes.size() && modes[a] == QLatin1Char('x')) {
+                    int b = a + 1; while (b < modes.size() && modes[b].isDigit()) ++b;
+                    res = modes.mid(i, b - i);
+                    break;
+                }
+            }
+        }
+        if (!res.isEmpty()) {
+            QVariantMap d;
+            d.insert(QStringLiteral("connector"), QStringLiteral("fb0"));
+            d.insert(QStringLiteral("status"), QStringLiteral("connected"));
+            d.insert(QStringLiteral("resolution"), res);
+            displays.append(d);
+        }
     }
     m.insert(QStringLiteral("displays"), displays);
     m.insert(QStringLiteral("driver"),
