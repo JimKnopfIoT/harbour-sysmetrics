@@ -2265,7 +2265,7 @@
     <message>
         <location filename="../qml/pages/HwInfo.js" line="220"/>
         <source>Internal storage (eMMC)</source>
-        <translation type="unfinished"></translation>
+        <translation>Interner Speicher (eMMC)</translation>
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="335"/>
@@ -4179,83 +4179,73 @@
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="27"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="35"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="29"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="37"/>
         <source>Sampling</source>
         <translation>Abtastung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="37"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="45"/>
         <source>Refresh interval</source>
         <translation>Aktualisierungsintervall</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="66"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="74"/>
         <source>Pause sampling</source>
         <translation>Abtastung pausieren</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="71"/>
-        <location filename="../qml/pages/SettingsPage.qml" line="75"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="79"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="83"/>
         <source>Language</source>
         <translation>Sprache</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="78"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="86"/>
         <source>System default</source>
         <translation>Systemstandard</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="98"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="106"/>
         <source>Restart the app to apply the language.</source>
         <translation>App neu starten, um die Sprache anzuwenden.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="101"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="109"/>
         <source>Root mode</source>
         <translation>Root-Modus</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="108"/>
-        <source>Without root, foreign-user processes (system daemons) expose only their basic figures; open files, devices, sockets, the access monitor and connection ownership stay empty. Start the helper as root once, then the app connects to it automatically.</source>
-        <translation>Ohne Root zeigen Prozesse fremder Benutzer (Systemdienste) nur ihre Basiswerte; offene Dateien, Geräte, Sockets, der Zugriffs-Monitor und die Verbindungszuordnung bleiben leer. Starte den Helfer einmal als Root, dann verbindet sich die App automatisch.</translation>
+        <location filename="../qml/pages/SettingsPage.qml" line="111"/>
+        <source>Use the root helper</source>
+        <translation>Root-Helfer verwenden</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="118"/>
-        <source>In the Terminal app (Developer mode):</source>
-        <translation>In der Terminal-App (Entwicklermodus):</translation>
+        <location filename="../qml/pages/SettingsPage.qml" line="112"/>
+        <source>Without root, foreign-user processes (system daemons) expose only their basic figures; open files, devices, sockets, the access monitor and connection ownership stay empty. This starts a root helper service the app reads them through; it stops itself when the app is gone.</source>
+        <translation>Ohne Root zeigen fremde Prozesse (System-Daemons) nur ihre Basiswerte; offene Dateien, Geräte, Sockets, der Zugriffsmonitor und die Verbindungszuordnung bleiben leer. Dies startet einen Root-Hilfsdienst, über den die App sie ausliest; er beendet sich selbst, wenn die App weg ist.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="135"/>
-        <source>Enter your developer password when asked. Use &apos;enable&apos; instead of &apos;start&apos; to keep it across reboots, &apos;stop&apos; to end it. Alternatively run the helper directly:</source>
-        <translation>Gib bei Aufforderung dein Entwicklerpasswort ein. Nutze „enable“ statt „start“, um es über Neustarts zu behalten, „stop“ zum Beenden. Alternativ den Helfer direkt starten:</translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="162"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="138"/>
         <source>Helper connected — full access</source>
         <translation>Helfer verbunden — voller Zugriff</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="163"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="139"/>
         <source>Helper not running</source>
         <translation>Helfer läuft nicht</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="171"/>
-        <source>Reconnect helper</source>
-        <translation>Helfer neu verbinden</translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="175"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="145"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
     <message>
-        <location filename="../qml/pages/SettingsPage.qml" line="182"/>
+        <location filename="../qml/pages/SettingsPage.qml" line="152"/>
         <source>About SysMetrics</source>
         <translation>Über SysMetrics</translation>
     </message>

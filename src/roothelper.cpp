@@ -5,9 +5,11 @@
 
 #include <QCoreApplication>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QTimer>
 
 #include <dirent.h>
 #include <signal.h>
@@ -257,10 +259,25 @@ int rootHelperMain(int argc, char *argv[])
     }
     chmod(SOCK_PATH, 0660);
     chown(SOCK_PATH, 0, 100000);  // root + defaultuser primary group
+    static int clients = 0;
     QObject::connect(&server, &QLocalServer::newConnection, &server, [&server]() {
-        while (QLocalSocket *s = server.nextPendingConnection())
+        while (QLocalSocket *s = server.nextPendingConnection()) {
+            ++clients;
+            QObject::connect(s, &QLocalSocket::disconnected, s, []() { --clients; });
             serve(s);
+        }
     });
+    // Selbst-Exit ohne verbundenen Client (20 s Anlaufgnade): der Helfer läuft
+    // nur, solange die App ihn nutzt.
+    QElapsedTimer up;
+    up.start();
+    QTimer idle;
+    idle.setInterval(5000);
+    QObject::connect(&idle, &QTimer::timeout, &app, [&app, &up]() {
+        if (clients == 0 && up.elapsed() > 20000)
+            app.quit();
+    });
+    idle.start();
     printf("sysmetrics helper: listening on %s\n", SOCK_PATH);
     return app.exec();
 }

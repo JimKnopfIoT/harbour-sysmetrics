@@ -58,6 +58,11 @@ helperservice.files = data/harbour-sysmetrics-helper.service
 helperservice.path = /usr/lib/systemd/system
 INSTALLS += helperservice
 
+# polkit rule: defaultuser may start/stop only the helper unit.
+polkitrule.files = data/50-harbour-sysmetrics.rules
+polkitrule.path = /usr/share/polkit-1/rules.d
+INSTALLS += polkitrule
+
 TRANSLATIONS += translations/harbour-sysmetrics-de.ts
 lupdate_only {
     SOURCES += qml/*.qml qml/cover/*.qml qml/pages/*.qml qml/components/*.qml

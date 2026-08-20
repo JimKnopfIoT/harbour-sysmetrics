@@ -17,6 +17,8 @@ public:
 
     bool active() const { return m_sock.state() == QLocalSocket::ConnectedState; }
     Q_INVOKABLE void probe();
+    // StartUnit/StopUnit for the helper unit (polkit-scoped to defaultuser).
+    Q_INVOKABLE void setHelper(bool on);
     Q_INVOKABLE QStringList chargerLog();
 
     QByteArray readFile(const QString &path);

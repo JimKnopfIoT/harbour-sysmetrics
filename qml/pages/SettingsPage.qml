@@ -1,10 +1,18 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Nemo.Configuration 1.0
 import "../components"
 
 Page {
     id: page
     allowedOrientations: Orientation.All
+
+    // Persisted; re-applied on launch by the main window.
+    ConfigurationValue {
+        id: cfgRootHelper
+        key: "/apps/harbour-sysmetrics/rootHelperEnabled"
+        defaultValue: false
+    }
 
     function stepInterval(delta) {
         var v = Math.round((sysmon.intervalMs + delta) / 100) * 100
@@ -99,51 +107,19 @@ Page {
             }
 
             SectionHeader { text: qsTr("Root mode") }
-            Label {
-                x: Theme.horizontalPageMargin
-                width: page.width - 2 * Theme.horizontalPageMargin
-                wrapMode: Text.Wrap
-                font.pixelSize: Theme.fontSizeExtraSmall
-                color: Theme.secondaryColor
-                text: qsTr("Without root, foreign-user processes (system daemons) expose "
-                    + "only their basic figures; open files, devices, sockets, the "
-                    + "access monitor and connection ownership stay empty. Start the "
-                    + "helper as root once, then the app connects to it automatically.")
-            }
-            Label {
-                x: Theme.horizontalPageMargin
-                width: page.width - 2 * Theme.horizontalPageMargin
-                font.pixelSize: Theme.fontSizeExtraSmall
-                color: Theme.secondaryHighlightColor
-                text: qsTr("In the Terminal app (Developer mode):")
-            }
-            Label {
-                x: Theme.horizontalPageMargin
-                width: page.width - 2 * Theme.horizontalPageMargin
-                wrapMode: Text.WrapAnywhere
-                font.pixelSize: Theme.fontSizeTiny
-                font.family: "monospace"
-                color: Diag.cyan
-                text: "devel-su systemctl start harbour-sysmetrics-helper"
-            }
-            Label {
-                x: Theme.horizontalPageMargin
-                width: page.width - 2 * Theme.horizontalPageMargin
-                wrapMode: Text.Wrap
-                font.pixelSize: Theme.fontSizeTiny
-                color: Theme.secondaryColor
-                text: qsTr("Enter your developer password when asked. Use 'enable' instead "
-                    + "of 'start' to keep it across reboots, 'stop' to end it. Alternatively "
-                    + "run the helper directly:")
-            }
-            Label {
-                x: Theme.horizontalPageMargin
-                width: page.width - 2 * Theme.horizontalPageMargin
-                wrapMode: Text.WrapAnywhere
-                font.pixelSize: Theme.fontSizeTiny
-                font.family: "monospace"
-                color: Diag.cyan
-                text: "devel-su /usr/bin/harbour-sysmetrics --root-helper"
+            TextSwitch {
+                text: qsTr("Use the root helper")
+                description: qsTr("Without root, foreign-user processes (system daemons) "
+                    + "expose only their basic figures; open files, devices, sockets, "
+                    + "the access monitor and connection ownership stay empty. This "
+                    + "starts a root helper service the app reads them through; it "
+                    + "stops itself when the app is gone.")
+                checked: cfgRootHelper.value
+                automaticCheck: false
+                onClicked: {
+                    cfgRootHelper.value = !cfgRootHelper.value
+                    rootmon.setHelper(cfgRootHelper.value)
+                }
             }
             Item {
                 x: Theme.horizontalPageMargin
@@ -166,12 +142,6 @@ Page {
                     }
                 }
             }
-            Button {
-                x: Theme.horizontalPageMargin
-                text: qsTr("Reconnect helper")
-                onClicked: rootmon.probe()
-            }
-
             SectionHeader { text: qsTr("About") }
             BackgroundItem {
                 width: page.width

@@ -1,0 +1,9 @@
+// harbour-sysmetrics: defaultuser darf genau harbour-sysmetrics-helper.service
+// starten/stoppen, sonst nichts.
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.systemd1.manage-units" &&
+        action.lookup("unit") == "harbour-sysmetrics-helper.service" &&
+        subject.user == "defaultuser") {
+        return polkit.Result.YES;
+    }
+});

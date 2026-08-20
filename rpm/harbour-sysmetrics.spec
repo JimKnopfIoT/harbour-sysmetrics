@@ -2,7 +2,7 @@
 %define _buildhost reproducible-builder
 Name:       harbour-sysmetrics
 Summary:    System diagnostics for Sailfish OS
-Version:    0.1.0
+Version:    0.1.1
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/JimKnopfIoT/harbour-sysmetrics
@@ -40,6 +40,19 @@ On-device only, collects nothing, transmits nothing.
 %post
 # Apply a changed [X-Sailjail] section without reboot.
 systemctl restart sailjaild >/dev/null 2>&1 || :
+systemctl daemon-reload >/dev/null 2>&1 || :
+# Upgrades: disable a manually enabled pre-0.1.1 helper.
+if [ "$1" -gt 1 ]; then
+    systemctl disable --now harbour-sysmetrics-helper.service >/dev/null 2>&1 || :
+fi
+
+%preun
+if [ "$1" = 0 ]; then
+    systemctl disable --now harbour-sysmetrics-helper.service >/dev/null 2>&1 || :
+fi
+
+%postun
+systemctl daemon-reload >/dev/null 2>&1 || :
 
 %files
 %defattr(-,root,root,-)
@@ -48,7 +61,13 @@ systemctl restart sailjaild >/dev/null 2>&1 || :
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 /usr/lib/systemd/system/harbour-sysmetrics-helper.service
+%{_datadir}/polkit-1/rules.d/50-harbour-sysmetrics.rules
 
 %changelog
+* Thu Aug 20 2026 harbour-sysmetrics contributors 0.1.1-1
+- The root helper is a settings switch (off by default) instead of a manual
+  devel-su start: StartUnit/StopUnit over the system bus, polkit rule scoped
+  to the helper unit. The helper exits by itself when no client is connected.
+
 * Thu Aug 20 2026 harbour-sysmetrics contributors 0.1.0-1
 - Initial release.
