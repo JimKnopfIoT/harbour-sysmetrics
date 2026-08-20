@@ -78,6 +78,30 @@ Page {
             }
 
             SectionHeader { text: qsTr("Ranking") }
+
+            Column {
+                visible: recorder.results.length === 0 && !recorder.running
+                width: parent.width
+                spacing: Theme.paddingSmall
+                Item { width: 1; height: Theme.paddingLarge }
+                Label {
+                    x: Theme.horizontalPageMargin
+                    width: parent.width - 2 * Theme.horizontalPageMargin
+                    horizontalAlignment: Text.AlignHCenter
+                    text: qsTr("Nothing recorded")
+                    font.pixelSize: Theme.fontSizeLarge
+                    color: Theme.secondaryColor
+                }
+                Label {
+                    x: Theme.horizontalPageMargin
+                    width: parent.width - 2 * Theme.horizontalPageMargin
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.Wrap
+                    text: qsTr("Press Start to begin sampling")
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.secondaryColor
+                }
+            }
         }
 
         delegate: BackgroundItem {
@@ -122,12 +146,6 @@ Page {
                     }
                 }
             }
-        }
-
-        ViewPlaceholder {
-            enabled: recorder.results.length === 0 && !recorder.running
-            text: qsTr("Nothing recorded")
-            hintText: qsTr("Press Start to begin sampling")
         }
 
         VerticalScrollDecorator {}
