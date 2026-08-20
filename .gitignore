@@ -1,0 +1,35 @@
+# Build output
+Makefile
+*.o
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+.qmake.stash
+RPMS/
+installroot/
+build/
+*.rpm
+documentation.list
+translations/*.qm
+
+# Sailfish SDK / Qt Creator local state
+.mb2/
+*.pro.user*
+
+# Python
+__pycache__/
+*.pyc
+
+# Local / private notes — never publish (contain personal or device data)
+CLAUDE.md
+HANDOFF.md
+STATUS.md
+PUBLISH.md
+docs/
+research/
+.claude/
+*.local.sh
+tools/
+
+# Local data / captures
+*.log

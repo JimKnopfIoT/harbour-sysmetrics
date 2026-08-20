@@ -1,0 +1,10 @@
+[Unit]
+Description=SysMetrics privileged diagnostics helper
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/harbour-sysmetrics --root-helper
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
