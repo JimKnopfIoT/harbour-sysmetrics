@@ -73,7 +73,7 @@ function gfx() {
     var s = []
     s.push({ title: qsTr("GPU"), rows: [
         row(qsTr("Model"), d.gpuModel),
-        row(qsTr("Driver"), d.driver),
+        row(qsTr("Driver"), d.gpuDriver || d.driver),
         row(qsTr("Clock"), (d.gpuCurMhz ? d.gpuCurMhz + " MHz" : "—") + (d.gpuMaxMhz ? " / " + d.gpuMaxMhz + " MHz" : "")),
         row(qsTr("Busy"), d.gpuBusy !== undefined ? d.gpuBusy + " %" : "—")
     ]})
