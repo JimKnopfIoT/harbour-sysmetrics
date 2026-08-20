@@ -215,8 +215,11 @@ function storage() {
         }
         if (h.hostNode || h.hostDriver)
             rows.push(row(qsTr("Card reader"), (h.hostDriver || "") + (h.hostNode ? "  ·  " + h.hostNode : ""), {mono:true}))
-        var isSd = ("" + h.bus).toUpperCase().indexOf("SD") >= 0
-        s.push({ title: isSd ? qsTr("microSD card") : (h.bus + " " + h.dev), rows: rows })
+        var busU = ("" + h.bus).toUpperCase()
+        var title = busU.indexOf("SD") >= 0 ? qsTr("microSD card")
+                  : busU.indexOf("MMC") >= 0 ? qsTr("Internal storage (eMMC)")
+                  : (h.bus + " " + h.dev)
+        s.push({ title: title, rows: rows })
     }
 
     var bars = []
