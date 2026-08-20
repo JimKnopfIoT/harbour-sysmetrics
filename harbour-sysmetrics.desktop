@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+X-Nemo-Application-Type=silica-qt5
+Icon=harbour-sysmetrics
+Name=SysMetrics
+Comment=System diagnostics & process monitor
+Exec=harbour-sysmetrics
+
+[X-Sailjail]
+# Diagnostics needs full /proc, /sys, /proc/net and signal delivery to other
+# processes of the same user; the Base profile's seccomp/net-none forbids that.
+Sandboxing=Disabled
