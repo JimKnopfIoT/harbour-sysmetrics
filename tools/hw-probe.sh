@@ -61,6 +61,40 @@ sep "CAMERA: MediaTek imgsensor / mtkcam"
 ls -d /proc/driver/camsensor* /sys/module/imgsensor* /sys/bus/platform/drivers/seninf* 2>/dev/null
 grep -riE "imx[0-9]|ov[0-9]{4}|s5k|gc[0-9]{4}|hi[0-9]{3}|jn[0-9]" /sys/bus/i2c/devices/*/name 2>/dev/null | head
 
+sep "GPU: MediaTek /proc (older Mali)"
+cat /proc/mali/frequency /proc/mali/utilization 2>/dev/null
+grep -E "g_cur_gpu_freq|_mt_gpufreq_get_cur_freq" /proc/gpufreq/gpufreq_var_dump 2>/dev/null | head -3
+head -3 /proc/gpufreq/gpufreq_opp_dump 2>/dev/null
+
+sep "DISPLAY: DRM + framebuffer"
+for c in /sys/class/drm/*/status; do echo "$(dirname $c | xargs basename): $(cat $c 2>/dev/null)"; done 2>/dev/null
+echo "fb0 modes: $(cat /sys/class/graphics/fb0/modes 2>/dev/null)  virtual_size: $(cat /sys/class/graphics/fb0/virtual_size 2>/dev/null)"
+
+sep "STORAGE: block devices + identity"
+for b in /sys/block/mmcblk* /sys/block/sd*; do
+  [ -e "$b/size" ] || continue
+  n=$(basename $b)
+  echo "== $n  size=$(( $(cat $b/size) * 512 / 1000000 )) MB =="
+  D="$b/device"
+  echo "  device -> $(readlink -f $D 2>/dev/null | sed 's#/sys/devices/##')"
+  for fld in type name manfid oemid fwrev hwrev date vendor model rev; do
+    [ -e "$D/$fld" ] && echo "  $fld = $(cat $D/$fld 2>/dev/null)"
+  done
+done
+echo "-- UFS descriptors (if any) --"
+U=$(find /sys/devices -type d -name "device_descriptor" 2>/dev/null | head -1)
+[ -n "$U" ] && for f in specification_version wb_type number_of_luns; do echo "  $(basename $f)=$(cat $U/$f 2>/dev/null)"; done
+UD=$(dirname "$U" 2>/dev/null)/string_descriptors
+[ -d "$UD" ] && for f in manufacturer_name product_name; do echo "  $f=$(cat $UD/$f 2>/dev/null)"; done
+
+sep "BATTERY: all power_supply fields"
+for s in /sys/class/power_supply/*; do
+  echo "== $(basename $s) =="
+  for f in type status present online technology health capacity capacity_level temp batt_temp TemperatureR voltage_now batt_vol BatterySenseVoltage current_now BatteryAverageCurrent ChargerVoltage charge_full charge_full_design cycle_count model_name manufacturer serial_number; do
+    [ -e "$s/$f" ] && echo "  $f = $(cat $s/$f 2>/dev/null)"
+  done
+done
+
 sep "THERMAL zones"
 for z in /sys/class/thermal/thermal_zone*; do [ -e "$z/type" ] && echo "$(basename $z): $(cat $z/type 2>/dev/null)"; done | head -40
 

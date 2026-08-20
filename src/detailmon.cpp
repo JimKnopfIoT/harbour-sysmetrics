@@ -424,8 +424,8 @@ void DetailMon::sampleFds()
             const auto it = socks.constFind(inode);
             if (it != socks.constEnd()) {
                 s.insert(QStringLiteral("proto"), it->proto);
-                s.insert(QStringLiteral("local"), it->local);
-                s.insert(QStringLiteral("remote"), it->remote);
+                s.insert(QStringLiteral("laddr"), it->local);
+                s.insert(QStringLiteral("raddr"), it->remote);
                 s.insert(QStringLiteral("state"), it->state);
                 const auto prevQ = m_prevQueues.constFind(inode);
                 const bool changed = prevQ != m_prevQueues.constEnd()
