@@ -121,8 +121,8 @@ void NetMonitor::refresh()
     for (const SockInfo &s : conns) {
         QVariantMap m;
         m.insert(QStringLiteral("proto"), s.proto);
-        m.insert(QStringLiteral("local"), s.local);
-        m.insert(QStringLiteral("remote"), s.remote);
+        m.insert(QStringLiteral("laddr"), s.local);
+        m.insert(QStringLiteral("raddr"), s.remote);
         m.insert(QStringLiteral("state"), s.state);
         m.insert(QStringLiteral("localPort"), s.localPort);
         m.insert(QStringLiteral("remotePort"), s.remotePort);

@@ -181,7 +181,7 @@ Page {
             height: visible ? contentHeight : 0
             contentHeight: Theme.itemSizeSmall
             onClicked: pageStack.push(Qt.resolvedUrl("ConnectionDetailPage.qml"), {
-                proto: modelData.proto, local: modelData.local, remote: modelData.remote,
+                proto: modelData.proto, local: modelData.laddr, remote: modelData.raddr,
                 state: modelData.state, direction: modelData.direction, user: modelData.user,
                 pid: modelData.pid, pname: modelData.name, threat: modelData.threat,
                 ssh: modelData.ssh, active: modelData.active })
@@ -222,8 +222,8 @@ Page {
                     Label {
                         width: parent.width
                         text: modelData.direction === "listen"
-                              ? qsTr("listening on %1").arg(modelData.local)
-                              : modelData.remote
+                              ? qsTr("listening on %1").arg(modelData.laddr)
+                              : modelData.raddr
                         truncationMode: TruncationMode.Fade
                         font.pixelSize: Theme.fontSizeSmall
                         font.family: "monospace"
@@ -234,7 +234,7 @@ Page {
                         width: parent.width
                         text: (modelData.name.length ? modelData.name : qsTr("uid %1").arg(modelData.user))
                               + (modelData.pid > 0 ? " · " + modelData.pid : "")
-                              + " · " + modelData.local
+                              + " · " + modelData.laddr
                         truncationMode: TruncationMode.Fade
                         font.pixelSize: Theme.fontSizeTiny
                         color: Theme.secondaryColor

@@ -318,7 +318,7 @@ Page {
                                     Label {
                                         width: parent.width
                                         text: (modelData.proto || "?").toUpperCase() + "  "
-                                              + (modelData.remote || modelData.state || "")
+                                              + (modelData.raddr || modelData.state || "")
                                         font.pixelSize: Theme.fontSizeExtraSmall
                                         font.family: "monospace"
                                         truncationMode: TruncationMode.Fade
@@ -326,8 +326,8 @@ Page {
                                     }
                                     Label {
                                         width: parent.width
-                                        visible: modelData.local !== undefined
-                                        text: qsTr("local ") + (modelData.local || "") + "  " + (modelData.state || "")
+                                        visible: modelData.laddr !== undefined
+                                        text: qsTr("local ") + (modelData.laddr || "") + "  " + (modelData.state || "")
                                         font.pixelSize: Theme.fontSizeTiny
                                         color: Theme.secondaryColor
                                         truncationMode: TruncationMode.Fade
