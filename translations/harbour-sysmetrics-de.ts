@@ -1623,7 +1623,7 @@
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="14"/>
-        <location filename="../qml/pages/HwInfo.js" line="582"/>
+        <location filename="../qml/pages/HwInfo.js" line="589"/>
         <source>Product</source>
         <translation>Produkt</translation>
     </message>
@@ -1633,7 +1633,7 @@
         <location filename="../qml/pages/HwInfo.js" line="159"/>
         <location filename="../qml/pages/HwInfo.js" line="202"/>
         <location filename="../qml/pages/HwInfo.js" line="367"/>
-        <location filename="../qml/pages/HwInfo.js" line="690"/>
+        <location filename="../qml/pages/HwInfo.js" line="697"/>
         <source>Model</source>
         <translation>Modell</translation>
     </message>
@@ -1754,7 +1754,7 @@
         <location filename="../qml/pages/HwInfo.js" line="76"/>
         <location filename="../qml/pages/HwInfo.js" line="266"/>
         <location filename="../qml/pages/HwInfo.js" line="293"/>
-        <location filename="../qml/pages/HwInfo.js" line="593"/>
+        <location filename="../qml/pages/HwInfo.js" line="600"/>
         <source>Driver</source>
         <translation>Treiber</translation>
     </message>
@@ -1782,7 +1782,7 @@
         <location filename="../qml/pages/HwInfo.js" line="86"/>
         <location filename="../qml/pages/HwInfo.js" line="261"/>
         <location filename="../qml/pages/HwInfo.js" line="311"/>
-        <location filename="../qml/pages/HwInfo.js" line="679"/>
+        <location filename="../qml/pages/HwInfo.js" line="686"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
@@ -1864,7 +1864,7 @@
         <location filename="../qml/pages/HwInfo.js" line="161"/>
         <location filename="../qml/pages/HwInfo.js" line="204"/>
         <location filename="../qml/pages/HwInfo.js" line="368"/>
-        <location filename="../qml/pages/HwInfo.js" line="587"/>
+        <location filename="../qml/pages/HwInfo.js" line="594"/>
         <source>Serial</source>
         <translation>Seriennummer</translation>
     </message>
@@ -1963,7 +1963,7 @@
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="255"/>
-        <location filename="../qml/pages/HwInfo.js" line="724"/>
+        <location filename="../qml/pages/HwInfo.js" line="731"/>
         <source>Signal</source>
         <translation>Signal</translation>
     </message>
@@ -2068,13 +2068,13 @@
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="301"/>
-        <location filename="../qml/pages/HwInfo.js" line="717"/>
+        <location filename="../qml/pages/HwInfo.js" line="724"/>
         <source>Network</source>
         <translation>Netzwerk</translation>
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="312"/>
-        <location filename="../qml/pages/HwInfo.js" line="560"/>
+        <location filename="../qml/pages/HwInfo.js" line="567"/>
         <source>Protocol</source>
         <translation>Protokoll</translation>
     </message>
@@ -2085,7 +2085,7 @@
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="314"/>
-        <location filename="../qml/pages/HwInfo.js" line="561"/>
+        <location filename="../qml/pages/HwInfo.js" line="568"/>
         <source>Charging power</source>
         <translation>Ladeleistung</translation>
     </message>
@@ -2096,7 +2096,7 @@
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="317"/>
-        <location filename="../qml/pages/HwInfo.js" line="562"/>
+        <location filename="../qml/pages/HwInfo.js" line="569"/>
         <source>Input</source>
         <translation>Eingang</translation>
     </message>
@@ -2112,7 +2112,7 @@
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="325"/>
-        <location filename="../qml/pages/HwInfo.js" line="564"/>
+        <location filename="../qml/pages/HwInfo.js" line="571"/>
         <source>Type-C role</source>
         <translation>Type-C-Rolle</translation>
     </message>
@@ -2133,8 +2133,8 @@
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="331"/>
-        <location filename="../qml/pages/HwInfo.js" line="701"/>
-        <location filename="../qml/pages/HwInfo.js" line="735"/>
+        <location filename="../qml/pages/HwInfo.js" line="708"/>
+        <location filename="../qml/pages/HwInfo.js" line="742"/>
         <source>yes</source>
         <translation>ja</translation>
     </message>
@@ -2142,8 +2142,8 @@
         <location filename="../qml/pages/HwInfo.js" line="164"/>
         <location filename="../qml/pages/HwInfo.js" line="331"/>
         <location filename="../qml/pages/HwInfo.js" line="511"/>
-        <location filename="../qml/pages/HwInfo.js" line="701"/>
-        <location filename="../qml/pages/HwInfo.js" line="735"/>
+        <location filename="../qml/pages/HwInfo.js" line="708"/>
+        <location filename="../qml/pages/HwInfo.js" line="742"/>
         <source>no</source>
         <translation>nein</translation>
     </message>
@@ -2398,230 +2398,255 @@
         <translation>Die Rollen-Tags oben (wide/tele/front/uwide) stammen aus den Modulnamen; die V4L2-Knoten selbst sind CAMSS-Steuerschnittstellen und tragen keine Position.</translation>
     </message>
     <message>
+        <location filename="../qml/pages/HwInfo.js" line="536"/>
+        <source>Kernel video nodes</source>
+        <translation>Kernel-Videoknoten</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="537"/>
+        <source>Kernel V4L2 interfaces — control, JPEG and video-codec blocks, not user-facing cameras.</source>
+        <translation>Kernel-V4L2-Schnittstellen — Steuer-, JPEG- und Video-Codec-Blöcke, keine nutzbaren Kameras.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="542"/>
+        <source>This is a MediaTek imgsensor/mtkcam stack. The image sensors are driven through the camera HAL, not exposed as V4L2 sensor sub-devices — so their models are not enumerable from sysfs. The video nodes above are the JPEG and video codecs.</source>
+        <translation>Dies ist ein MediaTek-imgsensor/mtkcam-Stack. Die Bildsensoren laufen über das Kamera-HAL, nicht als V4L2-Sensor-Subdevices — ihre Modelle sind daher nicht aus sysfs aufzählbar. Die Videoknoten oben sind die JPEG- und Video-Codecs.</translation>
+    </message>
+    <message>
         <location filename="../qml/pages/HwInfo.js" line="543"/>
+        <source>Sensor models</source>
+        <translation>Sensor-Modelle</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="543"/>
+        <source>not exposed by the MediaTek kernel</source>
+        <translation>vom MediaTek-Kernel nicht offengelegt</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="550"/>
         <source>Ultra-wide</source>
         <translation>Ultraweitwinkel</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="544"/>
+        <location filename="../qml/pages/HwInfo.js" line="551"/>
         <source>Wide (main)</source>
         <translation>Weitwinkel (Haupt)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="545"/>
+        <location filename="../qml/pages/HwInfo.js" line="552"/>
         <source>Telephoto</source>
         <translation>Tele</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="546"/>
+        <location filename="../qml/pages/HwInfo.js" line="553"/>
         <source>Front</source>
         <translation>Front</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="547"/>
+        <location filename="../qml/pages/HwInfo.js" line="554"/>
         <source>Macro</source>
         <translation>Makro</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="548"/>
+        <location filename="../qml/pages/HwInfo.js" line="555"/>
         <source>Depth</source>
         <translation>Tiefe</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="624"/>
+        <location filename="../qml/pages/HwInfo.js" line="631"/>
         <source>Cable disconnected (Type-C removed)</source>
         <translation>Kabel getrennt (Type-C entfernt)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="626"/>
+        <location filename="../qml/pages/HwInfo.js" line="633"/>
         <source>Cable attached (Type-C)</source>
         <translation>Kabel angesteckt (Type-C)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="628"/>
+        <location filename="../qml/pages/HwInfo.js" line="635"/>
         <source>Input voltage collapsed — charger current limit reached</source>
         <translation>Eingangsspannung eingebrochen — Ladegerät-Stromgrenze erreicht</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="630"/>
+        <location filename="../qml/pages/HwInfo.js" line="637"/>
         <source>Input-current detection finished (AICL)</source>
         <translation>Eingangsstrom-Erkennung abgeschlossen (AICL)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="633"/>
+        <location filename="../qml/pages/HwInfo.js" line="640"/>
         <source>Input current limit set to %1 A</source>
         <translation>Eingangsstrom-Limit auf %1 A gesetzt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="635"/>
+        <location filename="../qml/pages/HwInfo.js" line="642"/>
         <source>Adjusting input current limit (AICL)</source>
         <translation>Eingangsstrom-Limit wird angepasst (AICL)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="637"/>
+        <location filename="../qml/pages/HwInfo.js" line="644"/>
         <source>Charger type detected</source>
         <translation>Ladegerätetyp erkannt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="639"/>
+        <location filename="../qml/pages/HwInfo.js" line="646"/>
         <source>Quick Charge negotiation</source>
         <translation>Quick-Charge-Aushandlung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="641"/>
+        <location filename="../qml/pages/HwInfo.js" line="648"/>
         <source>USB-PD hard reset</source>
         <translation>USB-PD Hard-Reset</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="643"/>
+        <location filename="../qml/pages/HwInfo.js" line="650"/>
         <source>USB Power Delivery negotiation</source>
         <translation>USB-Power-Delivery-Aushandlung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="677"/>
-        <location filename="../qml/pages/HwInfo.js" line="687"/>
+        <location filename="../qml/pages/HwInfo.js" line="684"/>
+        <location filename="../qml/pages/HwInfo.js" line="694"/>
         <source>Modem</source>
         <translation>Modem</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="678"/>
+        <location filename="../qml/pages/HwInfo.js" line="685"/>
         <source>No ofono modem is registered. Flight mode, or ofono is not running.</source>
         <translation>Kein ofono-Modem registriert. Flugmodus, oder ofono läuft nicht.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="679"/>
+        <location filename="../qml/pages/HwInfo.js" line="686"/>
         <source>unavailable</source>
         <translation>nicht verfügbar</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="680"/>
-        <location filename="../qml/pages/HwInfo.js" line="741"/>
+        <location filename="../qml/pages/HwInfo.js" line="687"/>
+        <location filename="../qml/pages/HwInfo.js" line="748"/>
         <source>Modem / SIM</source>
         <translation>Modem / SIM</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="685"/>
+        <location filename="../qml/pages/HwInfo.js" line="692"/>
         <source>Modem %1</source>
         <translation>Modem %1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="691"/>
+        <location filename="../qml/pages/HwInfo.js" line="698"/>
         <source>Firmware</source>
         <translation>Firmware</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="693"/>
+        <location filename="../qml/pages/HwInfo.js" line="700"/>
         <source>online</source>
         <translation>online</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="693"/>
+        <location filename="../qml/pages/HwInfo.js" line="700"/>
         <source>powered, offline</source>
         <translation>eingeschaltet, offline</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="699"/>
+        <location filename="../qml/pages/HwInfo.js" line="706"/>
         <source>SIM</source>
         <translation>SIM</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="701"/>
+        <location filename="../qml/pages/HwInfo.js" line="708"/>
         <source>Present</source>
         <translation>Vorhanden</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="703"/>
+        <location filename="../qml/pages/HwInfo.js" line="710"/>
         <source>Provider</source>
         <translation>Anbieter</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="704"/>
+        <location filename="../qml/pages/HwInfo.js" line="711"/>
         <source>Phone number</source>
         <translation>Rufnummer</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="707"/>
-        <location filename="../qml/pages/HwInfo.js" line="727"/>
+        <location filename="../qml/pages/HwInfo.js" line="714"/>
+        <location filename="../qml/pages/HwInfo.js" line="734"/>
         <source>MCC / MNC</source>
         <translation>MCC / MNC</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="708"/>
+        <location filename="../qml/pages/HwInfo.js" line="715"/>
         <source>PIN lock</source>
         <translation>PIN-Sperre</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="714"/>
+        <location filename="../qml/pages/HwInfo.js" line="721"/>
         <source>registered</source>
         <translation>registriert</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="715"/>
+        <location filename="../qml/pages/HwInfo.js" line="722"/>
         <source>searching</source>
         <translation>suchend</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="716"/>
+        <location filename="../qml/pages/HwInfo.js" line="723"/>
         <source>denied</source>
         <translation>abgewiesen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="719"/>
+        <location filename="../qml/pages/HwInfo.js" line="726"/>
         <source>Operator</source>
         <translation>Betreiber</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="720"/>
+        <location filename="../qml/pages/HwInfo.js" line="727"/>
         <source>Registration</source>
         <translation>Registrierung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="723"/>
+        <location filename="../qml/pages/HwInfo.js" line="730"/>
         <source>Selection</source>
         <translation>Auswahl</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="723"/>
+        <location filename="../qml/pages/HwInfo.js" line="730"/>
         <source>automatic</source>
         <translation>automatisch</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="725"/>
+        <location filename="../qml/pages/HwInfo.js" line="732"/>
         <source>Cell ID</source>
         <translation>Cell ID</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="726"/>
+        <location filename="../qml/pages/HwInfo.js" line="733"/>
         <source>Area code (LAC/TAC)</source>
         <translation>Bereichscode (LAC/TAC)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="733"/>
+        <location filename="../qml/pages/HwInfo.js" line="740"/>
         <source>Mobile data</source>
         <translation>Mobile Daten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="735"/>
+        <location filename="../qml/pages/HwInfo.js" line="742"/>
         <source>Attached</source>
         <translation>Verbunden (Attach)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="736"/>
+        <location filename="../qml/pages/HwInfo.js" line="743"/>
         <source>APN</source>
         <translation>APN</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="737"/>
+        <location filename="../qml/pages/HwInfo.js" line="744"/>
         <source>Roaming</source>
         <translation>Roaming</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="737"/>
+        <location filename="../qml/pages/HwInfo.js" line="744"/>
         <source>allowed</source>
         <translation>erlaubt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="737"/>
+        <location filename="../qml/pages/HwInfo.js" line="744"/>
         <source>blocked</source>
         <translation>gesperrt</translation>
     </message>
@@ -2681,16 +2706,6 @@
         <translation>(unbenannt)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="536"/>
-        <source>CAMSS V4L2 nodes</source>
-        <translation>CAMSS-V4L2-Knoten</translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HwInfo.js" line="537"/>
-        <source>Kernel camera-subsystem interfaces — not user-facing cameras.</source>
-        <translation>Kernel-Kamerasubsystem-Schnittstellen — keine sichtbaren Kameras.</translation>
-    </message>
-    <message>
         <location filename="../qml/pages/HwInfo.js" line="364"/>
         <source>Identity</source>
         <translation>Identität</translation>
@@ -2703,14 +2718,14 @@
     <message>
         <location filename="../qml/pages/HwInfo.js" line="121"/>
         <location filename="../qml/pages/HwInfo.js" line="366"/>
-        <location filename="../qml/pages/HwInfo.js" line="583"/>
-        <location filename="../qml/pages/HwInfo.js" line="689"/>
+        <location filename="../qml/pages/HwInfo.js" line="590"/>
+        <location filename="../qml/pages/HwInfo.js" line="696"/>
         <source>Manufacturer</source>
         <translation>Hersteller</translation>
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="369"/>
-        <location filename="../qml/pages/HwInfo.js" line="722"/>
+        <location filename="../qml/pages/HwInfo.js" line="729"/>
         <source>Technology</source>
         <translation>Technologie</translation>
     </message>
@@ -2771,7 +2786,7 @@
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="384"/>
-        <location filename="../qml/pages/HwInfo.js" line="693"/>
+        <location filename="../qml/pages/HwInfo.js" line="700"/>
         <source>Power</source>
         <translation>Leistung</translation>
     </message>
@@ -2802,7 +2817,7 @@
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="410"/>
-        <location filename="../qml/pages/HwInfo.js" line="588"/>
+        <location filename="../qml/pages/HwInfo.js" line="595"/>
         <source>Class</source>
         <translation>Klasse</translation>
     </message>
@@ -2829,7 +2844,7 @@
         <location filename="../qml/pages/HwInfo.js" line="417"/>
         <location filename="../qml/pages/HwInfo.js" line="418"/>
         <location filename="../qml/pages/HwInfo.js" line="419"/>
-        <location filename="../qml/pages/HwInfo.js" line="693"/>
+        <location filename="../qml/pages/HwInfo.js" line="700"/>
         <source>off</source>
         <translation>aus</translation>
     </message>
@@ -2860,7 +2875,7 @@
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="428"/>
-        <location filename="../qml/pages/HwInfo.js" line="576"/>
+        <location filename="../qml/pages/HwInfo.js" line="583"/>
         <source>Devices</source>
         <translation>Geräte</translation>
     </message>
@@ -2882,8 +2897,8 @@
     <message>
         <location filename="../qml/pages/HwInfo.js" line="394"/>
         <location filename="../qml/pages/HwInfo.js" line="438"/>
-        <location filename="../qml/pages/HwInfo.js" line="572"/>
-        <location filename="../qml/pages/HwInfo.js" line="708"/>
+        <location filename="../qml/pages/HwInfo.js" line="579"/>
+        <location filename="../qml/pages/HwInfo.js" line="715"/>
         <source>none</source>
         <translation>keine</translation>
     </message>
@@ -2987,6 +3002,7 @@
     <message>
         <location filename="../qml/pages/HwInfo.js" line="500"/>
         <location filename="../qml/pages/HwInfo.js" line="508"/>
+        <location filename="../qml/pages/HwInfo.js" line="541"/>
         <source>Image sensors</source>
         <translation>Bildsensoren</translation>
     </message>
@@ -3011,137 +3027,137 @@
         <translation>Die statischen Wege sind ausgeschöpft — der Rest erfordert das Öffnen der Kamera über das HAL.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="538"/>
+        <location filename="../qml/pages/HwInfo.js" line="545"/>
         <source>Camera</source>
         <translation>Kamera</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="557"/>
+        <location filename="../qml/pages/HwInfo.js" line="564"/>
         <source>Charging (USB-C input)</source>
         <translation>Laden (USB-C-Eingang)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="558"/>
+        <location filename="../qml/pages/HwInfo.js" line="565"/>
         <source>A charger is not a USB data device, so it is shown here as the power input. Full details are under Battery.</source>
         <translation>Ein Ladegerät ist kein USB-Datengerät und wird hier als Stromeingang gezeigt. Vollständige Details unter Akku.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="569"/>
+        <location filename="../qml/pages/HwInfo.js" line="576"/>
         <source>Host controller</source>
         <translation>Host-Controller</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="570"/>
+        <location filename="../qml/pages/HwInfo.js" line="577"/>
         <source>USB host controllers</source>
         <translation>USB-Host-Controller</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="571"/>
+        <location filename="../qml/pages/HwInfo.js" line="578"/>
         <source>The SoC&apos;s integrated USB (dwc3/xHCI); root hubs are shown here.</source>
         <translation>Der ins SoC integrierte USB (dwc3/xHCI); Root-Hubs werden hier gezeigt.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="572"/>
+        <location filename="../qml/pages/HwInfo.js" line="579"/>
         <source>Controllers</source>
         <translation>Controller</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="576"/>
+        <location filename="../qml/pages/HwInfo.js" line="583"/>
         <source>Connected devices</source>
         <translation>Angeschlossene Geräte</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="576"/>
+        <location filename="../qml/pages/HwInfo.js" line="583"/>
         <source>none connected</source>
         <translation>keins angeschlossen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="584"/>
+        <location filename="../qml/pages/HwInfo.js" line="591"/>
         <source>Vendor (USB-ID DB)</source>
         <translation>Hersteller (USB-ID-DB)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="585"/>
+        <location filename="../qml/pages/HwInfo.js" line="592"/>
         <source>Product (USB-ID DB)</source>
         <translation>Produkt (USB-ID-DB)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="586"/>
+        <location filename="../qml/pages/HwInfo.js" line="593"/>
         <source>USB ID</source>
         <translation>USB-ID</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="589"/>
+        <location filename="../qml/pages/HwInfo.js" line="596"/>
         <source>Speed</source>
         <translation>Geschwindigkeit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="590"/>
+        <location filename="../qml/pages/HwInfo.js" line="597"/>
         <source>Max power</source>
         <translation>Max. Strom</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="591"/>
+        <location filename="../qml/pages/HwInfo.js" line="598"/>
         <source>USB version</source>
         <translation>USB-Version</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="592"/>
+        <location filename="../qml/pages/HwInfo.js" line="599"/>
         <source>Bus / device</source>
         <translation>Bus / Gerät</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="599"/>
+        <location filename="../qml/pages/HwInfo.js" line="606"/>
         <source>Serial port</source>
         <translation>Serielle Schnittstelle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="601"/>
+        <location filename="../qml/pages/HwInfo.js" line="608"/>
         <source>Storage node</source>
         <translation>Speicherknoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="601"/>
+        <location filename="../qml/pages/HwInfo.js" line="608"/>
         <source>mounted at %1</source>
         <translation>gemountet auf %1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="601"/>
+        <location filename="../qml/pages/HwInfo.js" line="608"/>
         <source>not mounted</source>
         <translation>nicht gemountet</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="603"/>
+        <location filename="../qml/pages/HwInfo.js" line="610"/>
         <source>Network interface</source>
         <translation>Netzwerk-Schnittstelle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="605"/>
+        <location filename="../qml/pages/HwInfo.js" line="612"/>
         <source>Video node</source>
         <translation>Video-Knoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="607"/>
+        <location filename="../qml/pages/HwInfo.js" line="614"/>
         <source>HID node</source>
         <translation>HID-Knoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="609"/>
+        <location filename="../qml/pages/HwInfo.js" line="616"/>
         <source>Input node</source>
         <translation>Eingabe-Knoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="612"/>
+        <location filename="../qml/pages/HwInfo.js" line="619"/>
         <source>Device nodes</source>
         <translation>Geräteknoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="612"/>
+        <location filename="../qml/pages/HwInfo.js" line="619"/>
         <source>none exposed</source>
         <translation>keine bereitgestellt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="616"/>
+        <location filename="../qml/pages/HwInfo.js" line="623"/>
         <source>USB</source>
         <translation>USB</translation>
     </message>
@@ -4242,57 +4258,57 @@
 <context>
     <name>SysMon</name>
     <message>
-        <location filename="../src/sysmon.cpp" line="1426"/>
+        <location filename="../src/sysmon.cpp" line="1448"/>
         <source>as new</source>
         <translation>wie neu</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1427"/>
+        <location filename="../src/sysmon.cpp" line="1449"/>
         <source>good</source>
         <translation>gut</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1428"/>
+        <location filename="../src/sysmon.cpp" line="1450"/>
         <source>aged</source>
         <translation>gealtert</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1429"/>
+        <location filename="../src/sysmon.cpp" line="1451"/>
         <source>worn</source>
         <translation>verschlissen</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1430"/>
+        <location filename="../src/sysmon.cpp" line="1452"/>
         <source>poor — consider replacement</source>
         <translation>schlecht — Austausch erwägen</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1433"/>
+        <location filename="../src/sysmon.cpp" line="1455"/>
         <source>good (%1 cycles)</source>
         <translation>gut (%1 Zyklen)</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1434"/>
+        <location filename="../src/sysmon.cpp" line="1456"/>
         <source>aged (%1 cycles)</source>
         <translation>gealtert (%1 Zyklen)</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1435"/>
+        <location filename="../src/sysmon.cpp" line="1457"/>
         <source>worn (%1 cycles)</source>
         <translation>verschlissen (%1 Zyklen)</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1436"/>
+        <location filename="../src/sysmon.cpp" line="1458"/>
         <source>poor (%1 cycles)</source>
         <translation>schlecht (%1 Zyklen)</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1438"/>
+        <location filename="../src/sysmon.cpp" line="1460"/>
         <source>unknown</source>
         <translation>unbekannt</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1441"/>
+        <location filename="../src/sysmon.cpp" line="1463"/>
         <source> · %1 cycles</source>
         <translation> · %1 Zyklen</translation>
     </message>
