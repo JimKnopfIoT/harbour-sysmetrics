@@ -25,21 +25,31 @@ Page {
 
     DiagBackground {}
 
-    // Freeze row re-ordering while the user interacts with the list, so a row
-    // does not jump away under the finger; values keep updating in place. A
-    // grace period lets the order settle before it catches up again.
-    property bool touching: list.moving || list.dragging || list.flicking
-    onTouchingChanged: {
-        if (touching) { thawTimer.stop(); procs.frozen = true }
-        else thawTimer.restart()
+    // Freeze row re-ordering while the user interacts with the list OR is
+    // scrolled away from the top, so rows never jump under the finger and a
+    // re-sort never yanks the view back to the top. Re-sorting resumes only when
+    // the list is idle at the top, where re-ordering is not visually disruptive.
+    property bool rowPressed: false
+    function _updateFreeze() {
+        if (list.moving || list.dragging || list.flicking || rowPressed || !list.atYBeginning) {
+            thawTimer.stop()
+            procs.frozen = true
+        } else {
+            thawTimer.restart()
+        }
     }
-    Timer { id: thawTimer; interval: 2500; onTriggered: procs.frozen = false }
+    Timer { id: thawTimer; interval: 900; onTriggered: procs.frozen = false }
 
     SilicaListView {
         id: list
         anchors.fill: parent
         model: procs
         clip: true
+
+        onMovingChanged: page._updateFreeze()
+        onDraggingChanged: page._updateFreeze()
+        onFlickingChanged: page._updateFreeze()
+        onAtYBeginningChanged: page._updateFreeze()
 
         PullDownMenu {
             MenuItem {
@@ -249,8 +259,8 @@ Page {
             visible: page.expanded || procs.search.length > 0 || index < page.topCount
             height: visible ? contentHeight : 0
             onPressedChanged: {
-                if (pressed) { thawTimer.stop(); procs.frozen = true }
-                else thawTimer.restart()
+                page.rowPressed = pressed
+                page._updateFreeze()
             }
             onClicked: pageStack.push(Qt.resolvedUrl("ProcessDetailPage.qml"),
                                       { pid: pid, pname: name })
