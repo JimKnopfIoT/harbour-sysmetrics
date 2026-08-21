@@ -7,6 +7,7 @@ import "../components"
 
 Page {
     id: cvePage
+    allowedOrientations: Orientation.All
 
     // The subsystem this page was opened from; presets follow it so a search
     // from the Network page targets the radio chip and its stack, not Android
@@ -152,6 +153,8 @@ Page {
         if (u === "LOW") return Diag.green
         return Theme.secondaryColor
     }
+
+    DiagBackground {}
 
     SilicaListView {
         anchors.fill: parent
