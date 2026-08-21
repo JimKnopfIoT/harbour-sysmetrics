@@ -45,7 +45,6 @@ private:
     QString userName(uint uid) const;
 
     QVector<ProcSample> m_rows;
-    QHash<int, int> m_rowByPid;
     mutable QHash<uint, QString> m_users;
     qulonglong m_memTotal = 0;
 };

@@ -112,7 +112,8 @@ Page {
                 width: page.width - 2 * Theme.horizontalPageMargin
                 title: qsTr("CPU")
                 value: (d.cpu.pct !== undefined ? d.cpu.pct : 0).toFixed(1)
-                unit: "%  ·  " + qsTr("%1 of %2 cores").arg(d.cpu.coresUsed || 0).arg(d.cpu.coreCount || 0)
+                unit: "%"
+                note: "·  " + qsTr("%1 of %2 cores").arg(d.cpu.coresUsed || 0).arg(d.cpu.coreCount || 0)
                 accent: Diag.loadColor(d.cpu.pct || 0)
                 Column {
                     width: parent.width; spacing: Theme.paddingSmall
@@ -172,7 +173,7 @@ Page {
                 width: page.width - 2 * Theme.horizontalPageMargin
                 title: qsTr("Memory")
                 value: sysmon.fmtBytes(d.mem.pss !== undefined ? d.mem.pss : d.mem.rss || 0)
-                unit: d.mem.pss !== undefined ? "PSS" : "RSS"
+                note: d.mem.pss !== undefined ? "PSS" : "RSS"
                 accent: Diag.teal
                 Column {
                     width: parent.width; spacing: Theme.paddingSmall / 2

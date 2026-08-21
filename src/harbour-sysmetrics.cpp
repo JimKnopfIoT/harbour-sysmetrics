@@ -83,6 +83,16 @@ int main(int argc, char *argv[])
     QObject::connect(&sysmon, &SysMon::pauseRequested, sampler, &Sampler::setPaused);
     QObject::connect(&sysmon, &SysMon::intervalRequested, sampler, &Sampler::setIntervalMs);
 
+    // Walking /proc for the process list costs far more than everything else in a
+    // tick, and while the app is covered nothing shows that list -- except a
+    // running recording, which needs it regardless of what is on screen.
+    auto updateProcSampling = [&sysmon, &recorder, sampler]() {
+        QMetaObject::invokeMethod(sampler, "setProcessesEnabled", Qt::QueuedConnection,
+                                  Q_ARG(bool, sysmon.foreground() || recorder.running()));
+    };
+    QObject::connect(&sysmon, &SysMon::foregroundChanged, &sysmon, updateProcSampling);
+    QObject::connect(&recorder, &Recorder::stateChanged, &recorder, updateProcSampling);
+
     workerThread.start();
 
     QScopedPointer<QQuickView> view(SailfishApp::createView());

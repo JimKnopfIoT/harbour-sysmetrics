@@ -45,6 +45,11 @@ Page {
         anchors.fill: parent
         model: procs
         clip: true
+        // No current-item concept here: rows are tapped, never "selected". With a
+        // currentIndex the view keeps the current delegate alive across model
+        // churn, and after a resort it can leave that stale instance painted on
+        // top of the new row 0 -- the doubled first line seen on app resume.
+        currentIndex: -1
 
         onMovingChanged: page._updateFreeze()
         onDraggingChanged: page._updateFreeze()
@@ -92,29 +97,48 @@ Page {
             Item {
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
-                height: Theme.itemSizeMedium
+                height: Math.max(Theme.itemSizeMedium, cpuCol.implicitHeight)
 
                 Column {
+                    id: cpuCol
                     width: parent.width * 0.42
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: Theme.paddingSmall
+                    // Same shape as the overview's metric cards: what it is in
+                    // small type above, the value below, both carrying the load
+                    // colour -- including the per-cent sign, which belongs to
+                    // the number and not to the caption.
                     Row {
                         spacing: Theme.paddingSmall
-                        Label {
-                            text: Math.round(sysmon.cpuPercent) + "%"
-                            font.pixelSize: Theme.fontSizeExtraLarge
+                        Rectangle {
+                            width: Theme.paddingSmall / 2
+                            height: cpuTitle.height
+                            radius: width / 2
                             color: Diag.loadColor(sysmon.cpuPercent)
+                            anchors.verticalCenter: parent.verticalCenter
                         }
                         Label {
+                            id: cpuTitle
                             text: qsTr("CPU")
-                            anchors.baseline: parent.children[0].baseline
                             font.pixelSize: Theme.fontSizeExtraSmall
-                            color: Theme.secondaryColor
+                            font.letterSpacing: 1.5
+                            color: Theme.secondaryHighlightColor
                         }
                     }
                     Label {
-                        text: qsTr("load %1  ·  %2 cores")
-                              .arg(sysmon.load1.toFixed(2)).arg(sysmon.coreCount)
+                        text: Math.round(sysmon.cpuPercent) + "%"
+                        font.pixelSize: Theme.fontSizeExtraLarge
+                        color: Diag.loadColor(sysmon.cpuPercent)
+                    }
+                    Label {
+                        // hotplug SoCs park cores: say so rather than shrinking
+                        // the core count and pretending the others do not exist
+                        text: sysmon.coresOnline < sysmon.coreCount
+                              ? qsTr("load %1  ·  %2 of %3 cores")
+                                .arg(sysmon.load1.toFixed(2)).arg(sysmon.coresOnline)
+                                .arg(sysmon.coreCount)
+                              : qsTr("load %1  ·  %2 cores")
+                                .arg(sysmon.load1.toFixed(2)).arg(sysmon.coreCount)
                         font.pixelSize: Theme.fontSizeTiny
                         color: Theme.secondaryColor
                     }
@@ -164,11 +188,15 @@ Page {
                         model: sysmon.corePercents
                         LoadBar {
                             width: (parent.width - Theme.paddingLarge) / 2
-                            value: modelData
+                            // -1 marks a parked core: no bar, no figures, just say so
+                            value: modelData < 0 ? 0 : modelData
+                            color: modelData < 0 ? Theme.secondaryColor
+                                                 : Diag.loadColor(modelData)
                             label: qsTr("c%1").arg(index)
-                            caption: Math.round(modelData) + "%"
-                                     + (sysmon.coreFreqsMhz.length > index
-                                        ? " · " + sysmon.coreFreqsMhz[index] + "M" : "")
+                            caption: modelData < 0 ? qsTr("offline")
+                                     : Math.round(modelData) + "%"
+                                       + (sysmon.coreFreqsMhz[index] > 0
+                                          ? " · " + sysmon.coreFreqsMhz[index] + "M" : "")
                         }
                     }
                 }
@@ -243,7 +271,10 @@ Page {
                 }
                 Label {
                     visible: page.expanded
-                    anchors { right: sectionH.right; rightMargin: Theme.horizontalPageMargin
+                    // SectionHeader is a right-aligned Label whose text ends at
+                    // sectionH.right -- park the arrow left of the glyphs.
+                    anchors { right: sectionH.right
+                        rightMargin: sectionH.contentWidth + Theme.paddingMedium
                         verticalCenter: sectionH.verticalCenter }
                     text: "▲"
                     color: Diag.cyan

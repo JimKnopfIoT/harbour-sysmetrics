@@ -39,7 +39,7 @@ function cpu() {
     var coreRows = []
     var cores = d.cores || []
     for (var i = 0; i < cores.length; ++i) {
-        var mhz = (sysmon.coreFreqsMhz.length > i) ? "  ·  " + sysmon.coreFreqsMhz[i] + " MHz" : ""
+        var mhz = (sysmon.coreFreqsMhz[i] > 0) ? "  ·  " + sysmon.coreFreqsMhz[i] + " MHz" : ""
         coreRows.push(row(qsTr("Core %1").arg(i), (cores[i].name || cores[i].part || "?") + mhz))
     }
     s.push({ title: qsTr("Processor"), rows: [
@@ -268,6 +268,9 @@ function storage() {
                   : (h.bus + " " + h.dev)
         s.push({ title: title, rows: rows })
     }
+
+    s.push({ note: qsTr("Got a backup? You know what the admins say: no backup, no mercy! Make one if you don't have one yet — and keep it current."),
+             italic: true, rows: [] })
 
     var bars = []
     for (var m = 0; m < mounts.length; ++m) {

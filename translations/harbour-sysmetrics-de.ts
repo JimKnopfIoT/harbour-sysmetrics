@@ -268,72 +268,72 @@ github.com/JimKnopfIoT/harbour-sysmetrics</translation>
 <context>
     <name>ConnectionsPage</name>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="53"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="55"/>
         <source>Refresh</source>
         <translation>Aktualisieren</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="61"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="63"/>
         <source>Connections</source>
         <translation>Verbindungen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="62"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="64"/>
         <source>%1 total · %2 listening · %3 established</source>
         <translation>%1 gesamt · %2 lauschend · %3 aufgebaut</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="102"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="104"/>
         <source>Threat: %1</source>
         <translation>Bedrohung: %1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="107"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="109"/>
         <source>network exposure assessment</source>
         <translation>Bewertung der Netzwerk-Exposition</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="144"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="146"/>
         <source>Connections owned by other users (e.g. sshd as root) show without a process name until root mode is active.</source>
         <translation>Verbindungen anderer Benutzer (z. B. sshd als root) erscheinen ohne Prozessnamen, bis der Root-Modus aktiv ist.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="159"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="161"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="160"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="162"/>
         <source>Inbound</source>
         <translation>Eingehend</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="161"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="163"/>
         <source>Outbound</source>
         <translation>Ausgehend</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="162"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="164"/>
         <source>Listening</source>
         <translation>Lauschend</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="163"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="165"/>
         <source>SSH</source>
         <translation>SSH</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="225"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="227"/>
         <source>listening on %1</source>
         <translation>lauscht auf %1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="235"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="237"/>
         <source>uid %1</source>
         <translation>UID %1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ConnectionsPage.qml" line="266"/>
+        <location filename="../qml/pages/ConnectionsPage.qml" line="268"/>
         <source>No connections</source>
         <translation>Keine Verbindungen</translation>
     </message>
@@ -387,57 +387,57 @@ github.com/JimKnopfIoT/harbour-sysmetrics</translation>
 <context>
     <name>CvePage</name>
     <message>
-        <location filename="../qml/pages/CvePage.qml" line="103"/>
+        <location filename="../qml/pages/CvePage.qml" line="104"/>
         <source>Kernel BT</source>
         <translation>Kernel-BT</translation>
     </message>
     <message>
-        <location filename="../qml/pages/CvePage.qml" line="121"/>
+        <location filename="../qml/pages/CvePage.qml" line="122"/>
         <source>Kernel %1</source>
         <translation>Kernel %1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/CvePage.qml" line="143"/>
+        <location filename="../qml/pages/CvePage.qml" line="144"/>
         <source>No dedicated audio chip to search for — the codec is integrated in the SoC/PMIC; chip-level CVEs are covered by the SoC search under System &amp; CPU. Below: the audio software stack only.</source>
         <translation>Kein eigener Audio-Chip zum Suchen — der Codec ist im SoC/PMIC integriert; Chip-CVEs deckt die SoC-Suche unter System &amp; CPU ab. Unten: nur der Audio-Software-Stack.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/CvePage.qml" line="165"/>
+        <location filename="../qml/pages/CvePage.qml" line="168"/>
         <source>CVE search</source>
         <translation>CVE-Suche</translation>
     </message>
     <message>
-        <location filename="../qml/pages/CvePage.qml" line="166"/>
+        <location filename="../qml/pages/CvePage.qml" line="169"/>
         <source>EUVD (ENISA) · flagged against CISA KEV</source>
         <translation>EUVD (ENISA) · abgeglichen mit CISA KEV</translation>
     </message>
     <message>
-        <location filename="../qml/pages/CvePage.qml" line="172"/>
+        <location filename="../qml/pages/CvePage.qml" line="175"/>
         <source>Component + version</source>
         <translation>Komponente + Version</translation>
     </message>
     <message>
-        <location filename="../qml/pages/CvePage.qml" line="231"/>
+        <location filename="../qml/pages/CvePage.qml" line="234"/>
         <source>Fix state vs. installed %1 %2:  </source>
         <translation>Fix-Status gegen installiertes %1 %2:  </translation>
     </message>
     <message>
-        <location filename="../qml/pages/CvePage.qml" line="232"/>
+        <location filename="../qml/pages/CvePage.qml" line="235"/>
         <source>Fix state:  </source>
         <translation>Fix-Status:  </translation>
     </message>
     <message>
-        <location filename="../qml/pages/CvePage.qml" line="233"/>
+        <location filename="../qml/pages/CvePage.qml" line="236"/>
         <source>✔ not affected or fixed (changelog / installed version above the stated range) · ✘ probably affected (version inside the range, or package older than the CVE) · ▢ unknown</source>
         <translation>✔ nicht betroffen oder gefixt (Changelog / installierte Version über dem genannten Bereich) · ✘ wahrscheinlich betroffen (Version im Bereich oder Paket älter als die CVE) · ▢ unbekannt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/CvePage.qml" line="245"/>
+        <location filename="../qml/pages/CvePage.qml" line="248"/>
         <source>Open on NVD</source>
         <translation>Auf NVD öffnen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/CvePage.qml" line="249"/>
+        <location filename="../qml/pages/CvePage.qml" line="252"/>
         <source>Search Exploit-DB</source>
         <translation>Exploit-DB durchsuchen</translation>
     </message>
@@ -2376,13 +2376,13 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
     <name>HwInfo</name>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="13"/>
-        <location filename="../qml/pages/HwInfo.js" line="356"/>
+        <location filename="../qml/pages/HwInfo.js" line="359"/>
         <source>Device</source>
         <translation>Gerät</translation>
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="14"/>
-        <location filename="../qml/pages/HwInfo.js" line="697"/>
+        <location filename="../qml/pages/HwInfo.js" line="700"/>
         <source>Product</source>
         <translation>Produkt</translation>
     </message>
@@ -2391,8 +2391,8 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
         <location filename="../qml/pages/HwInfo.js" line="122"/>
         <location filename="../qml/pages/HwInfo.js" line="206"/>
         <location filename="../qml/pages/HwInfo.js" line="249"/>
-        <location filename="../qml/pages/HwInfo.js" line="441"/>
-        <location filename="../qml/pages/HwInfo.js" line="805"/>
+        <location filename="../qml/pages/HwInfo.js" line="444"/>
+        <location filename="../qml/pages/HwInfo.js" line="808"/>
         <source>Model</source>
         <translation>Modell</translation>
     </message>
@@ -2448,8 +2448,8 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="56"/>
-        <location filename="../qml/pages/HwInfo.js" line="548"/>
-        <location filename="../qml/pages/HwInfo.js" line="549"/>
+        <location filename="../qml/pages/HwInfo.js" line="551"/>
+        <location filename="../qml/pages/HwInfo.js" line="552"/>
         <source>active</source>
         <translation>aktiv</translation>
     </message>
@@ -2511,10 +2511,10 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="123"/>
-        <location filename="../qml/pages/HwInfo.js" line="316"/>
-        <location filename="../qml/pages/HwInfo.js" line="343"/>
-        <location filename="../qml/pages/HwInfo.js" line="355"/>
-        <location filename="../qml/pages/HwInfo.js" line="708"/>
+        <location filename="../qml/pages/HwInfo.js" line="319"/>
+        <location filename="../qml/pages/HwInfo.js" line="346"/>
+        <location filename="../qml/pages/HwInfo.js" line="358"/>
+        <location filename="../qml/pages/HwInfo.js" line="711"/>
         <source>Driver</source>
         <translation>Treiber</translation>
     </message>
@@ -2540,9 +2540,9 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="133"/>
-        <location filename="../qml/pages/HwInfo.js" line="311"/>
-        <location filename="../qml/pages/HwInfo.js" line="385"/>
-        <location filename="../qml/pages/HwInfo.js" line="794"/>
+        <location filename="../qml/pages/HwInfo.js" line="314"/>
+        <location filename="../qml/pages/HwInfo.js" line="388"/>
+        <location filename="../qml/pages/HwInfo.js" line="797"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
@@ -2623,8 +2623,8 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="208"/>
         <location filename="../qml/pages/HwInfo.js" line="251"/>
-        <location filename="../qml/pages/HwInfo.js" line="442"/>
-        <location filename="../qml/pages/HwInfo.js" line="702"/>
+        <location filename="../qml/pages/HwInfo.js" line="445"/>
+        <location filename="../qml/pages/HwInfo.js" line="705"/>
         <source>Serial</source>
         <translation>Seriennummer</translation>
     </message>
@@ -2681,229 +2681,229 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
         <translation>vom Gerät nicht gemeldet</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="279"/>
+        <location filename="../qml/pages/HwInfo.js" line="282"/>
         <source>Partitions</source>
         <translation>Partitionen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="280"/>
+        <location filename="../qml/pages/HwInfo.js" line="283"/>
         <source>Storage</source>
         <translation>Speicher</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="299"/>
-        <location filename="../qml/pages/HwInfo.js" line="311"/>
+        <location filename="../qml/pages/HwInfo.js" line="302"/>
+        <location filename="../qml/pages/HwInfo.js" line="314"/>
         <source>Wi-Fi connection</source>
         <translation>WLAN-Verbindung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="300"/>
+        <location filename="../qml/pages/HwInfo.js" line="303"/>
         <source>SSID</source>
         <translation>SSID</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="301"/>
+        <location filename="../qml/pages/HwInfo.js" line="304"/>
         <source>Own MAC</source>
         <translation>Eigene MAC</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="302"/>
+        <location filename="../qml/pages/HwInfo.js" line="305"/>
         <source>Access point (BSSID)</source>
         <translation>Access Point (BSSID)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="303"/>
+        <location filename="../qml/pages/HwInfo.js" line="306"/>
         <source>Band</source>
         <translation>Band</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="304"/>
+        <location filename="../qml/pages/HwInfo.js" line="307"/>
         <source>Channel</source>
         <translation>Kanal</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="305"/>
-        <location filename="../qml/pages/HwInfo.js" line="839"/>
+        <location filename="../qml/pages/HwInfo.js" line="308"/>
+        <location filename="../qml/pages/HwInfo.js" line="842"/>
         <source>Signal</source>
         <translation>Signal</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="306"/>
+        <location filename="../qml/pages/HwInfo.js" line="309"/>
         <source>TX rate</source>
         <translation>Senderate</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="307"/>
+        <location filename="../qml/pages/HwInfo.js" line="310"/>
         <source>RX rate</source>
         <translation>Empfangsrate</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="308"/>
+        <location filename="../qml/pages/HwInfo.js" line="311"/>
         <source>TX power</source>
         <translation>Sendeleistung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="311"/>
+        <location filename="../qml/pages/HwInfo.js" line="314"/>
         <source>not connected</source>
         <translation>nicht verbunden</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="313"/>
+        <location filename="../qml/pages/HwInfo.js" line="316"/>
         <source>Wi-Fi adapter</source>
         <translation>WLAN-Adapter</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="314"/>
+        <location filename="../qml/pages/HwInfo.js" line="317"/>
         <source>Interface</source>
         <translation>Schnittstelle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="315"/>
+        <location filename="../qml/pages/HwInfo.js" line="318"/>
         <source>Chip vendor</source>
         <translation>Chip-Hersteller</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="324"/>
+        <location filename="../qml/pages/HwInfo.js" line="327"/>
         <source>Standards</source>
         <translation>Standards</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="325"/>
+        <location filename="../qml/pages/HwInfo.js" line="328"/>
         <source>Channels (usable)</source>
         <translation>Kanäle (nutzbar)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="329"/>
+        <location filename="../qml/pages/HwInfo.js" line="332"/>
         <source>Channels (blocked here)</source>
         <translation>Kanäle (hier gesperrt)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="330"/>
+        <location filename="../qml/pages/HwInfo.js" line="333"/>
         <source>Band: %1</source>
         <translation>Band: %1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="331"/>
+        <location filename="../qml/pages/HwInfo.js" line="334"/>
         <source>Capabilities of the Wi-Fi chip on this band; blocked channels are grayed.</source>
         <translation>Fähigkeiten des WLAN-Chips auf diesem Band; gesperrte Kanäle sind ausgegraut.</translation>
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="165"/>
         <location filename="../qml/pages/HwInfo.js" line="167"/>
-        <location filename="../qml/pages/HwInfo.js" line="339"/>
+        <location filename="../qml/pages/HwInfo.js" line="342"/>
         <source>Type</source>
         <translation>Typ</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="340"/>
-        <location filename="../qml/pages/HwInfo.js" line="496"/>
+        <location filename="../qml/pages/HwInfo.js" line="343"/>
+        <location filename="../qml/pages/HwInfo.js" line="499"/>
         <source>State</source>
         <translation>Zustand</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="340"/>
+        <location filename="../qml/pages/HwInfo.js" line="343"/>
         <source>carrier</source>
         <translation>Verbindung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="344"/>
-        <location filename="../qml/pages/HwInfo.js" line="483"/>
+        <location filename="../qml/pages/HwInfo.js" line="347"/>
+        <location filename="../qml/pages/HwInfo.js" line="486"/>
         <source>Chip</source>
         <translation>Chip</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="346"/>
+        <location filename="../qml/pages/HwInfo.js" line="349"/>
         <source>Link speed</source>
         <translation>Verbindungsgeschw.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="347"/>
+        <location filename="../qml/pages/HwInfo.js" line="350"/>
         <source>Traffic</source>
         <translation>Datenverkehr</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="348"/>
+        <location filename="../qml/pages/HwInfo.js" line="351"/>
         <source>Errors</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="375"/>
-        <location filename="../qml/pages/HwInfo.js" line="832"/>
+        <location filename="../qml/pages/HwInfo.js" line="378"/>
+        <location filename="../qml/pages/HwInfo.js" line="835"/>
         <source>Network</source>
         <translation>Netzwerk</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="386"/>
-        <location filename="../qml/pages/HwInfo.js" line="675"/>
+        <location filename="../qml/pages/HwInfo.js" line="389"/>
+        <location filename="../qml/pages/HwInfo.js" line="678"/>
         <source>Protocol</source>
         <translation>Protokoll</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="387"/>
+        <location filename="../qml/pages/HwInfo.js" line="390"/>
         <source>Charge type</source>
         <translation>Ladephase</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="388"/>
-        <location filename="../qml/pages/HwInfo.js" line="676"/>
+        <location filename="../qml/pages/HwInfo.js" line="391"/>
+        <location filename="../qml/pages/HwInfo.js" line="679"/>
         <source>Charging power</source>
         <translation>Ladeleistung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="389"/>
+        <location filename="../qml/pages/HwInfo.js" line="392"/>
         <source>Into battery</source>
         <translation>In den Akku</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="391"/>
-        <location filename="../qml/pages/HwInfo.js" line="677"/>
+        <location filename="../qml/pages/HwInfo.js" line="394"/>
+        <location filename="../qml/pages/HwInfo.js" line="680"/>
         <source>Input</source>
         <translation>Eingang</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="396"/>
+        <location filename="../qml/pages/HwInfo.js" line="399"/>
         <source>active — up to %1 V / %2 A</source>
         <translation>aktiv — bis %1 V / %2 A</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="397"/>
+        <location filename="../qml/pages/HwInfo.js" line="400"/>
         <source>not active</source>
         <translation>nicht aktiv</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="399"/>
-        <location filename="../qml/pages/HwInfo.js" line="679"/>
+        <location filename="../qml/pages/HwInfo.js" line="402"/>
+        <location filename="../qml/pages/HwInfo.js" line="682"/>
         <source>Type-C role</source>
         <translation>Type-C-Rolle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="401"/>
+        <location filename="../qml/pages/HwInfo.js" line="404"/>
         <source>Type-C current (CC advertise)</source>
         <translation>Type-C-Strom (CC-Angebot)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="403"/>
+        <location filename="../qml/pages/HwInfo.js" line="406"/>
         <source>PD / Type-C revision</source>
         <translation>PD- / Type-C-Revision</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="405"/>
+        <location filename="../qml/pages/HwInfo.js" line="408"/>
         <source>Partner supports PD</source>
         <translation>Partner unterstützt PD</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="405"/>
-        <location filename="../qml/pages/HwInfo.js" line="816"/>
-        <location filename="../qml/pages/HwInfo.js" line="850"/>
+        <location filename="../qml/pages/HwInfo.js" line="408"/>
+        <location filename="../qml/pages/HwInfo.js" line="819"/>
+        <location filename="../qml/pages/HwInfo.js" line="853"/>
         <source>yes</source>
         <translation>ja</translation>
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="211"/>
-        <location filename="../qml/pages/HwInfo.js" line="405"/>
-        <location filename="../qml/pages/HwInfo.js" line="606"/>
-        <location filename="../qml/pages/HwInfo.js" line="816"/>
-        <location filename="../qml/pages/HwInfo.js" line="850"/>
+        <location filename="../qml/pages/HwInfo.js" line="408"/>
+        <location filename="../qml/pages/HwInfo.js" line="609"/>
+        <location filename="../qml/pages/HwInfo.js" line="819"/>
+        <location filename="../qml/pages/HwInfo.js" line="853"/>
         <source>no</source>
         <translation>nein</translation>
     </message>
@@ -3073,999 +3073,1004 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
         <translation>Interner Speicher (eMMC)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="357"/>
-        <location filename="../qml/pages/HwInfo.js" line="516"/>
+        <location filename="../qml/pages/HwInfo.js" line="272"/>
+        <source>Got a backup? You know what the admins say: no backup, no mercy! Make one if you don&apos;t have one yet — and keep it current.</source>
+        <translation>Hast du ein Backup? Du weißt ja, was die Admins sagen: Kein Backup, kein Mitleid! Mach eins, wenn du noch keins hast — und halte es aktuell.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="360"/>
+        <location filename="../qml/pages/HwInfo.js" line="519"/>
         <source>Device-tree node</source>
         <translation>Device-Tree-Knoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="358"/>
-        <location filename="../qml/pages/HwInfo.js" line="517"/>
-        <location filename="../qml/pages/HwInfo.js" line="662"/>
+        <location filename="../qml/pages/HwInfo.js" line="361"/>
+        <location filename="../qml/pages/HwInfo.js" line="520"/>
+        <location filename="../qml/pages/HwInfo.js" line="665"/>
         <source>Compatible</source>
         <translation>Compatible</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="359"/>
-        <location filename="../qml/pages/HwInfo.js" line="365"/>
+        <location filename="../qml/pages/HwInfo.js" line="362"/>
+        <location filename="../qml/pages/HwInfo.js" line="368"/>
         <source>Firmware version</source>
         <translation>Firmware-Version</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="360"/>
+        <location filename="../qml/pages/HwInfo.js" line="363"/>
         <source>Firmware build</source>
         <translation>Firmware-Build</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="369"/>
+        <location filename="../qml/pages/HwInfo.js" line="372"/>
         <source>Firmware files</source>
         <translation>Firmware-Dateien</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="371"/>
+        <location filename="../qml/pages/HwInfo.js" line="374"/>
         <source>WLAN chipset</source>
         <translation>WLAN-Chipsatz</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="406"/>
+        <location filename="../qml/pages/HwInfo.js" line="409"/>
         <source>Cable e-marker</source>
         <translation>Kabel-E-Marker</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="408"/>
+        <location filename="../qml/pages/HwInfo.js" line="411"/>
         <source>not exposed by this chipset</source>
         <translation>von diesem Chipsatz nicht offengelegt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="409"/>
+        <location filename="../qml/pages/HwInfo.js" line="412"/>
         <source>Charging</source>
         <translation>Laden</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="410"/>
+        <location filename="../qml/pages/HwInfo.js" line="413"/>
         <source>Live charger negotiation and the rate into the battery.</source>
         <translation>Live-Aushandlung des Ladegeräts und die Rate in den Akku.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="423"/>
+        <location filename="../qml/pages/HwInfo.js" line="426"/>
         <source>Events</source>
         <translation>Ereignisse</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="424"/>
+        <location filename="../qml/pages/HwInfo.js" line="427"/>
         <source>Charger handshake — what happened</source>
         <translation>Ladegerät-Handshake — was passierte</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="425"/>
+        <location filename="../qml/pages/HwInfo.js" line="428"/>
         <source>Plain-language reading of the charger driver&apos;s negotiation. The full USB-PD packet exchange is not exposed by this chipset.</source>
         <translation>Klartext-Deutung der Aushandlung des Ladegerät-Treibers. Der vollständige USB-PD-Paketaustausch wird von diesem Chipsatz nicht offengelegt.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="431"/>
+        <location filename="../qml/pages/HwInfo.js" line="434"/>
         <source>Kernel log (raw excerpt)</source>
         <translation>Kernel-Log (Rohauszug)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="433"/>
+        <location filename="../qml/pages/HwInfo.js" line="436"/>
         <source>Charger handshake</source>
         <translation>Ladegerät-Handshake</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="434"/>
+        <location filename="../qml/pages/HwInfo.js" line="437"/>
         <source>Log</source>
         <translation>Log</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="492"/>
+        <location filename="../qml/pages/HwInfo.js" line="495"/>
         <source>on, once Bluetooth is switched on</source>
         <translation>an, sobald Bluetooth eingeschaltet wird</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="493"/>
+        <location filename="../qml/pages/HwInfo.js" line="496"/>
         <source>off, also once switched on</source>
         <translation>aus, auch nach dem Einschalten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="518"/>
+        <location filename="../qml/pages/HwInfo.js" line="521"/>
         <source>Adapters</source>
         <translation>Adapter</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="520"/>
+        <location filename="../qml/pages/HwInfo.js" line="523"/>
         <source>Bluetooth chipset</source>
         <translation>Bluetooth-Chipsatz</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="521"/>
+        <location filename="../qml/pages/HwInfo.js" line="524"/>
         <source>On most ports BT shares the WLAN combo chip; the device-tree node names it.</source>
         <translation>Auf den meisten Ports teilt sich BT den WLAN-Kombichip; der Device-Tree-Knoten benennt ihn.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="593"/>
+        <location filename="../qml/pages/HwInfo.js" line="596"/>
         <source>Camera %1</source>
         <translation>Kamera %1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="596"/>
+        <location filename="../qml/pages/HwInfo.js" line="599"/>
         <source>Recovered from the vendor camera modules (sensormodule/*.bin) — the actual sensor part numbers behind the HAL.</source>
         <translation>Aus den Vendor-Kameramodulen gewonnen (sensormodule/*.bin) — die tatsächlichen Sensor-Teilenummern hinter dem HAL.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="600"/>
+        <location filename="../qml/pages/HwInfo.js" line="603"/>
         <source>Camera subsystem (CAMSS)</source>
         <translation>Kamera-Subsystem (CAMSS)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="601"/>
+        <location filename="../qml/pages/HwInfo.js" line="604"/>
         <source>The cameras run behind the Android camera HAL (camx). The kernel exposes only the CAMSS infrastructure — these counts are real.</source>
         <translation>Die Kameras laufen hinter dem Android-Kamera-HAL (camx). Der Kernel legt nur die CAMSS-Infrastruktur offen — diese Zählungen sind echt.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="610"/>
+        <location filename="../qml/pages/HwInfo.js" line="613"/>
         <source>Sensor characteristics</source>
         <translation>Sensor-Eigenschaften</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="611"/>
+        <location filename="../qml/pages/HwInfo.js" line="614"/>
         <source>Mobile image sensors of this class use a Bayer colour-filter array — three primaries (RGB), one colour per pixel, demosaiced in the ISP. Raw output is typically 10-bit per channel.</source>
         <translation>Mobile Bildsensoren dieser Klasse nutzen eine Bayer-Farbfilter-Matrix — drei Grundfarben (RGB), eine Farbe pro Pixel, im ISP demosaict. Die Rohausgabe ist typisch 10 Bit je Kanal.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="613"/>
+        <location filename="../qml/pages/HwInfo.js" line="616"/>
         <source>Colour filter</source>
         <translation>Farbfilter</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="613"/>
+        <location filename="../qml/pages/HwInfo.js" line="616"/>
         <source>Bayer RGGB (3 primaries)</source>
         <translation>Bayer RGGB (3 Grundfarben)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="614"/>
+        <location filename="../qml/pages/HwInfo.js" line="617"/>
         <source>Optical format / pixel pitch</source>
         <translation>Optisches Format / Pixelabstand</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="614"/>
+        <location filename="../qml/pages/HwInfo.js" line="617"/>
         <source>datasheet spec of the model above — not queryable on-device</source>
         <translation>Datenblatt-Angabe des obigen Modells — nicht auf dem Gerät abfragbar</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="617"/>
+        <location filename="../qml/pages/HwInfo.js" line="620"/>
         <source>Only available live</source>
         <translation>Nur live verfügbar</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="620"/>
+        <location filename="../qml/pages/HwInfo.js" line="623"/>
         <source>Resolutions / capture modes</source>
         <translation>Auflösungen / Aufnahmemodi</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="620"/>
+        <location filename="../qml/pages/HwInfo.js" line="623"/>
         <source>Defined in the HAL, not in V4L2. Enumerable only by starting the camera (QtMultimedia / Camera2 supportedResolutions).</source>
         <translation>Im HAL definiert, nicht in V4L2. Nur durch Starten der Kamera aufzählbar (QtMultimedia / Camera2 supportedResolutions).</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="621"/>
+        <location filename="../qml/pages/HwInfo.js" line="624"/>
         <source>Pixel format (YUV/RAW)</source>
         <translation>Pixelformat (YUV/RAW)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="621"/>
+        <location filename="../qml/pages/HwInfo.js" line="624"/>
         <source>Negotiated per session with the HAL — read it from a running Camera via viewfinder/imageCapture formats.</source>
         <translation>Pro Sitzung mit dem HAL ausgehandelt — an einer laufenden Kamera über die viewfinder/imageCapture-Formate ablesbar.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="622"/>
+        <location filename="../qml/pages/HwInfo.js" line="625"/>
         <source>Camera2 SENSOR_INFO_SENSITIVITY_RANGE — only on a live session, not from sysfs.</source>
         <translation>Camera2 SENSOR_INFO_SENSITIVITY_RANGE — nur an einer laufenden Sitzung, nicht aus sysfs.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="623"/>
+        <location filename="../qml/pages/HwInfo.js" line="626"/>
         <source>The role tags above (wide/tele/front/uwide) come from the module names; the V4L2 nodes themselves are CAMSS control interfaces and carry no position.</source>
         <translation>Die Rollen-Tags oben (wide/tele/front/uwide) stammen aus den Modulnamen; die V4L2-Knoten selbst sind CAMSS-Steuerschnittstellen und tragen keine Position.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="631"/>
+        <location filename="../qml/pages/HwInfo.js" line="634"/>
         <source>Kernel video nodes</source>
         <translation>Kernel-Videoknoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="632"/>
+        <location filename="../qml/pages/HwInfo.js" line="635"/>
         <source>Kernel V4L2 interfaces — control, JPEG and video-codec blocks, not user-facing cameras.</source>
         <translation>Kernel-V4L2-Schnittstellen — Steuer-, JPEG- und Video-Codec-Blöcke, keine nutzbaren Kameras.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="637"/>
+        <location filename="../qml/pages/HwInfo.js" line="640"/>
         <source>This is a MediaTek imgsensor/mtkcam stack. The image sensors are driven through the camera HAL, not exposed as V4L2 sensor sub-devices — so their models are not enumerable from sysfs. The video nodes above are the JPEG and video codecs.</source>
         <translation>Dies ist ein MediaTek-imgsensor/mtkcam-Stack. Die Bildsensoren laufen über das Kamera-HAL, nicht als V4L2-Sensor-Subdevices — ihre Modelle sind daher nicht aus sysfs aufzählbar. Die Videoknoten oben sind die JPEG- und Video-Codecs.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="638"/>
+        <location filename="../qml/pages/HwInfo.js" line="641"/>
         <source>Sensor models</source>
         <translation>Sensor-Modelle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="638"/>
+        <location filename="../qml/pages/HwInfo.js" line="641"/>
         <source>not exposed by the MediaTek kernel</source>
         <translation>vom MediaTek-Kernel nicht offengelegt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="645"/>
+        <location filename="../qml/pages/HwInfo.js" line="648"/>
         <source>Ultra-wide</source>
         <translation>Ultraweitwinkel</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="646"/>
+        <location filename="../qml/pages/HwInfo.js" line="649"/>
         <source>Wide (main)</source>
         <translation>Weitwinkel (Haupt)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="647"/>
+        <location filename="../qml/pages/HwInfo.js" line="650"/>
         <source>Telephoto</source>
         <translation>Tele</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="648"/>
+        <location filename="../qml/pages/HwInfo.js" line="651"/>
         <source>Front</source>
         <translation>Front</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="649"/>
+        <location filename="../qml/pages/HwInfo.js" line="652"/>
         <source>Macro</source>
         <translation>Makro</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="650"/>
+        <location filename="../qml/pages/HwInfo.js" line="653"/>
         <source>Depth</source>
         <translation>Tiefe</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="663"/>
+        <location filename="../qml/pages/HwInfo.js" line="666"/>
         <source>Maximum speed</source>
         <translation>Maximalgeschwindigkeit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="664"/>
+        <location filename="../qml/pages/HwInfo.js" line="667"/>
         <source>Current speed</source>
         <translation>Aktuelle Geschwindigkeit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="665"/>
+        <location filename="../qml/pages/HwInfo.js" line="668"/>
         <source>Power role</source>
         <translation>Power-Rolle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="666"/>
+        <location filename="../qml/pages/HwInfo.js" line="669"/>
         <source>Data role</source>
         <translation>Daten-Rolle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="667"/>
+        <location filename="../qml/pages/HwInfo.js" line="670"/>
         <source>USB controller</source>
         <translation>USB-Controller</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="668"/>
+        <location filename="../qml/pages/HwInfo.js" line="671"/>
         <source>The SoC&apos;s USB IP core (dwc3 = Synopsys DesignWare USB3, musb = Mentor, mtu3 = MediaTek). Roles show the active side in [brackets].</source>
         <translation>Der USB-IP-Kern des SoC (dwc3 = Synopsys DesignWare USB3, musb = Mentor, mtu3 = MediaTek). Bei den Rollen steht die aktive Seite in [Klammern].</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="739"/>
+        <location filename="../qml/pages/HwInfo.js" line="742"/>
         <source>Cable disconnected (Type-C removed)</source>
         <translation>Kabel getrennt (Type-C entfernt)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="741"/>
+        <location filename="../qml/pages/HwInfo.js" line="744"/>
         <source>Cable attached (Type-C)</source>
         <translation>Kabel angesteckt (Type-C)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="743"/>
+        <location filename="../qml/pages/HwInfo.js" line="746"/>
         <source>Input voltage collapsed — charger current limit reached</source>
         <translation>Eingangsspannung eingebrochen — Ladegerät-Stromgrenze erreicht</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="745"/>
+        <location filename="../qml/pages/HwInfo.js" line="748"/>
         <source>Input-current detection finished (AICL)</source>
         <translation>Eingangsstrom-Erkennung abgeschlossen (AICL)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="748"/>
+        <location filename="../qml/pages/HwInfo.js" line="751"/>
         <source>Input current limit set to %1 A</source>
         <translation>Eingangsstrom-Limit auf %1 A gesetzt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="750"/>
+        <location filename="../qml/pages/HwInfo.js" line="753"/>
         <source>Adjusting input current limit (AICL)</source>
         <translation>Eingangsstrom-Limit wird angepasst (AICL)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="752"/>
+        <location filename="../qml/pages/HwInfo.js" line="755"/>
         <source>Charger type detected</source>
         <translation>Ladegerätetyp erkannt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="754"/>
+        <location filename="../qml/pages/HwInfo.js" line="757"/>
         <source>Quick Charge negotiation</source>
         <translation>Quick-Charge-Aushandlung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="756"/>
+        <location filename="../qml/pages/HwInfo.js" line="759"/>
         <source>USB-PD hard reset</source>
         <translation>USB-PD Hard-Reset</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="758"/>
+        <location filename="../qml/pages/HwInfo.js" line="761"/>
         <source>USB Power Delivery negotiation</source>
         <translation>USB-Power-Delivery-Aushandlung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="792"/>
-        <location filename="../qml/pages/HwInfo.js" line="802"/>
+        <location filename="../qml/pages/HwInfo.js" line="795"/>
+        <location filename="../qml/pages/HwInfo.js" line="805"/>
         <source>Modem</source>
         <translation>Modem</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="793"/>
+        <location filename="../qml/pages/HwInfo.js" line="796"/>
         <source>No ofono modem is registered. Flight mode, or ofono is not running.</source>
         <translation>Kein ofono-Modem registriert. Flugmodus, oder ofono läuft nicht.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="794"/>
+        <location filename="../qml/pages/HwInfo.js" line="797"/>
         <source>unavailable</source>
         <translation>nicht verfügbar</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="795"/>
-        <location filename="../qml/pages/HwInfo.js" line="856"/>
+        <location filename="../qml/pages/HwInfo.js" line="798"/>
+        <location filename="../qml/pages/HwInfo.js" line="859"/>
         <source>Modem / SIM</source>
         <translation>Modem / SIM</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="800"/>
+        <location filename="../qml/pages/HwInfo.js" line="803"/>
         <source>Modem %1</source>
         <translation>Modem %1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="806"/>
+        <location filename="../qml/pages/HwInfo.js" line="809"/>
         <source>Firmware</source>
         <translation>Firmware</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="808"/>
+        <location filename="../qml/pages/HwInfo.js" line="811"/>
         <source>online</source>
         <translation>online</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="808"/>
+        <location filename="../qml/pages/HwInfo.js" line="811"/>
         <source>powered, offline</source>
         <translation>eingeschaltet, offline</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="814"/>
+        <location filename="../qml/pages/HwInfo.js" line="817"/>
         <source>SIM</source>
         <translation>SIM</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="816"/>
+        <location filename="../qml/pages/HwInfo.js" line="819"/>
         <source>Present</source>
         <translation>Vorhanden</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="818"/>
+        <location filename="../qml/pages/HwInfo.js" line="821"/>
         <source>Provider</source>
         <translation>Anbieter</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="819"/>
+        <location filename="../qml/pages/HwInfo.js" line="822"/>
         <source>Phone number</source>
         <translation>Rufnummer</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="822"/>
-        <location filename="../qml/pages/HwInfo.js" line="842"/>
+        <location filename="../qml/pages/HwInfo.js" line="825"/>
+        <location filename="../qml/pages/HwInfo.js" line="845"/>
         <source>MCC / MNC</source>
         <translation>MCC / MNC</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="823"/>
+        <location filename="../qml/pages/HwInfo.js" line="826"/>
         <source>PIN lock</source>
         <translation>PIN-Sperre</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="829"/>
+        <location filename="../qml/pages/HwInfo.js" line="832"/>
         <source>registered</source>
         <translation>registriert</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="830"/>
+        <location filename="../qml/pages/HwInfo.js" line="833"/>
         <source>searching</source>
         <translation>suchend</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="831"/>
+        <location filename="../qml/pages/HwInfo.js" line="834"/>
         <source>denied</source>
         <translation>abgewiesen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="834"/>
+        <location filename="../qml/pages/HwInfo.js" line="837"/>
         <source>Operator</source>
         <translation>Betreiber</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="835"/>
+        <location filename="../qml/pages/HwInfo.js" line="838"/>
         <source>Registration</source>
         <translation>Registrierung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="838"/>
+        <location filename="../qml/pages/HwInfo.js" line="841"/>
         <source>Selection</source>
         <translation>Auswahl</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="838"/>
+        <location filename="../qml/pages/HwInfo.js" line="841"/>
         <source>automatic</source>
         <translation>automatisch</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="840"/>
+        <location filename="../qml/pages/HwInfo.js" line="843"/>
         <source>Cell ID</source>
         <translation>Cell ID</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="841"/>
+        <location filename="../qml/pages/HwInfo.js" line="844"/>
         <source>Area code (LAC/TAC)</source>
         <translation>Bereichscode (LAC/TAC)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="848"/>
+        <location filename="../qml/pages/HwInfo.js" line="851"/>
         <source>Mobile data</source>
         <translation>Mobile Daten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="850"/>
+        <location filename="../qml/pages/HwInfo.js" line="853"/>
         <source>Attached</source>
         <translation>Verbunden (Attach)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="851"/>
+        <location filename="../qml/pages/HwInfo.js" line="854"/>
         <source>APN</source>
         <translation>APN</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="852"/>
+        <location filename="../qml/pages/HwInfo.js" line="855"/>
         <source>Roaming</source>
         <translation>Roaming</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="852"/>
+        <location filename="../qml/pages/HwInfo.js" line="855"/>
         <source>allowed</source>
         <translation>erlaubt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="852"/>
+        <location filename="../qml/pages/HwInfo.js" line="855"/>
         <source>blocked</source>
         <translation>gesperrt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="423"/>
+        <location filename="../qml/pages/HwInfo.js" line="426"/>
         <source>no charger events in the kernel buffer</source>
         <translation>keine Ladegerät-Ereignisse im Kernel-Puffer</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="434"/>
+        <location filename="../qml/pages/HwInfo.js" line="437"/>
         <source>Root mode required — start the helper to read the kernel charger log.</source>
         <translation>Root-Modus nötig — starte den Helfer, um das Kernel-Ladelog zu lesen.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="468"/>
+        <location filename="../qml/pages/HwInfo.js" line="471"/>
         <source>Processes</source>
         <translation>Prozesse</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="469"/>
+        <location filename="../qml/pages/HwInfo.js" line="472"/>
         <source>Top consumers (CPU)</source>
         <translation>Top-Verbraucher (CPU)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="470"/>
+        <location filename="../qml/pages/HwInfo.js" line="473"/>
         <source>CPU time is the dominant battery drain — this ranks current CPU use. An estimate, not a per-app power meter.</source>
         <translation>CPU-Zeit ist der dominierende Akkuverbrauch — dies reiht die aktuelle CPU-Nutzung. Eine Schätzung, kein Pro-App-Messgerät.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="473"/>
+        <location filename="../qml/pages/HwInfo.js" line="476"/>
         <source>Battery</source>
         <translation>Akku</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="604"/>
+        <location filename="../qml/pages/HwInfo.js" line="607"/>
         <source>Calibration EEPROMs</source>
         <translation>Kalibrierungs-EEPROMs</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="607"/>
+        <location filename="../qml/pages/HwInfo.js" line="610"/>
         <source>CAMSS sub-devices</source>
         <translation>CAMSS-Sub-Geräte</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="623"/>
+        <location filename="../qml/pages/HwInfo.js" line="626"/>
         <source>Front / back mapping</source>
         <translation>Front-/Rück-Zuordnung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="622"/>
+        <location filename="../qml/pages/HwInfo.js" line="625"/>
         <source>ISO / exposure range</source>
         <translation>ISO / Belichtungsbereich</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="629"/>
+        <location filename="../qml/pages/HwInfo.js" line="632"/>
         <source>(unnamed)</source>
         <translation>(unbenannt)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="438"/>
+        <location filename="../qml/pages/HwInfo.js" line="441"/>
         <source>Identity</source>
         <translation>Identität</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="439"/>
+        <location filename="../qml/pages/HwInfo.js" line="442"/>
         <source>Supply</source>
         <translation>Versorgung</translation>
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="168"/>
-        <location filename="../qml/pages/HwInfo.js" line="440"/>
-        <location filename="../qml/pages/HwInfo.js" line="698"/>
-        <location filename="../qml/pages/HwInfo.js" line="804"/>
+        <location filename="../qml/pages/HwInfo.js" line="443"/>
+        <location filename="../qml/pages/HwInfo.js" line="701"/>
+        <location filename="../qml/pages/HwInfo.js" line="807"/>
         <source>Manufacturer</source>
         <translation>Hersteller</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="443"/>
-        <location filename="../qml/pages/HwInfo.js" line="837"/>
+        <location filename="../qml/pages/HwInfo.js" line="446"/>
+        <location filename="../qml/pages/HwInfo.js" line="840"/>
         <source>Technology</source>
         <translation>Technologie</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="445"/>
+        <location filename="../qml/pages/HwInfo.js" line="448"/>
         <source>Capacity &amp; health</source>
         <translation>Kapazität &amp; Gesundheit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="446"/>
+        <location filename="../qml/pages/HwInfo.js" line="449"/>
         <source>Design capacity</source>
         <translation>Designkapazität</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="447"/>
+        <location filename="../qml/pages/HwInfo.js" line="450"/>
         <source>Full capacity</source>
         <translation>Volle Kapazität</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="448"/>
+        <location filename="../qml/pages/HwInfo.js" line="451"/>
         <source>State of health</source>
         <translation>Gesundheitszustand</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="450"/>
+        <location filename="../qml/pages/HwInfo.js" line="453"/>
         <source>Charge cycles</source>
         <translation>Ladezyklen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="451"/>
+        <location filename="../qml/pages/HwInfo.js" line="454"/>
         <source>Design voltage</source>
         <translation>Designspannung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="452"/>
+        <location filename="../qml/pages/HwInfo.js" line="455"/>
         <source>Driver health</source>
         <translation>Treiber-Gesundheit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="454"/>
+        <location filename="../qml/pages/HwInfo.js" line="457"/>
         <source>Live</source>
         <translation>Live</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="455"/>
+        <location filename="../qml/pages/HwInfo.js" line="458"/>
         <source>Level</source>
         <translation>Ladestand</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="456"/>
+        <location filename="../qml/pages/HwInfo.js" line="459"/>
         <source>Voltage</source>
         <translation>Spannung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="457"/>
+        <location filename="../qml/pages/HwInfo.js" line="460"/>
         <source>Current</source>
         <translation>Strom</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="458"/>
-        <location filename="../qml/pages/HwInfo.js" line="808"/>
+        <location filename="../qml/pages/HwInfo.js" line="461"/>
+        <location filename="../qml/pages/HwInfo.js" line="811"/>
         <source>Power</source>
         <translation>Leistung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="459"/>
+        <location filename="../qml/pages/HwInfo.js" line="462"/>
         <source>Temperature</source>
         <translation>Temperatur</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="479"/>
-        <location filename="../qml/pages/HwInfo.js" line="661"/>
+        <location filename="../qml/pages/HwInfo.js" line="482"/>
+        <location filename="../qml/pages/HwInfo.js" line="664"/>
         <source>Controller</source>
         <translation>Controller</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="480"/>
+        <location filename="../qml/pages/HwInfo.js" line="483"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="481"/>
+        <location filename="../qml/pages/HwInfo.js" line="484"/>
         <source>Address</source>
         <translation>Adresse</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="482"/>
+        <location filename="../qml/pages/HwInfo.js" line="485"/>
         <source>Address type</source>
         <translation>Adresstyp</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="484"/>
-        <location filename="../qml/pages/HwInfo.js" line="703"/>
+        <location filename="../qml/pages/HwInfo.js" line="487"/>
+        <location filename="../qml/pages/HwInfo.js" line="706"/>
         <source>Class</source>
         <translation>Klasse</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="497"/>
+        <location filename="../qml/pages/HwInfo.js" line="500"/>
         <source>Adapter capabilities; grayed ones are supported but currently off.</source>
         <translation>Adapter-Fähigkeiten; ausgegraute werden unterstützt, sind aber gerade aus.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="499"/>
+        <location filename="../qml/pages/HwInfo.js" line="502"/>
         <source>Powered</source>
         <translation>Eingeschaltet</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="494"/>
-        <location filename="../qml/pages/HwInfo.js" line="499"/>
+        <location filename="../qml/pages/HwInfo.js" line="497"/>
         <location filename="../qml/pages/HwInfo.js" line="502"/>
+        <location filename="../qml/pages/HwInfo.js" line="505"/>
         <source>on</source>
         <translation>an</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="494"/>
-        <location filename="../qml/pages/HwInfo.js" line="499"/>
+        <location filename="../qml/pages/HwInfo.js" line="497"/>
         <location filename="../qml/pages/HwInfo.js" line="502"/>
-        <location filename="../qml/pages/HwInfo.js" line="808"/>
+        <location filename="../qml/pages/HwInfo.js" line="505"/>
+        <location filename="../qml/pages/HwInfo.js" line="811"/>
         <source>off</source>
         <translation>aus</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="500"/>
+        <location filename="../qml/pages/HwInfo.js" line="503"/>
         <source>Discoverable</source>
         <translation>Sichtbar</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="501"/>
+        <location filename="../qml/pages/HwInfo.js" line="504"/>
         <source>Pairable</source>
         <translation>Koppelbar</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="502"/>
+        <location filename="../qml/pages/HwInfo.js" line="505"/>
         <source>Scanning</source>
         <translation>Sucht</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="508"/>
+        <location filename="../qml/pages/HwInfo.js" line="511"/>
         <source>connected</source>
         <translation>verbunden</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="508"/>
+        <location filename="../qml/pages/HwInfo.js" line="511"/>
         <source>paired</source>
         <translation>gekoppelt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="511"/>
-        <location filename="../qml/pages/HwInfo.js" line="691"/>
+        <location filename="../qml/pages/HwInfo.js" line="514"/>
+        <location filename="../qml/pages/HwInfo.js" line="694"/>
         <source>Devices</source>
         <translation>Geräte</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="524"/>
+        <location filename="../qml/pages/HwInfo.js" line="527"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="532"/>
+        <location filename="../qml/pages/HwInfo.js" line="535"/>
         <source>Card %1</source>
         <translation>Karte %1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="533"/>
+        <location filename="../qml/pages/HwInfo.js" line="536"/>
         <source>Cards</source>
         <translation>Karten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="468"/>
-        <location filename="../qml/pages/HwInfo.js" line="533"/>
-        <location filename="../qml/pages/HwInfo.js" line="687"/>
-        <location filename="../qml/pages/HwInfo.js" line="823"/>
+        <location filename="../qml/pages/HwInfo.js" line="471"/>
+        <location filename="../qml/pages/HwInfo.js" line="536"/>
+        <location filename="../qml/pages/HwInfo.js" line="690"/>
+        <location filename="../qml/pages/HwInfo.js" line="826"/>
         <source>none</source>
         <translation>keine</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="366"/>
+        <location filename="../qml/pages/HwInfo.js" line="369"/>
         <source>root mode shows version and build of the running WLAN firmware here</source>
         <translation>Der Root-Modus zeigt hier Version und Build der laufenden WLAN-Firmware</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="372"/>
+        <location filename="../qml/pages/HwInfo.js" line="375"/>
         <source>Chip identity from driver, device tree and firmware.</source>
         <translation>Chip-Identität aus Treiber, Device-Tree und Firmware.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="534"/>
+        <location filename="../qml/pages/HwInfo.js" line="537"/>
         <source>Sound cards</source>
         <translation>Soundkarten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="537"/>
+        <location filename="../qml/pages/HwInfo.js" line="540"/>
         <source>Codec</source>
         <translation>Codec</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="539"/>
+        <location filename="../qml/pages/HwInfo.js" line="542"/>
         <source>Codec chip</source>
         <translation>Codec-Chip</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="542"/>
+        <location filename="../qml/pages/HwInfo.js" line="545"/>
         <source>headphones plugged</source>
         <translation>Kopfhörer eingesteckt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="542"/>
+        <location filename="../qml/pages/HwInfo.js" line="545"/>
         <source>headset plugged</source>
         <translation>Headset eingesteckt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="543"/>
+        <location filename="../qml/pages/HwInfo.js" line="546"/>
         <source>nothing plugged</source>
         <translation>nichts eingesteckt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="543"/>
+        <location filename="../qml/pages/HwInfo.js" line="546"/>
         <source>not reported</source>
         <translation>nicht gemeldet</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="544"/>
+        <location filename="../qml/pages/HwInfo.js" line="547"/>
         <source>Connectors &amp; status</source>
         <translation>Anschlüsse &amp; Status</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="545"/>
+        <location filename="../qml/pages/HwInfo.js" line="548"/>
         <source>The kernel does not report hardware faults; shown are jack state and stream activity.</source>
         <translation>Der Kernel meldet keine Hardware-Störungen; gezeigt werden Klinken-Status und Stream-Aktivität.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="547"/>
+        <location filename="../qml/pages/HwInfo.js" line="550"/>
         <source>Headphone jack</source>
         <translation>Kopfhörerbuchse</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="548"/>
+        <location filename="../qml/pages/HwInfo.js" line="551"/>
         <source>Playback</source>
         <translation>Wiedergabe</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="548"/>
-        <location filename="../qml/pages/HwInfo.js" line="549"/>
+        <location filename="../qml/pages/HwInfo.js" line="551"/>
+        <location filename="../qml/pages/HwInfo.js" line="552"/>
         <source>idle</source>
         <translation>inaktiv</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="549"/>
+        <location filename="../qml/pages/HwInfo.js" line="552"/>
         <source>Capture</source>
         <translation>Aufnahme</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="559"/>
-        <location filename="../qml/pages/HwInfo.js" line="573"/>
+        <location filename="../qml/pages/HwInfo.js" line="562"/>
+        <location filename="../qml/pages/HwInfo.js" line="576"/>
         <source>muted</source>
         <translation>stumm</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="563"/>
+        <location filename="../qml/pages/HwInfo.js" line="566"/>
         <source>Outputs (sinks)</source>
         <translation>Ausgänge (Sinks)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="564"/>
+        <location filename="../qml/pages/HwInfo.js" line="567"/>
         <source>PulseAudio playback devices, with volume and state.</source>
         <translation>PulseAudio-Wiedergabegeräte, mit Lautstärke und Zustand.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="577"/>
+        <location filename="../qml/pages/HwInfo.js" line="580"/>
         <source>Inputs (sources)</source>
         <translation>Eingänge (Sources)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="578"/>
+        <location filename="../qml/pages/HwInfo.js" line="581"/>
         <source>PulseAudio capture devices. The microphone gain is the primary input&apos;s volume — reflects the harbour-mic-gain fix.</source>
         <translation>PulseAudio-Aufnahmegeräte. Die Mikrofonverstärkung ist die Lautstärke des primären Eingangs — spiegelt den harbour-mic-gain-Fix wider.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="580"/>
+        <location filename="../qml/pages/HwInfo.js" line="583"/>
         <source>Audio</source>
         <translation>Audio</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="595"/>
-        <location filename="../qml/pages/HwInfo.js" line="603"/>
-        <location filename="../qml/pages/HwInfo.js" line="636"/>
+        <location filename="../qml/pages/HwInfo.js" line="598"/>
+        <location filename="../qml/pages/HwInfo.js" line="606"/>
+        <location filename="../qml/pages/HwInfo.js" line="639"/>
         <source>Image sensors</source>
         <translation>Bildsensoren</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="605"/>
+        <location filename="../qml/pages/HwInfo.js" line="608"/>
         <source>Flash units</source>
         <translation>Blitz-Einheiten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="606"/>
+        <location filename="../qml/pages/HwInfo.js" line="609"/>
         <source>ISP</source>
         <translation>ISP</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="606"/>
+        <location filename="../qml/pages/HwInfo.js" line="609"/>
         <source>present</source>
         <translation>vorhanden</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="618"/>
+        <location filename="../qml/pages/HwInfo.js" line="621"/>
         <source>The static paths are exhausted — the rest requires opening the camera through the HAL.</source>
         <translation>Die statischen Wege sind ausgeschöpft — der Rest erfordert das Öffnen der Kamera über das HAL.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="640"/>
+        <location filename="../qml/pages/HwInfo.js" line="643"/>
         <source>Camera</source>
         <translation>Kamera</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="672"/>
+        <location filename="../qml/pages/HwInfo.js" line="675"/>
         <source>Charging (USB-C input)</source>
         <translation>Laden (USB-C-Eingang)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="673"/>
+        <location filename="../qml/pages/HwInfo.js" line="676"/>
         <source>A charger is not a USB data device, so it is shown here as the power input. Full details are under Battery.</source>
         <translation>Ein Ladegerät ist kein USB-Datengerät und wird hier als Stromeingang gezeigt. Vollständige Details unter Akku.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="684"/>
+        <location filename="../qml/pages/HwInfo.js" line="687"/>
         <source>Host controller</source>
         <translation>Host-Controller</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="685"/>
+        <location filename="../qml/pages/HwInfo.js" line="688"/>
         <source>USB host controllers</source>
         <translation>USB-Host-Controller</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="686"/>
+        <location filename="../qml/pages/HwInfo.js" line="689"/>
         <source>The SoC&apos;s integrated USB (dwc3/xHCI); root hubs are shown here.</source>
         <translation>Der ins SoC integrierte USB (dwc3/xHCI); Root-Hubs werden hier gezeigt.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="687"/>
+        <location filename="../qml/pages/HwInfo.js" line="690"/>
         <source>Controllers</source>
         <translation>Controller</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="691"/>
+        <location filename="../qml/pages/HwInfo.js" line="694"/>
         <source>Connected devices</source>
         <translation>Angeschlossene Geräte</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="691"/>
+        <location filename="../qml/pages/HwInfo.js" line="694"/>
         <source>none connected</source>
         <translation>keins angeschlossen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="699"/>
+        <location filename="../qml/pages/HwInfo.js" line="702"/>
         <source>Vendor (USB-ID DB)</source>
         <translation>Hersteller (USB-ID-DB)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="700"/>
+        <location filename="../qml/pages/HwInfo.js" line="703"/>
         <source>Product (USB-ID DB)</source>
         <translation>Produkt (USB-ID-DB)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="701"/>
+        <location filename="../qml/pages/HwInfo.js" line="704"/>
         <source>USB ID</source>
         <translation>USB-ID</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="704"/>
+        <location filename="../qml/pages/HwInfo.js" line="707"/>
         <source>Speed</source>
         <translation>Geschwindigkeit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="705"/>
+        <location filename="../qml/pages/HwInfo.js" line="708"/>
         <source>Max power</source>
         <translation>Max. Strom</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="706"/>
+        <location filename="../qml/pages/HwInfo.js" line="709"/>
         <source>USB version</source>
         <translation>USB-Version</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="707"/>
+        <location filename="../qml/pages/HwInfo.js" line="710"/>
         <source>Bus / device</source>
         <translation>Bus / Gerät</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="714"/>
+        <location filename="../qml/pages/HwInfo.js" line="717"/>
         <source>Serial port</source>
         <translation>Serielle Schnittstelle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="716"/>
+        <location filename="../qml/pages/HwInfo.js" line="719"/>
         <source>Storage node</source>
         <translation>Speicherknoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="716"/>
+        <location filename="../qml/pages/HwInfo.js" line="719"/>
         <source>mounted at %1</source>
         <translation>gemountet auf %1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="716"/>
+        <location filename="../qml/pages/HwInfo.js" line="719"/>
         <source>not mounted</source>
         <translation>nicht gemountet</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="718"/>
+        <location filename="../qml/pages/HwInfo.js" line="721"/>
         <source>Network interface</source>
         <translation>Netzwerk-Schnittstelle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="720"/>
+        <location filename="../qml/pages/HwInfo.js" line="723"/>
         <source>Video node</source>
         <translation>Video-Knoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="722"/>
+        <location filename="../qml/pages/HwInfo.js" line="725"/>
         <source>HID node</source>
         <translation>HID-Knoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="724"/>
+        <location filename="../qml/pages/HwInfo.js" line="727"/>
         <source>Input node</source>
         <translation>Eingabe-Knoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="727"/>
+        <location filename="../qml/pages/HwInfo.js" line="730"/>
         <source>Device nodes</source>
         <translation>Geräteknoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="727"/>
+        <location filename="../qml/pages/HwInfo.js" line="730"/>
         <source>none exposed</source>
         <translation>keine bereitgestellt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HwInfo.js" line="731"/>
+        <location filename="../qml/pages/HwInfo.js" line="734"/>
         <source>USB</source>
         <translation>USB</translation>
     </message>
@@ -4073,22 +4078,22 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
 <context>
     <name>InfoDetailPage</name>
     <message>
-        <location filename="../qml/pages/InfoDetailPage.qml" line="128"/>
+        <location filename="../qml/pages/InfoDetailPage.qml" line="132"/>
         <source>Diagnosis</source>
         <translation>Diagnose</translation>
     </message>
     <message>
-        <location filename="../qml/pages/InfoDetailPage.qml" line="139"/>
+        <location filename="../qml/pages/InfoDetailPage.qml" line="143"/>
         <source>CVE search</source>
         <translation>CVE-Suche</translation>
     </message>
     <message>
-        <location filename="../qml/pages/InfoDetailPage.qml" line="147"/>
+        <location filename="../qml/pages/InfoDetailPage.qml" line="151"/>
         <source>The Ultimate version adds an online CVE search (EUVD/KEV) here. It is not available in any store — build it yourself from the source (see README, --with ultimate).</source>
         <translation>Die Ultimate-Version ergänzt hier eine Online-CVE-Suche (EUVD/KEV). Es gibt sie in keinem Store — sie muss selbst aus dem Quellcode gebaut werden (siehe README, --with ultimate).</translation>
     </message>
     <message>
-        <location filename="../qml/pages/InfoDetailPage.qml" line="101"/>
+        <location filename="../qml/pages/InfoDetailPage.qml" line="105"/>
         <source>unused</source>
         <translation>ungenutzt</translation>
     </message>
@@ -4096,128 +4101,138 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
 <context>
     <name>MainPage</name>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="60"/>
+        <location filename="../qml/pages/MainPage.qml" line="65"/>
         <source>Resume</source>
         <translation>Fortsetzen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="60"/>
+        <location filename="../qml/pages/MainPage.qml" line="65"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="64"/>
+        <location filename="../qml/pages/MainPage.qml" line="69"/>
         <source>Bug reports</source>
         <translation>Bugreports</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="68"/>
+        <location filename="../qml/pages/MainPage.qml" line="73"/>
         <source>Record load</source>
         <translation>Last aufzeichnen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="72"/>
+        <location filename="../qml/pages/MainPage.qml" line="77"/>
         <source>Connections</source>
         <translation>Verbindungen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="76"/>
+        <location filename="../qml/pages/MainPage.qml" line="81"/>
         <source>System overview</source>
         <translation>Systemübersicht</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="56"/>
+        <location filename="../qml/pages/MainPage.qml" line="61"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="86"/>
+        <location filename="../qml/pages/MainPage.qml" line="91"/>
         <source>SysMetrics</source>
         <translation>SysMetrics</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="87"/>
+        <location filename="../qml/pages/MainPage.qml" line="92"/>
         <source>%1 processes · %2 threads</source>
         <translation>%1 Prozesse · %2 Threads</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="109"/>
-        <location filename="../qml/pages/MainPage.qml" line="196"/>
+        <location filename="../qml/pages/MainPage.qml" line="122"/>
+        <location filename="../qml/pages/MainPage.qml" line="224"/>
         <source>CPU</source>
         <translation>CPU</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="116"/>
+        <location filename="../qml/pages/MainPage.qml" line="137"/>
+        <source>load %1  ·  %2 of %3 cores</source>
+        <translation>Last %1  ·  %2 von %3 Kernen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="140"/>
         <source>load %1  ·  %2 cores</source>
         <translation>Last %1  ·  %2 Kerne</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="144"/>
+        <location filename="../qml/pages/MainPage.qml" line="168"/>
         <source>Cores</source>
         <translation>Kerne</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="150"/>
+        <location filename="../qml/pages/MainPage.qml" line="174"/>
         <source>avg %1%</source>
         <translation>Ø %1 %</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="168"/>
+        <location filename="../qml/pages/MainPage.qml" line="195"/>
         <source>c%1</source>
         <translation>K%1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="180"/>
+        <location filename="../qml/pages/MainPage.qml" line="196"/>
+        <source>offline</source>
+        <translation>offline</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="208"/>
         <source>Filter by name, cmdline or PID</source>
         <translation>Nach Name, Kommandozeile oder PID filtern</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="197"/>
+        <location filename="../qml/pages/MainPage.qml" line="225"/>
         <source>Memory</source>
         <translation>Speicher</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="198"/>
+        <location filename="../qml/pages/MainPage.qml" line="226"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="199"/>
+        <location filename="../qml/pages/MainPage.qml" line="227"/>
         <source>PID</source>
         <translation>PID</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="200"/>
+        <location filename="../qml/pages/MainPage.qml" line="228"/>
         <source>Threads</source>
         <translation>Threads</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="224"/>
+        <location filename="../qml/pages/MainPage.qml" line="252"/>
         <source>Apps only</source>
         <translation>Nur Apps</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="229"/>
+        <location filename="../qml/pages/MainPage.qml" line="257"/>
         <source>Kernel threads</source>
         <translation>Kernel-Threads</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="241"/>
+        <location filename="../qml/pages/MainPage.qml" line="269"/>
         <source>All processes (%1)</source>
         <translation>Alle Prozesse (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="242"/>
+        <location filename="../qml/pages/MainPage.qml" line="270"/>
         <source>Top consumers</source>
         <translation>Top-Verbraucher</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="282"/>
+        <location filename="../qml/pages/MainPage.qml" line="313"/>
         <source>Collapse</source>
         <translation>Einklappen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="283"/>
+        <location filename="../qml/pages/MainPage.qml" line="314"/>
         <source>Show all %1 processes</source>
         <translation>Alle %1 Prozesse anzeigen</translation>
     </message>
@@ -4316,218 +4331,223 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
         <translation>Prozessor</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="87"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="90"/>
         <source>core %1</source>
         <translation>Kern %1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="94"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="91"/>
+        <source>offline</source>
+        <translation>offline</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/OverviewPage.qml" line="98"/>
         <source>Load 1/5/15</source>
         <translation>Last 1/5/15</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="97"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="101"/>
         <source>Runnable</source>
         <translation>Lauffähig</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="98"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="102"/>
         <source>Uptime</source>
         <translation>Laufzeit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="106"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="110"/>
         <source>RAM</source>
         <translation>RAM</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="121"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="126"/>
         <source>Available</source>
         <translation>Verfügbar</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="122"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="127"/>
         <source>Cached</source>
         <translation>Zwischengespeichert</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="127"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="132"/>
         <source>Swap</source>
         <translation>Swap</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="137"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="142"/>
         <source>Network</source>
         <translation>Netzwerk</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="162"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="167"/>
         <source>Down / Up</source>
         <translation>Runter / Hoch</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="184"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="189"/>
         <source>Storage I/O</source>
         <translation>Speicher-I/O</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="189"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="194"/>
         <source>Read / Write</source>
         <translation>Lesen / Schreiben</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="197"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="202"/>
         <source>Graphics</source>
         <translation>Grafik</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="204"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="209"/>
         <source>GPU, display — tap for details</source>
         <translation>GPU, Display — für Details tippen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="215"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="220"/>
         <source>Audio</source>
         <translation>Audio</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="222"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="227"/>
         <source>Codec, connectors, streams — tap for details</source>
         <translation>Codec, Anschlüsse, Streams — für Details tippen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="233"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="238"/>
         <source>Sensors &amp; GPS</source>
         <translation>Sensoren &amp; GPS</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="239"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="244"/>
         <source>Gyro, compass, light, GPS — tap for live values</source>
         <translation>Gyro, Kompass, Licht, GPS — für Live-Werte tippen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="250"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="255"/>
         <source>Camera</source>
         <translation>Kamera</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="257"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="262"/>
         <source>Sensors, ISP, capture nodes — tap for details</source>
         <translation>Sensoren, ISP, Aufnahme-Knoten — für Details tippen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="268"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="273"/>
         <source>USB</source>
         <translation>USB</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="274"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="279"/>
         <source>Controller &amp; connected devices — tap for details</source>
         <translation>Controller &amp; angeschlossene Geräte — für Details tippen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="285"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="290"/>
         <source>Modem / SIM</source>
         <translation>Modem / SIM</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="291"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="296"/>
         <source>Operator, SIM, signal, mobile data — tap for details</source>
         <translation>Betreiber, SIM, Signal, Mobildaten — tippen für Details</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="303"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="308"/>
         <source>Battery</source>
         <translation>Akku</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="318"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="324"/>
         <source>Power draw</source>
         <translation>Leistungsaufnahme</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="320"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="326"/>
         <source>Current</source>
         <translation>Strom</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="321"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="327"/>
         <source>Voltage</source>
         <translation>Spannung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="322"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="328"/>
         <source>Temperature</source>
         <translation>Temperatur</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="323"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="329"/>
         <source>Quality</source>
         <translation>Qualität</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="332"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="338"/>
         <source>State of health</source>
         <translation>Gesundheitszustand</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="334"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="340"/>
         <source>(gauge)</source>
         <translation>(Gauge)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="334"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="340"/>
         <source>(calc.)</source>
         <translation>(berechnet)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="337"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="343"/>
         <source>Capacity</source>
         <translation>Kapazität</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="342"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="348"/>
         <source>Full cycles</source>
         <translation>Vollzyklen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="343"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="349"/>
         <source>(gauge, equiv. full cycles)</source>
         <translation>(Gauge, äquiv. Vollzyklen)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="345"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="351"/>
         <source>Technology</source>
         <translation>Technologie</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="348"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="354"/>
         <source>Driver health</source>
         <translation>Treiber-Gesundheit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="357"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="363"/>
         <source>Thermal</source>
         <translation>Thermik</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="392"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="399"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="402"/>
-        <location filename="../qml/pages/OverviewPage.qml" line="412"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="409"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="419"/>
         <source>connected</source>
         <translation>verbunden</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="402"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="409"/>
         <source>adapter off</source>
         <translation>Adapter aus</translation>
     </message>
     <message>
-        <location filename="../qml/pages/OverviewPage.qml" line="412"/>
+        <location filename="../qml/pages/OverviewPage.qml" line="419"/>
         <source>paired</source>
         <translation>gekoppelt</translation>
     </message>
@@ -4580,293 +4600,293 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
         <translation>CPU</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="115"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="116"/>
         <source>%1 of %2 cores</source>
         <translation>%1 von %2 Kernen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="139"/>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="424"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="140"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="425"/>
         <source>c%1</source>
         <translation>K%1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="151"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="152"/>
         <source>Share of busy CPU</source>
         <translation>Anteil an der CPU-Last</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="153"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="154"/>
         <source>CPU time</source>
         <translation>CPU-Zeit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="155"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="156"/>
         <source>Context switches/s</source>
         <translation>Kontextwechsel/s</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="156"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="157"/>
         <source>%1 vol · %2 invol</source>
         <translation>%1 frw · %2 unfrw</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="158"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="159"/>
         <source>Wakeups/s</source>
         <translation>Aufwecken/s</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="160"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="161"/>
         <source>Page faults/s</source>
         <translation>Page-Faults/s</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="161"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="162"/>
         <source>%1 minor · %2 major</source>
         <translation>%1 minor · %2 major</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="163"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="164"/>
         <source>CPU affinity</source>
         <translation>CPU-Affinität</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="164"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="165"/>
         <source>Nice / priority</source>
         <translation>Nice / Priorität</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="173"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="174"/>
         <source>Memory</source>
         <translation>Speicher</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="179"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="180"/>
         <source>RSS (resident)</source>
         <translation>RSS (resident)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="181"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="182"/>
         <source>USS (private)</source>
         <translation>USS (privat)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="182"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="183"/>
         <source>Swapped</source>
         <translation>Ausgelagert</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="184"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="185"/>
         <source>Virtual</source>
         <translation>Virtuell</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="192"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="193"/>
         <source>I/O &amp; energy</source>
         <translation>I/O &amp; Energie</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="197"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="198"/>
         <source>Disk read/write</source>
         <translation>Datenträger lesen/schreiben</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="199"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="200"/>
         <source>Total read/write</source>
         <translation>Gesamt lesen/schreiben</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="201"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="202"/>
         <source>Est. power share</source>
         <translation>Gesch. Leistungsanteil</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="203"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="204"/>
         <source>charging</source>
         <translation>lädt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="209"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="210"/>
         <source>Access monitor</source>
         <translation>Zugriffs-Monitor</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="215"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="216"/>
         <source>Traced by</source>
         <translation>Verfolgt von</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="217"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="218"/>
         <source>no</source>
         <translation>nein</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="223"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="224"/>
         <source>Full access-monitor coverage needs root mode.</source>
         <translation>Vollständige Abdeckung des Zugriffs-Monitors erfordert den Root-Modus.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="239"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="240"/>
         <source>No other process holds handles into this process.</source>
         <translation>Kein anderer Prozess hält Handles in diesen Prozess.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="249"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="250"/>
         <source>Devices (%1)</source>
         <translation>Geräte (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="264"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="265"/>
         <source>Node</source>
         <translation>Knoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="265"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="266"/>
         <source>Subsystem</source>
         <translation>Subsystem</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="266"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="267"/>
         <source>Driver</source>
         <translation>Treiber</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="267"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="268"/>
         <source>Vendor</source>
         <translation>Hersteller</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="268"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="269"/>
         <source>Serial</source>
         <translation>Seriennummer</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="270"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="271"/>
         <source>Size</source>
         <translation>Größe</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="281"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="282"/>
         <source>No device nodes open</source>
         <translation>Keine Geräteknoten geöffnet</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="293"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="294"/>
         <source>Network (%1)</source>
         <translation>Netzwerk (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="330"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="331"/>
         <source>local </source>
         <translation>lokal </translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="345"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="346"/>
         <source>No sockets open</source>
         <translation>Keine Sockets offen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="357"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="358"/>
         <source>Open files (%1)</source>
         <translation>Offene Dateien (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="372"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="373"/>
         <source>(deleted)</source>
         <translation>(gelöscht)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="389"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="390"/>
         <source>No regular files open</source>
         <translation>Keine regulären Dateien offen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="401"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="402"/>
         <source>Threads (%1)</source>
         <translation>Threads (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="447"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="448"/>
         <source>Process</source>
         <translation>Prozess</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="452"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="453"/>
         <source>Command line</source>
         <translation>Kommandozeile</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="453"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="454"/>
         <source>Executable</source>
         <translation>Programmdatei</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="454"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="455"/>
         <source>Working dir</source>
         <translation>Arbeitsverzeichnis</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="455"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="456"/>
         <source>Parent</source>
         <translation>Elternprozess</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="457"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="458"/>
         <source>cgroup</source>
         <translation>cgroup</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="458"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="459"/>
         <source>Threads / fds</source>
         <translation>Threads / fds</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="460"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="461"/>
         <source>Timer fds</source>
         <translation>Timer-fds</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="461"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="462"/>
         <source>OOM score</source>
         <translation>OOM-Score</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="462"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="463"/>
         <source>Age</source>
         <translation>Alter</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="463"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="464"/>
         <source>Data source</source>
         <translation>Datenquelle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="464"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="465"/>
         <source>root helper</source>
         <translation>Root-Helfer</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="465"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="466"/>
         <source>direct</source>
         <translation>direkt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="466"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="467"/>
         <source>restricted — sandboxed, enable root mode</source>
         <translation>eingeschränkt — sandboxed, Root-Modus aktivieren</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="467"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="468"/>
         <source>limited (foreign user)</source>
         <translation>eingeschränkt (fremder Benutzer)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="472"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="473"/>
         <source>Priority</source>
         <translation>Priorität</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="479"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="480"/>
         <source>nice (lower = more CPU; needs privilege to lower)</source>
         <translation>Nice (niedriger = mehr CPU; Absenken erfordert Rechte)</translation>
     </message>
@@ -4874,7 +4894,7 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
 <context>
     <name>ProcessRow</name>
     <message>
-        <location filename="../qml/components/ProcessRow.qml" line="50"/>
+        <location filename="../qml/components/ProcessRow.qml" line="52"/>
         <source>kernel</source>
         <translation>Kernel</translation>
     </message>
@@ -5171,57 +5191,57 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
 <context>
     <name>SysMon</name>
     <message>
-        <location filename="../src/sysmon.cpp" line="1812"/>
+        <location filename="../src/sysmon.cpp" line="1820"/>
         <source>as new</source>
         <translation>wie neu</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1813"/>
+        <location filename="../src/sysmon.cpp" line="1821"/>
         <source>good</source>
         <translation>gut</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1814"/>
+        <location filename="../src/sysmon.cpp" line="1822"/>
         <source>aged</source>
         <translation>gealtert</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1815"/>
+        <location filename="../src/sysmon.cpp" line="1823"/>
         <source>worn</source>
         <translation>verschlissen</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1816"/>
+        <location filename="../src/sysmon.cpp" line="1824"/>
         <source>poor — consider replacement</source>
         <translation>schlecht — Austausch erwägen</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1819"/>
+        <location filename="../src/sysmon.cpp" line="1827"/>
         <source>good (%1 cycles)</source>
         <translation>gut (%1 Zyklen)</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1820"/>
+        <location filename="../src/sysmon.cpp" line="1828"/>
         <source>aged (%1 cycles)</source>
         <translation>gealtert (%1 Zyklen)</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1821"/>
+        <location filename="../src/sysmon.cpp" line="1829"/>
         <source>worn (%1 cycles)</source>
         <translation>verschlissen (%1 Zyklen)</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1822"/>
+        <location filename="../src/sysmon.cpp" line="1830"/>
         <source>poor (%1 cycles)</source>
         <translation>schlecht (%1 Zyklen)</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1824"/>
+        <location filename="../src/sysmon.cpp" line="1832"/>
         <source>unknown</source>
         <translation>unbekannt</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1827"/>
+        <location filename="../src/sysmon.cpp" line="1835"/>
         <source> · %1 cycles</source>
         <translation> · %1 Zyklen</translation>
     </message>

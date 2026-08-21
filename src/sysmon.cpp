@@ -71,7 +71,7 @@ QVariantList SysMon::coreFreqsMhz() const
 {
     QVariantList l;
     for (int k : m_s.coreFreqKhz)
-        l.append(k / 1000);
+        l.append(k < 0 ? SysSnap::CoreOffline : k / 1000);   // keep the offline flag intact
     return l;
 }
 
@@ -108,6 +108,14 @@ void SysMon::setPaused(bool p)
     m_paused = p;
     emit pausedChanged();
     emit pauseRequested(p);
+}
+
+void SysMon::setForeground(bool f)
+{
+    if (m_foreground == f)
+        return;
+    m_foreground = f;
+    emit foregroundChanged();
 }
 
 void SysMon::setIntervalMs(int ms)

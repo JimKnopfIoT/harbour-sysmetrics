@@ -48,6 +48,8 @@ Page {
         id: list
         anchors.fill: parent
         model: netmon.connections
+        // same reason as MainPage: no current row, no stale current delegate
+        currentIndex: -1
 
         PullDownMenu {
             MenuItem { text: qsTr("Refresh"); onClicked: netmon.refresh() }

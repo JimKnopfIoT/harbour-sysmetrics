@@ -83,11 +83,15 @@ Page {
                             model: sysmon.corePercents
                             LoadBar {
                                 width: (parent.width - Theme.paddingLarge) / 2
-                                value: modelData
+                                // -1 marks a parked core, see MainPage
+                                value: modelData < 0 ? 0 : modelData
+                                color: modelData < 0 ? Theme.secondaryColor
+                                                     : Diag.loadColor(modelData)
                                 label: qsTr("core %1").arg(index)
-                                caption: Math.round(modelData) + "%"
-                                         + (sysmon.coreFreqsMhz.length > index
-                                            ? " · " + sysmon.coreFreqsMhz[index] + " MHz" : "")
+                                caption: modelData < 0 ? qsTr("offline")
+                                         : Math.round(modelData) + "%"
+                                           + (sysmon.coreFreqsMhz[index] > 0
+                                              ? " · " + sysmon.coreFreqsMhz[index] + " MHz" : "")
                             }
                         }
                     }
@@ -105,7 +109,8 @@ Page {
                 x: Theme.horizontalPageMargin
                 title: qsTr("RAM")
                 value: sysmon.memTotal > 0 ? Math.round(100 * sysmon.memUsed / sysmon.memTotal) : 0
-                unit: "%  ·  " + sysmon.fmtBytes(sysmon.memUsed) + " / " + sysmon.fmtBytes(sysmon.memTotal)
+                unit: "%"
+                note: "·  " + sysmon.fmtBytes(sysmon.memUsed) + " / " + sysmon.fmtBytes(sysmon.memTotal)
                 accent: Diag.teal
                 drilldown: true
                 onClicked: page.openDetail(HwInfo.mem())
@@ -302,7 +307,8 @@ Page {
                 visible: sysmon.battCapacity >= 0
                 title: qsTr("Battery")
                 value: sysmon.battCapacity
-                unit: "%  ·  " + sysmon.battStatus
+                unit: "%"
+                note: "·  " + sysmon.battStatus
                 accent: sysmon.battCapacity < 20 ? Diag.red : Diag.green
                 drilldown: true
                 onClicked: page.openDetail(HwInfo.batt())
@@ -361,7 +367,8 @@ Page {
                         m = Math.max(m, sysmon.thermalZones[i].temp)
                     return m.toFixed(1)
                 }
-                unit: "°C max"
+                unit: "°C"
+                note: "max"
                 accent: Diag.red
                 Column {
                     width: parent.width; spacing: Theme.paddingSmall / 2
@@ -399,7 +406,7 @@ Page {
                         if (bt.devices[i].connected) n++
                     return n
                 }
-                unit: qsTr("connected") + (bt.powered ? "" : "  ·  " + qsTr("adapter off"))
+                note: qsTr("connected") + (bt.powered ? "" : "  ·  " + qsTr("adapter off"))
                 accent: Diag.violet
                 Column {
                     width: parent.width; spacing: Theme.paddingSmall / 2

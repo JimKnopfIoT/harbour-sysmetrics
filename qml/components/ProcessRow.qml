@@ -32,7 +32,9 @@ ListItem {
             height: Theme.itemSizeSmall * 0.5
             radius: width / 2
             anchors.verticalCenter: parent.verticalCenter
-            color: Diag.stateColor(state)
+            // model.state, not state: Item has its own "state" property that
+            // would shadow the role and leave every dot at the neutral colour.
+            color: Diag.stateColor(model.state)
         }
 
         Column {
@@ -56,7 +58,10 @@ ListItem {
 
         Column {
             id: cpuCol
-            width: Math.max(implicitWidth, Theme.itemSizeSmall * 1.7)
+            // Reserve only what the figures actually need. The old 1.7x floor was
+            // roughly double that and cost the process name three or four
+            // characters on every row; the labels stay flush right either way.
+            width: Math.max(implicitWidth, Theme.itemSizeSmall)
             anchors.verticalCenter: parent.verticalCenter
             Label {
                 anchors.right: parent.right
