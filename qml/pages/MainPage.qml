@@ -53,8 +53,16 @@ Page {
 
         PullDownMenu {
             MenuItem {
+                text: qsTr("Settings")
+                onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
+            }
+            MenuItem {
                 text: sysmon.paused ? qsTr("Resume") : qsTr("Pause")
                 onClicked: sysmon.paused = !sysmon.paused
+            }
+            MenuItem {
+                text: qsTr("Bug reports")
+                onClicked: pageStack.push(Qt.resolvedUrl("BugReportPage.qml"))
             }
             MenuItem {
                 text: qsTr("Record load")
@@ -67,10 +75,6 @@ Page {
             MenuItem {
                 text: qsTr("System overview")
                 onClicked: pageStack.push(Qt.resolvedUrl("OverviewPage.qml"))
-            }
-            MenuItem {
-                text: qsTr("Settings")
-                onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
             }
         }
 

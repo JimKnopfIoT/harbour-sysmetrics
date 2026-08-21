@@ -24,6 +24,16 @@ Page {
     property var expandedSections: []
     readonly property int cap: 10
 
+    // Findings for this page's subsystem, rendered above the info sections.
+    property string diagTopic: ""
+    property var findings: []
+    Component.onCompleted: {
+        if (diagTopic.length) {
+            var all = diagnostics.run(sysmon.cpuPercent, sysmon.load1)
+            findings = all.filter(function (f) { return f.topic === diagTopic })
+        }
+    }
+
 
     DiagBackground {}
 
@@ -109,6 +119,35 @@ Page {
                         }
                     }
                 }
+            }
+
+            // ---- diagnosis: the subsystem's known issues, deliberately
+            // last — facts first, complaints at the end -------------------
+            SectionHeader {
+                visible: page.findings.length > 0
+                text: qsTr("Diagnosis")
+            }
+            Repeater {
+                model: page.findings
+                FindingItem { finding: modelData }
+            }
+            // Ultimate builds add the CVE search here; store builds say
+            // what the self-built variant would offer.
+            ButtonLayout {
+                visible: page.findings.length > 0 && typeof cve !== "undefined"
+                Button {
+                    text: qsTr("CVE search")
+                    onClicked: pageStack.push(Qt.resolvedUrl("CvePage.qml"), { topic: page.diagTopic })
+                }
+            }
+            Label {
+                visible: page.findings.length > 0 && typeof cve === "undefined"
+                x: Theme.horizontalPageMargin
+                width: page.width - 2 * Theme.horizontalPageMargin
+                text: qsTr("The Ultimate version adds an online CVE search (EUVD/KEV) here. It is not available in any store — build it yourself from the source (see README, --with ultimate).")
+                wrapMode: Text.Wrap
+                font.pixelSize: Theme.fontSizeTiny
+                color: Theme.secondaryColor
             }
 
             Item { width: 1; height: Theme.paddingLarge }

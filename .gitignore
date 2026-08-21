@@ -1,42 +1,20 @@
-# Build output
-Makefile
+# build artifacts (in-source builds)
 *.o
 moc_*.cpp
 moc_*.h
 qrc_*.cpp
+Makefile
 .qmake.stash
-RPMS/
-installroot/
-build/
-*.rpm
-documentation.list
-translations/*.qm
-
-# Sailfish SDK / Qt Creator local state
-.mb2/
-*.pro.user*
-
-# Python
-__pycache__/
-*.pyc
-
-# Local / private notes — never publish (contain personal or device data)
-CLAUDE.md
-HANDOFF.md
-STATUS.md
-PUBLISH.md
-docs/
-research/
-.claude/
-*.local.sh
-tools/*
-!tools/hw-probe.sh
-
-# Local data / captures
-*.log
-
-# Tester screenshots / local media — never publish
-media/
-
-# built binary (bare name)
 harbour-sysmetrics
+src/generated/
+translations/*.qm
+installroot/
+RPMS/
+upload/
+frank-log/
+*.local.md
+*.local.sh
+media/
+*_tmp_no
+documentation.list
+translations/harbour-htdiag*.ts

@@ -1,8 +1,13 @@
 # Neutral packaging metadata — no personal identifiers.
 %define _buildhost reproducible-builder
+
+# Self-built Ultimate variant (adds the online CVE search):
+#   mb2 build -- --with ultimate
+# Store/default builds stay without it.
+%bcond_with ultimate
 Name:       harbour-sysmetrics
 Summary:    System diagnostics for Sailfish OS
-Version:    0.1.1
+Version:    0.2.0
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/JimKnopfIoT/harbour-sysmetrics
@@ -31,7 +36,7 @@ On-device only, collects nothing, transmits nothing.
 %setup -q
 
 %build
-%qmake5 "DEFINES+=SYSMETRICS_VERSION=%{version}-%{release}"
+%qmake5 "DEFINES+=SYSMETRICS_VERSION=%{version}-%{release}" %{?with_ultimate:CONFIG+=ultimate}
 %make_build
 
 %install

@@ -867,6 +867,72 @@ QVariantMap SysMon::cpuDetail() const
     m.insert(QStringLiteral("deviceModel"),
              osField(QStringLiteral("/etc/hw-release"), "HW_DEVICE_MODEL"));
     m.insert(QStringLiteral("hwVersion"), osField(QStringLiteral("/etc/hw-release"), "VERSION_ID"));
+
+    // Android base under libhybris: version/patch level of the vendor blobs.
+    // Property names moved between Android generations, so try both spellings
+    // in each build.prop the port ships.
+    auto prop = [](const QStringList &files, const QStringList &keys) -> QString {
+        for (const QString &file : files) {
+            QFile f(file);
+            if (!f.open(QIODevice::ReadOnly))
+                continue;
+            const QList<QByteArray> lines = f.readAll().split('\n');
+            for (const QString &key : keys)
+                for (const QByteArray &l : lines)
+                    if (l.startsWith(key.toLatin1() + '='))
+                        return QString::fromUtf8(l.mid(key.size() + 1).trimmed());
+        }
+        return QString();
+    };
+    const QStringList propFiles = {
+        QStringLiteral("/vendor/build.prop"), QStringLiteral("/odm/etc/build.prop"),
+        QStringLiteral("/system/build.prop"), QStringLiteral("/vendor/odm/etc/build.prop") };
+    m.insert(QStringLiteral("androidVersion"),
+             prop(propFiles, { QStringLiteral("ro.vendor.build.version.release"),
+                               QStringLiteral("ro.build.version.release") }));
+    m.insert(QStringLiteral("androidPatch"),
+             prop(propFiles, { QStringLiteral("ro.vendor.build.security_patch"),
+                               QStringLiteral("ro.build.version.security_patch") }));
+    m.insert(QStringLiteral("androidBuild"),
+             prop(propFiles, { QStringLiteral("ro.vendor.build.id"),
+                               QStringLiteral("ro.build.id") }));
+    m.insert(QStringLiteral("androidFingerprint"),
+             prop(propFiles, { QStringLiteral("ro.vendor.build.fingerprint"),
+                               QStringLiteral("ro.build.fingerprint") }));
+
+    // SoC identity straight from the device tree root ("qcom,lagoon",
+    // "mediatek,MT6797", …) — names the IC independent of marketing names.
+    {
+        QFile f(QStringLiteral("/proc/device-tree/compatible"));
+        if (f.open(QIODevice::ReadOnly)) {
+            QStringList parts;
+            for (const QByteArray &p : f.readAll().split('\0'))
+                if (!p.isEmpty()) parts << QString::fromLatin1(p);
+            m.insert(QStringLiteral("socCompatible"), parts.join(QStringLiteral(", ")));
+        }
+    }
+
+    // Qualcomm exposes the SoC identity in /sys/devices/soc0. soc_id maps to
+    // the part number Qualcomm's security bulletins (and thus CVE texts) use;
+    // only verified ids are mapped, everything else falls back to
+    // family + machine as reported.
+    {
+        const QString fam = readTrim(QStringLiteral("/sys/devices/soc0/family"));
+        const QString mach = readTrim(QStringLiteral("/sys/devices/soc0/machine"));
+        const int socId = readTrim(QStringLiteral("/sys/devices/soc0/soc_id")).toInt();
+        QString model;
+        switch (socId) {
+        case 434: model = QStringLiteral("SM6350 (Snapdragon 690)"); break;   // lagoon
+        case 394: model = QStringLiteral("SM6125 (Snapdragon 665)"); break;   // trinket
+        default: break;
+        }
+        if (model.isEmpty() && !fam.isEmpty() && !mach.isEmpty())
+            model = fam + QLatin1Char(' ') + mach;
+        if (!model.isEmpty())
+            m.insert(QStringLiteral("socModel"), model);
+        if (socId > 0)
+            m.insert(QStringLiteral("socId"), socId);
+    }
     return m;
 }
 
@@ -883,6 +949,9 @@ QVariantMap SysMon::graphicsDetail() const
     if (!bp.isEmpty())
         busy = bp.split(QLatin1Char(' ')).value(0).remove(QLatin1Char('%')).toInt();
 
+    // Mali (MediaTek & Co.): the kbase driver names the exact core here
+    if (gpuModel.isEmpty())
+        gpuModel = readTrim(QStringLiteral("/sys/class/misc/mali0/device/gpuinfo"));
     if (gpuModel.isEmpty()) {
         // generic: find a devfreq node whose name mentions gpu
         const QDir df(QStringLiteral("/sys/class/devfreq"));
@@ -1238,6 +1307,36 @@ QVariantMap SysMon::usbDetail() const
     }
     out.insert(QStringLiteral("controllers"), controllers);
     out.insert(QStringLiteral("devices"), devices);
+
+    // Host/device controller identity: the UDC names the IP core (dwc3 =
+    // Synopsys DesignWare USB3, musb = Mentor, mtu3 = MediaTek), its DT
+    // compatible names the SoC integration, Type-C adds the current roles.
+    QVariantMap ctl;
+    const QDir udc(QStringLiteral("/sys/class/udc"));
+    const QStringList udcs = udc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    if (!udcs.isEmpty()) {
+        const QString u = udcs.first();
+        ctl.insert(QStringLiteral("name"), u);
+        ctl.insert(QStringLiteral("maxSpeed"), readTrim(udc.filePath(u) + QStringLiteral("/maximum_speed")));
+        const QString cur = readTrim(udc.filePath(u) + QStringLiteral("/current_speed"));
+        if (!cur.isEmpty() && cur != QLatin1String("UNKNOWN"))
+            ctl.insert(QStringLiteral("curSpeed"), cur);
+        QFile cf(udc.filePath(u) + QStringLiteral("/device/of_node/compatible"));
+        if (cf.open(QIODevice::ReadOnly)) {
+            QStringList parts;
+            for (const QByteArray &p : cf.readAll().split('\0'))
+                if (!p.isEmpty()) parts << QString::fromLatin1(p);
+            ctl.insert(QStringLiteral("compatible"), parts.join(QStringLiteral(", ")));
+        }
+    }
+    const QDir tc(QStringLiteral("/sys/class/typec"));
+    const QStringList ports = tc.entryList(QStringList() << QStringLiteral("port*"), QDir::Dirs);
+    if (!ports.isEmpty()) {
+        const QString p = tc.filePath(ports.first());
+        ctl.insert(QStringLiteral("powerRole"), readTrim(p + QStringLiteral("/power_role")));
+        ctl.insert(QStringLiteral("dataRole"), readTrim(p + QStringLiteral("/data_role")));
+    }
+    out.insert(QStringLiteral("controller"), ctl);
     return out;
 }
 
@@ -1323,6 +1422,198 @@ QVariantMap SysMon::cameraDetail() const
     m.insert(QStringLiteral("isp"), isp);
     m.insert(QStringLiteral("cpas"), cpas);
     return m;
+}
+
+// Radio chipset identity: everything the kernel exposes about the WLAN/BT
+// combo chip — driver, device-tree node, firmware identity, firmware files.
+// Sources vary per SoC; every field simply stays empty when absent. All of
+// this is offline; the debugfs firmware identity additionally falls back to
+// the root helper when the direct read is not permitted.
+QVariantMap SysMon::wirelessDetail() const
+{
+    QVariantMap m;
+
+    // --- WLAN ---------------------------------------------------------
+    const QString wlanDev = QStringLiteral("/sys/class/net/wlan0/device");
+    m.insert(QStringLiteral("wlanAddress"), readTrim(QStringLiteral("/sys/class/net/wlan0/address")));
+    const QFileInfo drv(wlanDev + QStringLiteral("/driver"));
+    if (drv.exists())
+        m.insert(QStringLiteral("wlanDriver"), QFileInfo(drv.symLinkTarget()).fileName());
+    const QFileInfo devNode(wlanDev);
+    if (devNode.exists())
+        m.insert(QStringLiteral("wlanDevice"), QFileInfo(devNode.symLinkTarget()).fileName());
+
+    // device-tree: wifi and bt nodes name the chip on ARM SoCs
+    auto dtCompatible = [](const QString &dir) -> QString {
+        QFile f(dir + QStringLiteral("/compatible"));
+        if (!f.open(QIODevice::ReadOnly))
+            return QString();
+        // NUL-separated list of compatible strings
+        const QList<QByteArray> parts = f.readAll().split('\0');
+        QStringList out;
+        for (const QByteArray &p : parts)
+            if (!p.isEmpty()) out << QString::fromLatin1(p);
+        return out.join(QStringLiteral(", "));
+    };
+    // Qualcomm puts the radio nodes under /soc; MediaTek at the tree root
+    // (btif@…, consys@…) — scan both.
+    for (const QString &base : { QStringLiteral("/proc/device-tree/soc"),
+                                 QStringLiteral("/proc/device-tree") }) {
+        const QDir soc(base);
+        for (const QString &e : soc.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+            const QString le = e.toLower();
+            if ((le.contains(QLatin1String("wifi")) || le.contains(QLatin1String("wlan"))
+                 || le.startsWith(QLatin1String("consys")))
+                && !le.contains(QLatin1String("smmu"))
+                && !m.contains(QStringLiteral("wlanDtNode"))) {
+                m.insert(QStringLiteral("wlanDtNode"), e);
+                m.insert(QStringLiteral("wlanDtCompatible"), dtCompatible(soc.filePath(e)));
+            }
+            if ((le.startsWith(QLatin1String("bt")) || le.contains(QLatin1String("bluetooth"))
+                 || le.contains(QLatin1String("wcn")))
+                && !le.contains(QLatin1String("wifi"))
+                && !m.contains(QStringLiteral("btDtNode"))) {
+                m.insert(QStringLiteral("btDtNode"), e);
+                m.insert(QStringLiteral("btDtCompatible"), dtCompatible(soc.filePath(e)));
+            }
+        }
+    }
+
+    // firmware identity from the Qualcomm cnss/icnss driver (root-only
+    // debugfs; falls back to the root helper, else the fields stay empty)
+    for (const QString &p : { QStringLiteral("/sys/kernel/debug/icnss/stats"),
+                              QStringLiteral("/sys/kernel/debug/cnss/stats") }) {
+        QString stats = readTrim(p);
+        if (stats.isEmpty() && RootClient::instance()->active())
+            stats = QString::fromUtf8(RootClient::instance()->readFile(p)).trimmed();
+        if (stats.isEmpty())
+            continue;
+        for (const QString &ln : stats.split(QLatin1Char('\n'))) {
+            const QString t = ln.trimmed();
+            if (t.startsWith(QLatin1String("Firmware Version")))
+                m.insert(QStringLiteral("wlanFwVersion"),
+                         t.section(QLatin1Char(':'), 1).trimmed());
+            else if (t.contains(QLatin1String("IMAGE_VERSION_STRING")))
+                m.insert(QStringLiteral("wlanFwBuild"),
+                         t.section(QLatin1Char('='), 1).trimmed());
+        }
+        break;
+    }
+
+    // shipped firmware blobs (names only — they identify the chip family);
+    // Qualcomm patterns plus MediaTek (WIFI_RAM_CODE_*, WMT_*, /etc/firmware)
+    QStringList fwFiles;
+    for (const QString &d : { QStringLiteral("/vendor/firmware"),
+                              QStringLiteral("/lib/firmware"),
+                              QStringLiteral("/etc/firmware"),
+                              QStringLiteral("/vendor/firmware_mnt/image") }) {
+        for (const QString &f : QDir(d).entryList(
+                 QStringList() << QStringLiteral("*wlan*") << QStringLiteral("*wcn*")
+                               << QStringLiteral("bdwlan*") << QStringLiteral("*bt*fw*")
+                               << QStringLiteral("WIFI_RAM_CODE*") << QStringLiteral("BT_RAM_CODE*")
+                               << QStringLiteral("WMT_*") << QStringLiteral("mt66*"),
+                 QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot))
+            if (!fwFiles.contains(f)) fwFiles << f;
+    }
+    fwFiles.sort();
+    m.insert(QStringLiteral("firmwareFiles"), fwFiles.join(QStringLiteral(", ")));
+
+    // --- Bluetooth ----------------------------------------------------
+    QStringList adapters;
+    const QDir btd(QStringLiteral("/sys/class/bluetooth"));
+    for (const QString &e : btd.entryList(QStringList() << QStringLiteral("hci*"), QDir::Dirs))
+        adapters << e;
+    adapters.sort();
+    m.insert(QStringLiteral("btAdapters"), adapters.join(QStringLiteral(", ")));
+
+    QStringList rfk;
+    const QDir rf(QStringLiteral("/sys/class/rfkill"));
+    for (const QString &e : rf.entryList(QStringList() << QStringLiteral("rfkill*"), QDir::Dirs)) {
+        const QString type = readTrim(rf.filePath(e) + QStringLiteral("/type"));
+        if (type != QLatin1String("bluetooth") && type != QLatin1String("wlan"))
+            continue;
+        const bool blocked = readTrim(rf.filePath(e) + QStringLiteral("/soft")) == QLatin1String("1")
+                          || readTrim(rf.filePath(e) + QStringLiteral("/hard")) == QLatin1String("1");
+        rfk << type + (blocked ? QStringLiteral(": blocked") : QStringLiteral(": ok"));
+    }
+    m.insert(QStringLiteral("rfkill"), rfk.join(QStringLiteral(" · ")));
+    return m;
+}
+
+// Registered Android HAL services on /dev/hwbinder — the HAL-level view of
+// the hardware adaptation. Uses binder-list (libgbinder-tools) when present;
+// returns empty on non-hybris devices or without the tool.
+QVariantList SysMon::halServices() const
+{
+    QVariantList out;
+    if (!QFileInfo::exists(QStringLiteral("/dev/hwbinder")))
+        return out;
+    QProcess p;
+    p.start(QStringLiteral("binder-list"),
+            QStringList() << QStringLiteral("-d") << QStringLiteral("/dev/hwbinder"));
+    if (!p.waitForFinished(3000))
+        return out;
+    QStringList lines;
+    for (const QByteArray &l : p.readAllStandardOutput().split('\n')) {
+        const QString s = QString::fromUtf8(l).trimmed();
+        if (!s.isEmpty()) lines << s;
+    }
+    lines.sort();
+    for (const QString &s : lines)
+        out.append(s);
+    return out;
+}
+
+// Bug-report log info, unprivileged part: installed packages and running
+// processes matching the term. Journal/dmesg excerpts come from the root
+// helper (logGrep) — the QML page combines both.
+QString SysMon::bugReportInfo(const QString &term) const
+{
+    const QString low = term.trimmed().toLower();
+    if (low.isEmpty())
+        return QString();
+    QString out;
+
+    QProcess rpm;
+    rpm.start(QStringLiteral("rpm"), QStringList() << QStringLiteral("-qa"));
+    if (rpm.waitForFinished(15000)) {
+        QStringList hits;
+        for (const QByteArray &l : rpm.readAllStandardOutput().split('\n'))
+            if (!l.isEmpty() && l.toLower().contains(low.toUtf8()))
+                hits << QString::fromUtf8(l);
+        hits.sort();
+        out += QStringLiteral("== installed packages matching \"%1\" ==\n").arg(term.trimmed());
+        out += hits.isEmpty() ? QStringLiteral("(none)\n") : hits.join(QLatin1Char('\n')) + QLatin1Char('\n');
+    }
+
+    out += QStringLiteral("\n== running processes matching \"%1\" ==\n").arg(term.trimmed());
+    bool anyProc = false;
+    const QDir proc(QStringLiteral("/proc"));
+    for (const QString &pid : proc.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        bool numeric = false;
+        pid.toInt(&numeric);
+        if (!numeric)
+            continue;
+        const QString base = QStringLiteral("/proc/") + pid;
+        QString cmdline = readTrim(base + QStringLiteral("/cmdline")).replace(QLatin1Char('\0'), QLatin1Char(' '));
+        const QString comm = readTrim(base + QStringLiteral("/comm"));
+        if (!comm.toLower().contains(low) && !cmdline.toLower().contains(low))
+            continue;
+        QString state, rss;
+        for (const QString &l : readTrim(base + QStringLiteral("/status")).split(QLatin1Char('\n'))) {
+            if (l.startsWith(QLatin1String("State:"))) state = l.mid(6).trimmed();
+            else if (l.startsWith(QLatin1String("VmRSS:"))) rss = l.mid(6).trimmed();
+        }
+        out += pid + QStringLiteral("  ") + comm
+             + (state.isEmpty() ? QString() : QStringLiteral("  [") + state + QLatin1Char(']'))
+             + (rss.isEmpty() ? QString() : QStringLiteral("  ") + rss)
+             + (cmdline.isEmpty() ? QString() : QStringLiteral("\n    ") + cmdline.left(160))
+             + QLatin1Char('\n');
+        anyProc = true;
+    }
+    if (!anyProc)
+        out += QStringLiteral("(none)\n");
+    return out;
 }
 
 static QVariantMap ofonoProps(const QString &path, const QString &iface)
