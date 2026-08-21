@@ -50,7 +50,7 @@ void RootClient::probe()
     m_sock.waitForConnected(200);
 }
 
-QByteArray RootClient::request(const QByteArray &line)
+QByteArray RootClient::request(const QByteArray &line, int timeoutMs)
 {
     if (m_sock.state() != QLocalSocket::ConnectedState)
         return QByteArray();
@@ -60,7 +60,7 @@ QByteArray RootClient::request(const QByteArray &line)
     // response: "OK <len>\n<payload>" or "ERR\n"
     QByteArray header;
     while (!header.contains('\n')) {
-        if (!m_sock.waitForReadyRead(500)) {
+        if (!m_sock.waitForReadyRead(timeoutMs)) {
             m_sock.abort();
             return QByteArray();
         }
@@ -123,6 +123,11 @@ QStringList RootClient::chargerLog()
     if (r.isEmpty())
         return QStringList();
     return QString::fromUtf8(r).split(QLatin1Char('\n'), QString::SkipEmptyParts);
+}
+
+QString RootClient::logGrep(const QString &term)
+{
+    return QString::fromUtf8(request("J " + term.toUtf8(), 15000));
 }
 
 bool RootClient::sendSignal(int pid, int sig)

@@ -14,6 +14,10 @@
 #include "applang.h"
 #include "btinfo.h"
 #include "detailmon.h"
+#include "diagnostics.h"
+#ifdef SYSMETRICS_ULTIMATE
+#include "cvelookup.h"
+#endif
 #include "graphitem.h"
 #include "sysmetrics_version.h"
 #include "netmon.h"
@@ -70,6 +74,7 @@ int main(int argc, char *argv[])
     Recorder recorder;
     BtInfo bt;
     NetMonitor netmon;
+    Diagnostics diagnostics;
 
     QObject::connect(sampler, &Sampler::systemSampled, &sysmon, &SysMon::onSystem);
     QObject::connect(sampler, &Sampler::systemSampled, &model, &ProcModel::onSystem);
@@ -107,10 +112,18 @@ int main(int argc, char *argv[])
     view->rootContext()->setContextProperty(QStringLiteral("recorder"), &recorder);
     view->rootContext()->setContextProperty(QStringLiteral("bt"), &bt);
     view->rootContext()->setContextProperty(QStringLiteral("netmon"), &netmon);
+    view->rootContext()->setContextProperty(QStringLiteral("diagnostics"), &diagnostics);
+#ifdef SYSMETRICS_ULTIMATE
+    // Ultimate only: the "cve" context property is the QML-side feature gate.
+    CveLookup cvelookup;
+    view->rootContext()->setContextProperty(QStringLiteral("cve"), &cvelookup);
+#endif
     view->rootContext()->setContextProperty(QStringLiteral("rootmon"), RootClient::instance());
     view->rootContext()->setContextProperty(QStringLiteral("applang"), &applang);
     view->rootContext()->setContextProperty(QStringLiteral("appVersion"),
                                             QStringLiteral(SYSMETRICS_VERSION_STRING));
+    view->rootContext()->setContextProperty(QStringLiteral("appBuildDate"),
+                                            QStringLiteral(SYSMETRICS_BUILD_DATE));
     view->setSource(SailfishApp::pathTo(QStringLiteral("qml/harbour-sysmetrics.qml")));
     view->showFullScreen();
 

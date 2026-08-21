@@ -1,140 +1,72 @@
-# harbour-sysmetrics
+# SysMetrics
 
-**SysMetrics is an on-device deep system and hardware diagnostics tool for Sailfish OS.** 
+System diagnostics for Sailfish OS. htop-class process monitor plus system,
+network, device and battery inspection — and read-only diagnostics that
+recognise documented device issues and explain their fixes.
 
-Intended primarily for developers, testers and advanced users. Some features 
-require elevated privileges. It reads /proc, /sys and the system D-Bus locally 
-and shows what the device reports about itself. Everything runs on the device: 
-it collects nothing, transmits nothing, and has no network or cloud component. 
-The only data it ever shows is that of the phone it runs on.**
+## Features
 
-SysMetrics is an htop-style monitor that also opens up every hardware subsystem
-of the phone on its own detail page. It reads `/proc`, `/sys` and the system
-D-Bus locally and shows what the device reports about itself. Everything runs on
-the device: it **collects nothing, transmits nothing, and has no network or
-cloud component**. The only data it ever shows is that of the phone it runs on.
+- Process list: CPU%, RSS, state, threads, nice, user; sort by any key;
+  text search; filters for apps / system / kernel threads.
+- Process detail: CPU history, PSS/USS/swap, I/O rates, context-switch and
+  page-fault rates, open files with mode, accessed /dev nodes with full
+  sysfs identification (vendor, product, serial, driver), network sockets
+  with live activity indication, threads, cgroup, estimated power share,
+  rule-based load/drain assessment.
+- Actions: SIGTERM, SIGKILL, SIGSTOP/SIGCONT, renice (lowering only).
+- System overview: per-core load and frequency, memory, network and disk
+  rates, thermal zones, battery (current, voltage, power, health),
+  Bluetooth connections (BlueZ).
+- Record mode: accumulates per-process CPU time over a session and ranks
+  the consumers.
+- Diagnostics on every subsystem page (facts first, findings at the end):
+  CPU hardware vulnerabilities (only issues that can affect this
+  architecture; green = kernel mitigation active), cpufreq governor health
+  and tuning assessment, per-touch CPU boost, GPU idle floor,
+  frequency-residency energy headroom, D-state-inflated load average,
+  MediaTek core-hotplug health, duplicate-BT-adapter/rfkill artifacts, WLAN
+  regulatory domain and firmware-crash counters, the Xperia 10 III
+  camera-provider crash (missing HAL library, detected incl. installed
+  fix) and the too-quiet-recordings camcorder gain. Verdict up front,
+  measured details behind a tap, known fixes named as plain text —
+  informs only, never changes the system. The overview cards carry a dot
+  when their subsystem has a finding.
+- Chipset identity: WLAN/BT combo chip from driver, device tree and
+  firmware (Qualcomm and MediaTek patterns), USB controller (UDC, DT
+  compatible, speeds, Type-C roles), SoC part number from /sys/devices/soc0,
+  registered Android HAL services via binder.
+- Android base under System & CPU: Android version, security patch level,
+  vendor build and fingerprint of the HAL layer.
+- Bug reports page: copy-ready device summary (with a fill-in skeleton for
+  the reporter's part) and a log-info generator — name a component and get
+  its exact package versions, running processes and, with root mode,
+  matching journal/kernel-log lines as one copyable block.
+- Glossary explaining every figure, including the technical background of
+  the vulnerability classes and the camera-crash fix.
+- Optional root helper (read-only, off by default) unlocks debugfs details
+  such as the WLAN firmware identity and journal excerpts.
 
-Tested on a Sony Xperia 10 III. The hardware readouts are written to degrade
-gracefully on other devices — where a value is not exposed by the kernel, the
-app says so instead of guessing.
+Everything is read from /proc, /sys, D-Bus and rpm on the device. The base
+app never talks to the network.
 
-## Screenshots
+## Build
 
-<table>
-  <tr>
-    <td><img src="screenshots/01.png" width="150"></td>
-    <td><img src="screenshots/02.png" width="150"></td>
-    <td><img src="screenshots/03.png" width="150"></td>
-    <td><img src="screenshots/04.png" width="150"></td>
-  </tr>
-  <tr>
-    <td><img src="screenshots/05.png" width="150"></td>
-    <td><img src="screenshots/06.png" width="150"></td>
-    <td><img src="screenshots/07.png" width="150"></td>
-    <td><img src="screenshots/08.png" width="150"></td>
-  </tr>
-  <tr>
-    <td><img src="screenshots/09.png" width="150"></td>
-    <td><img src="screenshots/10.png" width="150"></td>
-    <td><img src="screenshots/11.png" width="150"></td>
-    <td><img src="screenshots/12.png" width="150"></td>
-  </tr>
-</table>
+    mb2 -t SailfishOS-5.0.0.62-aarch64 build
 
-## What it shows
+### Ultimate variant (self-built)
 
-- **Processes** — a live list sorted by CPU, with a collapsible top-10 view. The
-  ordering freezes while a row is touched so it can be tapped without jumping.
-  Each process opens a detail page: per-process CPU, memory, I/O, scheduling,
-  open files, device nodes and network sockets.
-- **System overview** — CPU (per core and total, with history graphs), memory,
-  thermal zones, load recording for later analysis.
-- **Connections** — inbound and outbound sockets with a public/private/loopback
-  classification and a threat-assessment view; tap a connection for its detail.
-- **Hardware detail pages**, each a tap away:
-  - **CPU / SoC**, **RAM** (type and timing where exposed).
-  - **Storage** — UFS/eMMC identity, health/wear estimate, and the capacity
-    composition (LUNs), plus any microSD card and its host controller.
-  - **Network** — interfaces, and live Wi-Fi detail via `iw` (SSID, BSSID, band,
-    channel, signal, rates, per-band channel capabilities).
-  - **Battery** — charge state, health, charging protocol and negotiated power,
-    top CPU consumers, and a human-readable charger handshake from the kernel log.
-  - **Bluetooth**, **Graphics**, **Audio** (sinks/sources with levels).
-  - **Camera** — sensor models recovered from the vendor camera modules, the
-    CAMSS layout, and an honest account of what only a live capture session can
-    report.
-  - **USB** — host controllers and connected devices with human-readable names
-    (from the system USB-ID database) and their associated `/dev` nodes.
-  - **Modem / SIM** — operator, registration, radio technology, signal, and SIM
-    details, read from ofono.
-  - **Sensors / GPS** — a live raw-value readout of the motion, environment and
-    positioning sensors.
-- **Context glossary** — every detail page carries a swipe-left glossary that
-  explains exactly the terms on that page.
-- **English and German**, switchable in Settings (or follow the system locale).
+    mb2 -t SailfishOS-5.0.0.62-aarch64 build -- --with ultimate
 
-## Optional root mode
-
-A few things — inspecting foreign or sandboxed processes in full, and reading
-the charger handshake from the kernel ring buffer — need privileges the app does
-not have as a normal user. For those, a switch in Settings (off by default)
-starts an **optional** privileged helper service
-(`data/harbour-sysmetrics-helper.service`, never enabled at boot; a polkit rule
-scopes the switch to exactly this unit). The helper exits by itself when the app
-is gone. It is strictly additive: the whole app builds and runs without it, and
-nothing leaves the device either way.
-
-## Privacy
-
-- All processing is **on-device**. No analytics, no upload, no network calls of
-  its own.
-- The app shows the state of **the phone it runs on** — including identifiers
-  like IMEI/IMSI that belong to that device. None of it is stored or sent
-  anywhere; it is read live and shown on screen only.
-- This repository contains **no** real device identifiers, serials, MAC or IP
-  addresses, coordinates or personal data, and it must stay that way.
-
-## Building
-
-Requires the [Sailfish OS SDK](https://sailfishos.org/develop/). From the
-project root:
-
-```sh
-mb2 -t SailfishOS-<version>-aarch64 build    # produces an RPM under RPMS/
-```
-
-Install on the device:
-
-```sh
-scp RPMS/harbour-sysmetrics-*.aarch64.rpm <device>:/tmp/
-ssh <device> 'pkcon install-local -y /tmp/harbour-sysmetrics-*.aarch64.rpm'
-```
-
-## Status & responsible use
-
-**Work in progress**, shared **as is** with **no warranty** of any kind (see the
-GPLv3). Where the kernel or HAL does not expose a value, the app is honest about
-it rather than inventing one — a blank field means "not readable here", not
-"nothing there".
-
-## Unsupported or misbehaving hardware
-
-The hardware readouts are tuned on a Qualcomm device (Sony Xperia 10 III) and a
-MediaTek one. On other SoCs some values may be blank or wrong where the kernel
-exposes them under different paths. If you run different hardware and spot a
-readout that is missing or incorrect, run the bundled probe and share its output
-so support can be added:
-
-```sh
-sh tools/hw-probe.sh    # writes sysmetrics-hwprobe-<model>-<date>.txt
-```
-
-Attach that file to a [new issue](https://github.com/JimKnopfIoT/harbour-sysmetrics/issues),
-or send it to the developer. It contains only hardware/kernel capability
-information — CPU, GPU, camera, thermal and power-supply paths — and **no**
-serials, subscriber data or other personal information.
+Adds an online CVE search to the diagnosis blocks — the only feature that
+talks to the network, which is why it stays out of default builds. It
+queries the ENISA EUVD and flags hits against the CISA known-exploited
+catalog. Search presets are context-aware (the network page seeds the radio
+chip and its stack, the CPU page kernel/SoC/Android, …), every page starts
+with an empty query, and each result carries a local fix verdict: ✔ not
+affected or fixed (rpm changelog names the CVE, or the installed version
+lies above the affected range stated in the CVE), ✘ probably affected
+(version inside the range, or the package predates the CVE), ▢ unknown.
 
 ## License
 
-Licensed under the **GNU General Public License v3.0 or later** (see
-[`LICENSE`](LICENSE)).
+GPL-3.0-or-later

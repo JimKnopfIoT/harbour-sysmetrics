@@ -20,6 +20,9 @@ public:
     // StartUnit/StopUnit for the helper unit (polkit-scoped to defaultuser).
     Q_INVOKABLE void setHelper(bool on);
     Q_INVOKABLE QStringList chargerLog();
+    // journal + kernel-log excerpt matching a term (bug-report page); the
+    // helper runs journalctl, so allow it time.
+    Q_INVOKABLE QString logGrep(const QString &term);
 
     QByteArray readFile(const QString &path);
     QString symlinkTarget(const QString &path);
@@ -34,7 +37,7 @@ signals:
 
 private:
     explicit RootClient(QObject *parent = nullptr);
-    QByteArray request(const QByteArray &line);
+    QByteArray request(const QByteArray &line, int timeoutMs = 500);
 
     QLocalSocket m_sock;
     QTimer m_retry;   // auto-connect while the helper is not yet running

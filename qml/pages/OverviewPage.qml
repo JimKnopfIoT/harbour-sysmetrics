@@ -24,11 +24,21 @@ Page {
 
     function openDetail(d) {
         pageStack.push(Qt.resolvedUrl("InfoDetailPage.qml"),
-                       { title: d.title, sections: d.sections, helpTopics: (d.helpTopics ? d.helpTopics : []) })
+                       { title: d.title, sections: d.sections,
+                         helpTopics: (d.helpTopics ? d.helpTopics : []),
+                         diagTopic: (d.diagTopic ? d.diagTopic : "") })
     }
+
+    // worst diagnostics level per topic — feeds the dots on the cards
+    property var diagLevels: ({})
 
     Component.onCompleted: {
         bt.refresh()
+        var all = diagnostics.run(sysmon.cpuPercent, sysmon.load1)
+        var lv = {}
+        for (var i = 0; i < all.length; ++i)
+            if (all[i].level > (lv[all[i].topic] || 0)) lv[all[i].topic] = all[i].level
+        diagLevels = lv
     }
     Timer { interval: 5000; running: true; repeat: true; onTriggered: bt.refresh() }
 
@@ -54,6 +64,7 @@ Page {
                 unit: "%"
                 accent: Diag.loadColor(sysmon.cpuPercent)
                 drilldown: true
+                diagLevel: page.diagLevels["cpu"] || 0
                 onClicked: page.openDetail(HwInfo.cpu())
                 Column {
                     width: parent.width
@@ -127,6 +138,7 @@ Page {
                 value: sysmon.fmtRate(sysmon.netRxRate + sysmon.netTxRate)
                 accent: Diag.cyan
                 drilldown: true
+                diagLevel: page.diagLevels["network"] || 0
                 onClicked: page.openDetail(HwInfo.net())
                 Column {
                     width: parent.width; spacing: Theme.paddingSmall
@@ -185,6 +197,7 @@ Page {
                 title: qsTr("Graphics")
                 accent: Diag.violet
                 drilldown: true
+                diagLevel: page.diagLevels["gpu"] || 0
                 onClicked: page.openDetail(HwInfo.gfx())
                 Label {
                     width: parent.width
@@ -202,6 +215,7 @@ Page {
                 title: qsTr("Audio")
                 accent: Diag.teal
                 drilldown: true
+                diagLevel: page.diagLevels["audio"] || 0
                 onClicked: page.openDetail(HwInfo.audio())
                 Label {
                     width: parent.width
@@ -236,6 +250,7 @@ Page {
                 title: qsTr("Camera")
                 accent: Diag.violet
                 drilldown: true
+                diagLevel: page.diagLevels["camera"] || 0
                 onClicked: page.openDetail(HwInfo.camera())
                 Label {
                     width: parent.width
@@ -376,6 +391,7 @@ Page {
                 visible: bt.available
                 title: qsTr("Bluetooth")
                 drilldown: true
+                diagLevel: page.diagLevels["bluetooth"] || 0
                 onClicked: page.openDetail(HwInfo.bluetooth())
                 value: {
                     var n = 0
@@ -400,13 +416,6 @@ Page {
                         }
                     }
                 }
-            }
-
-            // ---- Kernel ------------------------------------------------
-            Column {
-                x: Theme.horizontalPageMargin
-                width: page.width - 2 * Theme.horizontalPageMargin
-                KeyValue { label: qsTr("Kernel"); value: sysmon.kernel; mono: true }
             }
 
             Item { width: 1; height: Theme.paddingLarge }

@@ -29,11 +29,39 @@ Page {
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
+                text: qsTr("Built %1").arg(appBuildDate)
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: Theme.secondaryColor
+            }
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - 2 * Theme.horizontalPageMargin
                 wrapMode: Text.Wrap
                 font.pixelSize: Theme.fontSizeExtraSmall
                 color: Theme.secondaryColor
-                text: qsTr("Process and system monitor. Reads /proc, /sys and BlueZ on "
-                    + "the device. Collects nothing, transmits nothing.")
+                text: qsTr("Process and system monitor with known-issue diagnostics: "
+                    + "processes, hardware, chipsets, HAL services, Android base, "
+                    + "bug-report assistant. Reads /proc, /sys, D-Bus and rpm on the "
+                    + "device — read-only, collects nothing, transmits nothing.")
+            }
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - 2 * Theme.horizontalPageMargin
+                wrapMode: Text.Wrap
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: Theme.secondaryColor
+                text: qsTr("The self-built Ultimate variant adds an online CVE search "
+                    + "(EUVD/KEV) — the only feature that talks to the network. "
+                    + "Build it yourself: --with ultimate.")
+            }
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - 2 * Theme.horizontalPageMargin
+                wrapMode: Text.WrapAnywhere
+                font.pixelSize: Theme.fontSizeExtraSmall
+                font.family: "monospace"
+                color: Theme.secondaryColor
+                text: qsTr("License: GPL-3.0-or-later\nSource:\ngithub.com/JimKnopfIoT/harbour-sysmetrics")
             }
             Item { width: 1; height: Theme.paddingLarge }
         }

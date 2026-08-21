@@ -152,6 +152,17 @@ Page {
             ]
         },
         {
+            title: qsTr("Diagnosis"), key: "diagnosis",
+            items: [
+                { t: qsTr("Mitigation vs. Vulnerable"), d: qsTr("The kernel reports each speculative-execution issue per CPU: 'Mitigation: …' names the active countermeasure (fix in place, shown green), 'Vulnerable' means this kernel build carries no fix (red), 'Not affected' means the CPU's microarchitecture cannot express the attack at all — such entries are not listed on the diagnosis card.") },
+                { t: "Spectre v1 / v2", d: qsTr("Speculative execution runs code past unresolved branches and leaves traces in the caches. v1 (bounds-check bypass) tricks speculation past an array bounds check; v2 (branch target injection) poisons the branch predictor to steer speculation into attacker-chosen code. Both affect out-of-order ARM cores (A72, A76, A77 …); mitigations are pointer sanitization (v1) and predictor hardening/CSV2+BHB (v2).") },
+                { t: qsTr("Spectre-BHB"), d: qsTr("A v2 refinement: the branch *history* buffer is poisoned instead of the target buffer, bypassing the first round of v2 hardware fixes. Affects newer ARM cores (Cortex-A77 and later); mitigated with history-clearing loop sequences in the kernel.") },
+                { t: qsTr("Speculative Store Bypass (v4)"), d: qsTr("The CPU speculatively lets a load run before an older store to the same address is resolved, briefly exposing stale data. Mitigated per process (prctl/SSBS) rather than globally, because the global fix is expensive.") },
+                { t: "Meltdown", d: qsTr("Rogue data cache load: on affected CPUs, a user-space access to kernel memory is only faulted *after* speculation already fetched the data into the cache. Broadly an Intel issue; among ARM cores essentially only Cortex-A75. In-order cores (A53, A55) and post-A75 designs (A76, A77 …) fault before the fetch — they are structurally not affected.") },
+                { t: qsTr("x86-only classes (MDS, L1TF, TAA, SRBDS …)"), d: qsTr("Several listed classes exploit Intel-specific microarchitecture and cannot occur on ARM SoCs: MDS/TAA sample stale data from fill/store buffers shared between hyper-threads (these SoCs have no SMT); L1TF abuses Intel's handling of not-present page-table entries; TAA needs the TSX transactional-memory extension (ARM has none); SRBDS leaks the on-chip RNG through a shared microcode buffer; iTLB multihit and MMIO stale data target Intel TLB and chipset behavior. The kernel prints 'Not affected' for them; the diagnosis card therefore omits them.") }
+            ]
+        },
+        {
             title: qsTr("Monitoring"), key: "monitoring",
             items: [
                 { t: qsTr("Sampling interval"), d: qsTr("How often the app re-reads /proc and /sys. Shorter is more responsive but uses more CPU.") },
@@ -181,7 +192,8 @@ Page {
                 { t: qsTr("ISP"), d: qsTr("Image Signal Processor — the SoC block that demosaics, denoises, white-balances and encodes the sensor stream.") },
                 { t: qsTr("CAMSS / cam-req-mgr"), d: qsTr("Qualcomm's camera subsystem in the kernel. It exposes control nodes (cam-req-mgr, cam_sync), not per-camera capture devices — capture runs through the userspace HAL (camx).") },
                 { t: qsTr("EEPROM (calibration)"), d: qsTr("A small memory beside each module holding per-unit factory calibration: lens shading, autofocus range, colour.") },
-                { t: qsTr("Capture mode"), d: qsTr("A sensor output configuration (resolution + frame rate + binning). Modes live in the HAL and are enumerable only on a running camera, not via V4L2.") }
+                { t: qsTr("Capture mode"), d: qsTr("A sensor output configuration (resolution + frame rate + binning). Modes live in the HAL and are enumerable only on a running camera, not via V4L2.") },
+                { t: qsTr("Camera provider crash (Xperia 10 III)"), d: qsTr("Defect: stopping a video recording crashes the Android camera service — CamX dlopens libswregistrationalgo.so from /odm/lib64, which the Sailfish port does not ship (sonyxperiadev bug #761, known since 2022). Fix — extract the proprietary library from the device's own Android firmware, then one of two ways: (1) copy it straight into /odm/lib64 (remount rw; simple, but gone after a reflash of odm), or (2) keep it in /data and bind-mount it over /odm/lib64 via a boot unit (survives OS updates). Both are system-wide, every camera app benefits. Step-by-step details in the README (GitHub only):\ngithub.com/JimKnopfIoT/harbour-advanced-camera") }
             ]
         },
         {

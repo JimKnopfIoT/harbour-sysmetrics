@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QProcess>
 #include <QTimer>
 
 #include <dirent.h>
@@ -193,6 +194,62 @@ QByteArray cmdChargerLog()
     return keep.join(QLatin1Char('\n')).toUtf8();
 }
 
+// Log excerpt for bug reports: journal + kernel ring buffer, filtered to
+// lines containing the term. Read-only; journalctl runs with fixed argv and
+// no shell, the term is only used as an in-process filter needle.
+QByteArray cmdLogGrep(const QByteArray &term)
+{
+    QByteArray out;
+    const QByteArray low = term.toLower().trimmed();
+    if (low.isEmpty())
+        return out;
+
+    QProcess jp;
+    jp.start(QStringLiteral("journalctl"),
+             QStringList() << QStringLiteral("--no-pager") << QStringLiteral("-n")
+                           << QStringLiteral("5000") << QStringLiteral("-o")
+                           << QStringLiteral("short-iso"));
+    if (jp.waitForFinished(10000)) {
+        QList<QByteArray> keep;
+        for (const QByteArray &l : jp.readAllStandardOutput().split('\n'))
+            if (!l.isEmpty() && l.toLower().contains(low))
+                keep << l;
+        while (keep.size() > 200)
+            keep.removeFirst();
+        out += "== journal (last " + QByteArray::number(keep.size()) + " matching lines) ==\n";
+        for (const QByteArray &l : keep)
+            out += l + '\n';
+    } else {
+        out += "== journal: journalctl not available ==\n";
+    }
+
+    int len = klogctl(10 /*SIZE_BUFFER*/, nullptr, 0);
+    if (len <= 0)
+        len = 1 << 20;
+    QByteArray buf(len + 1, 0);
+    const int n = klogctl(3 /*READ_ALL*/, buf.data(), len);
+    if (n > 0) {
+        buf.truncate(n);
+        QList<QByteArray> keep;
+        for (const QByteArray &raw : buf.split('\n')) {
+            QByteArray l = raw;
+            if (l.startsWith('<')) {
+                const int gt = l.indexOf('>');
+                if (gt > 0)
+                    l = l.mid(gt + 1);
+            }
+            if (!l.isEmpty() && l.toLower().contains(low))
+                keep << l;
+        }
+        while (keep.size() > 100)
+            keep.removeFirst();
+        out += "\n== kernel log (last " + QByteArray::number(keep.size()) + " matching lines) ==\n";
+        for (const QByteArray &l : keep)
+            out += l + '\n';
+    }
+    return out;
+}
+
 QByteArray cmdSignal(const QByteArray &arg)
 {
     const QList<QByteArray> a = arg.split(' ');
@@ -227,6 +284,8 @@ void serve(QLocalSocket *sock)
                 payload = cmdSockMap();
             else if (cmd == "D")
                 payload = cmdChargerLog();
+            else if (cmd == "J")
+                payload = cmdLogGrep(arg);
             else if (cmd == "K")
                 payload = cmdSignal(arg);
             else if (cmd == "N")
