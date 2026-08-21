@@ -3,7 +3,7 @@ import Sailfish.Silica 1.0
 import "../components"
 
 // Generic hardware/detail renderer.
-// sections: [ { title, note?, rows:[{k,v,active?,mono?,color?}], bars?:[{label,value,max,caption,color}] } ]
+// sections: [ { title?, note?, italic?, rows:[{k,v,active?,mono?,color?}], bars?:[{label,value,max,caption,color}] } ]
 // A row with active===false is a capability the hardware has but the phone is
 // not using — rendered grayed/semi-transparent.
 Page {
@@ -54,7 +54,10 @@ Page {
                     width: page.width
                     property int si: index
                     property bool exp: page.expandedSections[index] === true
-                    SectionHeader { text: modelData.title }
+                    SectionHeader {
+                        visible: modelData.title !== undefined
+                        text: modelData.title ? modelData.title : ""
+                    }
 
                     Label {
                         visible: modelData.note !== undefined
@@ -62,8 +65,9 @@ Page {
                         width: page.width - 2 * Theme.horizontalPageMargin
                         text: modelData.note ? modelData.note : ""
                         wrapMode: Text.Wrap
-                        font.pixelSize: Theme.fontSizeTiny
-                        color: Theme.secondaryColor
+                        font.italic: modelData.italic === true
+                        font.pixelSize: modelData.italic === true ? Theme.fontSizeSmall : Theme.fontSizeTiny
+                        color: modelData.italic === true ? Theme.highlightColor : Theme.secondaryColor
                     }
 
                     // bars (usage etc.)

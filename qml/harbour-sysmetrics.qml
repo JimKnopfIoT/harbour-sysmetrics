@@ -10,6 +10,10 @@ ApplicationWindow {
     cover: Component { CoverPage {} }
     allowedOrientations: defaultAllowedOrientations
 
+    // Covered: the process list is out of sight, so stop paying for it. The
+    // cover's own figures come from the cheap system sample and keep running.
+    onApplicationActiveChanged: sysmon.foreground = applicationActive
+
     // Root-helper switch, re-applied on launch (default off).
     ConfigurationValue {
         id: cfgRootHelper
@@ -17,6 +21,7 @@ ApplicationWindow {
         defaultValue: false
     }
     Component.onCompleted: {
+        sysmon.foreground = applicationActive
         if (cfgRootHelper.value)
             rootmon.setHelper(true)
     }

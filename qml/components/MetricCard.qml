@@ -7,7 +7,10 @@ Rectangle {
     id: card
     property string title
     property string value
+    // unit is the symbol that belongs to the number (%, °C) and is coloured with
+    // it; note is the descriptive tail beside it and stays secondary.
     property string unit
+    property string note
     property color accent: Diag.cyan
     property alias content: slot.data
     default property alias extra: slot.data
@@ -72,7 +75,7 @@ Rectangle {
         }
 
         Row {
-            spacing: Theme.paddingSmall
+            spacing: 0
             Label {
                 text: card.value
                 font.pixelSize: Theme.fontSizeExtraLarge
@@ -83,7 +86,17 @@ Rectangle {
                 id: unitLabel
                 text: card.unit
                 font.pixelSize: Theme.fontSizeSmall
+                color: card.accent
+            }
+            Item {
+                width: card.note.length ? Theme.paddingMedium : 0
+                height: 1
+            }
+            Label {
+                text: card.note
+                font.pixelSize: Theme.fontSizeSmall
                 color: Theme.secondaryColor
+                anchors.baseline: unitLabel.baseline
             }
         }
 

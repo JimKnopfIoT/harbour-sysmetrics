@@ -112,7 +112,6 @@ void ProcModel::onProcesses(const QVector<ProcSample> &procs, qulonglong)
         endInsertRows();
     }
 
-    m_rowByPid = incoming;
     emit updated();
 }
 
