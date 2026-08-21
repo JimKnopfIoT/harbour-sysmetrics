@@ -12,6 +12,8 @@ Rectangle {
     property alias content: slot.data
     default property alias extra: slot.data
     property bool drilldown: false
+    // worst diagnostics level of this card's subsystem (0 = nothing to show)
+    property int diagLevel: 0
     signal clicked()
 
     width: parent ? parent.width : implicitWidth
@@ -60,6 +62,12 @@ Rectangle {
                 font.pixelSize: Theme.fontSizeExtraSmall
                 font.letterSpacing: 1.5
                 color: Theme.secondaryHighlightColor
+            }
+            Rectangle {
+                visible: card.diagLevel > 0
+                width: Theme.paddingMedium; height: width; radius: width / 2
+                color: Diag.levelColor(card.diagLevel)
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
 

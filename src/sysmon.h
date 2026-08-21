@@ -131,6 +131,9 @@ public:
     Q_INVOKABLE QVariantMap cameraDetail() const;
     Q_INVOKABLE QVariantMap modemDetail() const;
     Q_INVOKABLE QVariantMap usbDetail() const;
+    Q_INVOKABLE QVariantMap wirelessDetail() const;
+    Q_INVOKABLE QVariantList halServices() const;
+    Q_INVOKABLE QString bugReportInfo(const QString &term) const;
     Q_INVOKABLE QString fmtBytes(double b) const;
     Q_INVOKABLE QString fmtRate(double bps) const;
     Q_INVOKABLE QString fmtDuration(int sec) const;

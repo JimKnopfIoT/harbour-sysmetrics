@@ -14,7 +14,8 @@ function cpu() {
         row(qsTr("Product"), d.deviceName),
         row(qsTr("Model"), d.deviceModel),
         row(qsTr("Board"), d.machine),
-        row("SoC", d.socName, {mono:true})
+        row("SoC", d.socModel || d.socName, {mono:true}),
+        row(qsTr("SoC (device tree)"), d.socCompatible, {mono:true})
     ]})
     s.push({ title: qsTr("Operating system"), rows: [
         row("Sailfish OS", d.os),
@@ -23,6 +24,18 @@ function cpu() {
         row(qsTr("Kernel"), d.kernel, {mono:true}),
         row(qsTr("Kernel build"), d.kernelVersion, {mono:true})
     ]})
+    if (d.androidVersion || d.androidPatch) {
+        var ar = [
+            row(qsTr("Android version"), d.androidVersion),
+            row(qsTr("Security patch level"), d.androidPatch, {mono:true}),
+            row(qsTr("Vendor build"), d.androidBuild, {mono:true})
+        ]
+        if (d.androidFingerprint)
+            ar.push(row(qsTr("Fingerprint"), d.androidFingerprint, {mono:true}))
+        s.push({ title: qsTr("Android base"),
+                 note: qsTr("The Android layer under libhybris — kernel and HAL blobs come from this base. The patch level dates the vendor's last security fixes."),
+                 rows: ar })
+    }
     var coreRows = []
     var cores = d.cores || []
     for (var i = 0; i < cores.length; ++i) {
@@ -65,7 +78,41 @@ function cpu() {
         s.push({ title: qsTr("CPU features"),
                  note: qsTr("Instruction-set capabilities the CPU reports."), rows: frows })
     }
-    return { title: qsTr("System & CPU"), helpTopics: ["cpu","monitoring"], sections: s }
+    // Ultimate: registered Android HAL services on /dev/hwbinder
+    var hal = sysmon.halServices()
+    if (hal.length) {
+        var hr = []
+        for (var h = 0; h < hal.length; ++h) {
+            var parts = ("" + hal[h]).split("::")
+            hr.push(row(parts[0], parts.length > 1 ? parts[1] : "", {mono:true}))
+        }
+        s.push({ title: qsTr("Android HAL services"),
+                 note: qsTr("HIDL services registered on /dev/hwbinder — the HAL layer the hardware adaptation actually runs."),
+                 rows: hr })
+    }
+    // Copy-ready device block for bug reports. Deliberately English literals:
+    // reports go to international trackers.
+    var rep = "Date: " + Qt.formatDateTime(new Date(), "yyyy-MM-dd hh:mm") + "\n"
+        + "Device: " + (d.deviceName || "?") + (d.deviceModel ? " (" + d.deviceModel + ")" : "") + "\n"
+        + "OS: " + (d.os || "Sailfish OS") + " " + (d.osVersion || "") + "\n"
+        + "HW adaptation: " + (d.hwVersion || "?") + "\n"
+        + "Kernel: " + (d.kernel || "?") + "\n"
+        + (d.kernelVersion ? "Kernel build: " + d.kernelVersion + "\n" : "")
+        + (d.socCompatible ? "SoC: " + d.socCompatible + "\n" : "")
+        + "Arch: ARMv" + (d.architecture || "?") + ", " + (d.count || "?") + " cores\n"
+        + (d.androidVersion ? "Android base: " + d.androidVersion
+            + (d.androidPatch ? ", security patch " + d.androidPatch : "")
+            + (d.androidBuild ? ", build " + d.androidBuild : "") + "\n" : "")
+        + "Uptime: " + sysmon.fmtDuration(sysmon.uptimeSec) + "\n"
+        + "\n--- fill in yourself ---\n"
+        + "Affected app + exact version (rpm -q <package>): \n"
+        + "Steps to reproduce: \n"
+        + "Expected vs. actual behavior: \n"
+        + "Frequency (always/sometimes) + since when/which update: \n"
+        + "Exact error message (verbatim): \n"
+        + "Logs around the event (journalctl/app log/dmesg): \n"
+        + "Already tried: "
+    return { title: qsTr("System & CPU"), helpTopics: ["cpu","diagnosis","monitoring"], sections: s, diagTopic: "cpu", report: rep }
 }
 
 function gfx() {
@@ -89,7 +136,7 @@ function gfx() {
     } else {
         s.push({ title: qsTr("Display"), note: qsTr("No connected DRM connector exposed by the kernel."), rows: [] })
     }
-    return { title: qsTr("Graphics"), helpTopics: [], sections: s }
+    return { title: qsTr("Graphics"), helpTopics: [], sections: s, diagTopic: "gpu" }
 }
 
 function mem() {
@@ -301,7 +348,31 @@ function net() {
         if (n.rxErrors || n.txErrors) rows.push(row(qsTr("Errors"), "rx " + n.rxErrors + " · tx " + n.txErrors))
         s.push({ title: n.iface, rows: rows })
     }
-    return { title: qsTr("Network"), helpTopics: ["conn"], sections: s }
+    // Ultimate: WLAN chipset identity
+    var w = sysmon.wirelessDetail()
+    if (w.wlanDriver || w.wlanDtNode || w.wlanFwBuild) {
+        var wr = []
+        if (w.wlanDriver) wr.push(row(qsTr("Driver"), w.wlanDriver, {mono:true}))
+        if (w.wlanDevice) wr.push(row(qsTr("Device"), w.wlanDevice, {mono:true}))
+        if (w.wlanDtNode) wr.push(row(qsTr("Device-tree node"), w.wlanDtNode, {mono:true}))
+        if (w.wlanDtCompatible) wr.push(row(qsTr("Compatible"), w.wlanDtCompatible, {mono:true}))
+        if (w.wlanFwVersion) wr.push(row(qsTr("Firmware version"), w.wlanFwVersion, {mono:true}))
+        if (w.wlanFwBuild) wr.push(row(qsTr("Firmware build"), w.wlanFwBuild, {mono:true}))
+        if (!w.wlanFwVersion && !w.wlanFwBuild) {
+            var rootOn = false
+            try { rootOn = (typeof rootmon !== "undefined") && rootmon.active } catch (eW) {}
+            if (!rootOn)
+                wr.push(row(qsTr("Firmware version"),
+                            qsTr("root mode shows version and build of the running WLAN firmware here"),
+                            {active:false}))
+        }
+        if (w.firmwareFiles) wr.push(row(qsTr("Firmware files"), w.firmwareFiles, {mono:true}))
+        if (w.rfkill) wr.push(row("rfkill", w.rfkill))
+        s.unshift({ title: qsTr("WLAN chipset"),
+                    note: qsTr("Chip identity from driver, device tree and firmware."),
+                    rows: wr })
+    }
+    return { title: qsTr("Network"), helpTopics: ["conn"], sections: s, diagTopic: "network" }
 }
 
 function batt() {
@@ -412,13 +483,22 @@ function bluetooth() {
         row(qsTr("Chip"), a.modalias, {mono:true}),
         row(qsTr("Class"), a.class ? "0x" + a.class.toString(16) : "—")
     ]})
-    // capability-style: powers/modes the adapter has; grayed when off
+    // capability-style: powers/modes the adapter has; grayed when off.
+    // Discoverable/pairable are BlueZ *configuration* that persists while the
+    // adapter is powered down — showing them plain "on" then reads as if the
+    // radio were visible. Gate them on powered and say what they really are.
+    function mode(v) {
+        if (!a.powered)
+            return v ? qsTr("on, once Bluetooth is switched on")
+                     : qsTr("off, also once switched on")
+        return v ? qsTr("on") : qsTr("off")
+    }
     s.push({ title: qsTr("State"),
         note: qsTr("Adapter capabilities; grayed ones are supported but currently off."),
         rows: [
             row(qsTr("Powered"), a.powered ? qsTr("on") : qsTr("off"), { active: a.powered === true }),
-            row(qsTr("Discoverable"), a.discoverable ? qsTr("on") : qsTr("off"), { active: a.discoverable === true }),
-            row(qsTr("Pairable"), a.pairable ? qsTr("on") : qsTr("off"), { active: a.pairable === true }),
+            row(qsTr("Discoverable"), mode(a.discoverable), { active: a.powered === true && a.discoverable === true }),
+            row(qsTr("Pairable"), mode(a.pairable), { active: a.powered === true && a.pairable === true }),
             row(qsTr("Scanning"), a.discovering ? qsTr("on") : qsTr("off"), { active: a.discovering === true })
         ]})
     var devs = bt.devices || []
@@ -429,7 +509,19 @@ function bluetooth() {
                        + (devs[i].icon ? " · " + devs[i].icon : ""),
                        { active: devs[i].connected === true }))
     s.push({ title: qsTr("Devices"), rows: drows })
-    return { title: qsTr("Bluetooth"), helpTopics: [], sections: s }
+    // Ultimate: BT chipset identity (shares the combo chip with WLAN)
+    var wb = sysmon.wirelessDetail()
+    if (wb.btDtNode || wb.btAdapters) {
+        var br = []
+        if (wb.btDtNode) br.push(row(qsTr("Device-tree node"), wb.btDtNode, {mono:true}))
+        if (wb.btDtCompatible) br.push(row(qsTr("Compatible"), wb.btDtCompatible, {mono:true}))
+        if (wb.btAdapters) br.push(row(qsTr("Adapters"), wb.btAdapters, {mono:true}))
+        if (wb.rfkill) br.push(row("rfkill", wb.rfkill))
+        s.unshift({ title: qsTr("Bluetooth chipset"),
+                    note: qsTr("On most ports BT shares the WLAN combo chip; the device-tree node names it."),
+                    rows: br })
+    }
+    return { title: qsTr("Bluetooth"), helpTopics: [], sections: s, diagTopic: "bluetooth" }
 }
 
 function audio() {
@@ -485,7 +577,7 @@ function audio() {
         s.push({ title: qsTr("Inputs (sources)"),
             note: qsTr("PulseAudio capture devices. The microphone gain is the primary input's volume — reflects the harbour-mic-gain fix."), rows: qrows })
 
-    return { title: qsTr("Audio"), helpTopics: [], sections: s }
+    return { title: qsTr("Audio"), helpTopics: [], sections: s, diagTopic: "audio" }
 }
 
 function camera() {
@@ -545,7 +637,7 @@ function camera() {
             note: qsTr("This is a MediaTek imgsensor/mtkcam stack. The image sensors are driven through the camera HAL, not exposed as V4L2 sensor sub-devices — so their models are not enumerable from sysfs. The video nodes above are the JPEG and video codecs."),
             rows: [ row(qsTr("Sensor models"), qsTr("not exposed by the MediaTek kernel")) ] })
 
-    return { title: qsTr("Camera"), helpTopics: ["camera"], sections: s }
+    return { title: qsTr("Camera"), helpTopics: ["camera"], sections: s, diagTopic: "camera" }
 }
 
 function roleName(r) {
@@ -563,6 +655,19 @@ function usb() {
     var d = sysmon.usbDetail()
     var c = sysmon.chargerDetail()
     var s = []
+    // controller identity first — present even with nothing plugged in
+    var ctl = d.controller || {}
+    if (ctl.name) {
+        var ur = [ row(qsTr("Controller"), ctl.name, {mono:true}) ]
+        if (ctl.compatible) ur.push(row(qsTr("Compatible"), ctl.compatible, {mono:true}))
+        if (ctl.maxSpeed) ur.push(row(qsTr("Maximum speed"), ctl.maxSpeed))
+        if (ctl.curSpeed) ur.push(row(qsTr("Current speed"), ctl.curSpeed))
+        if (ctl.powerRole) ur.push(row(qsTr("Power role"), ctl.powerRole))
+        if (ctl.dataRole) ur.push(row(qsTr("Data role"), ctl.dataRole))
+        s.push({ title: qsTr("USB controller"),
+                 note: qsTr("The SoC's USB IP core (dwc3 = Synopsys DesignWare USB3, musb = Mentor, mtu3 = MediaTek). Roles show the active side in [brackets]."),
+                 rows: ur })
+    }
     if (c.online) {
         s.push({ title: qsTr("Charging (USB-C input)"),
             note: qsTr("A charger is not a USB data device, so it is shown here as the power input. Full details are under Battery."),
