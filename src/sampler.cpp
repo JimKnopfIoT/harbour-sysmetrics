@@ -5,19 +5,48 @@
 #include <QFile>
 #include <QTimer>
 
+#include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <dirent.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
+// out-of-line definition: QVector::fill() binds a reference, which ODR-uses it
+const int SysSnap::CoreOffline;
+
 namespace {
+
+// /proc and /sys are read a few hundred times per tick. QFile sets up an engine
+// and buffering for each of those; open/read/close does the same job far cheaper.
+int readRaw(const char *path, char *buf, int cap)
+{
+    const int fd = ::open(path, O_RDONLY | O_CLOEXEC);
+    if (fd < 0)
+        return -1;
+    int total = 0;
+    ssize_t r;
+    while (total < cap - 1 && (r = ::read(fd, buf + total, cap - 1 - total)) > 0)
+        total += (int)r;
+    ::close(fd);
+    buf[total] = '\0';
+    return total;
+}
 
 QByteArray readAll(const QString &path)
 {
-    QFile f(path);
-    if (!f.open(QIODevice::ReadOnly))
+    const QByteArray p = QFile::encodeName(path);
+    const int fd = ::open(p.constData(), O_RDONLY | O_CLOEXEC);
+    if (fd < 0)
         return QByteArray();
-    return f.readAll();
+    QByteArray out;
+    char chunk[4096];
+    ssize_t r;
+    while ((r = ::read(fd, chunk, sizeof(chunk))) > 0)
+        out.append(chunk, (int)r);
+    ::close(fd);
+    return out;
 }
 
 qulonglong keyValue(const QByteArray &text, const QByteArray &key)
@@ -35,6 +64,28 @@ qulonglong keyValue(const QByteArray &text, const QByteArray &key)
     while (i < text.size() && text.at(i) >= '0' && text.at(i) <= '9')
         v = v * 10 + (text.at(i++) - '0');
     return v;
+}
+
+int cpuPresentCount()
+{
+    // /sys/.../cpu/present lists every CPU the kernel knows, online or parked,
+    // as "0-7" or "0-3,6-7". /proc/stat only ever shows the online ones.
+    const QByteArray s = readAll(QStringLiteral("/sys/devices/system/cpu/present")).trimmed();
+    int count = 0;
+    for (const QByteArray &part : s.split(',')) {
+        if (part.isEmpty())
+            continue;
+        const int dash = part.indexOf('-');
+        if (dash < 0) {
+            ++count;
+        } else {
+            const int a = part.left(dash).toInt();
+            const int b = part.mid(dash + 1).toInt();
+            if (b >= a)
+                count += b - a + 1;
+        }
+    }
+    return count;
 }
 
 } // namespace
@@ -69,6 +120,15 @@ void Sampler::setPaused(bool paused)
     m_paused = paused;
 }
 
+void Sampler::setProcessesEnabled(bool on)
+{
+    if (m_procsEnabled == on)
+        return;
+    m_procsEnabled = on;
+    if (on)
+        sample();     // the list is visible again: refresh it now, not in 3s
+}
+
 void Sampler::sampleNow()
 {
     sample();
@@ -80,31 +140,48 @@ void Sampler::sample()
         return;
 
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
-    const qint64 dtMs = m_prevMs > 0 ? now - m_prevMs : 0;
 
     SysSnap snap;
     qulonglong totalDelta = 0;
     sampleSystem(snap, totalDelta);
 
     QVector<ProcSample> procs;
-    sampleProcesses(procs, dtMs);
-
-    snap.processCount = procs.size();
-    int threads = 0;
-    for (const ProcSample &p : procs)
-        threads += p.threads;
+    if (m_procsEnabled) {
+        // measured against the last walk, not the last tick: after a spell in the
+        // background those are minutes apart and a tick-sized divisor would
+        // inflate every percentage
+        sampleProcesses(procs, m_prevProcMs > 0 ? now - m_prevProcMs : 0);
+        m_prevProcMs = now;
+        m_lastProcCount = procs.size();
+        m_lastThreadCount = 0;
+        for (const ProcSample &p : procs)
+            m_lastThreadCount += p.threads;
+    }
+    snap.processCount = m_lastProcCount;
+    const int threads = m_lastThreadCount;
     snap.threadCount = threads;
 
     m_prevMs = now;
     emit systemSampled(snap);
-    emit processesSampled(procs, totalDelta);
+    // never emit an empty list while skipping: the model would read that as
+    // "every process exited" and clear itself
+    if (m_procsEnabled)
+        emit processesSampled(procs, totalDelta);
 }
 
 void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
 {
     // /proc/stat: aggregate + per-core busy/total deltas
+    // Cores are keyed by their real CPU number, never by line position. SoCs that
+    // hotplug (MediaTek in particular) drop a parked core's line from /proc/stat
+    // entirely, so position N stops meaning cpuN -- subtracting the stored
+    // counters of a different core underflows the unsigned delta and yields
+    // impossible readings such as 134%.
     const QByteArray stat = readAll(QStringLiteral("/proc/stat"));
-    QVector<QPair<qulonglong, qulonglong>> cur; // (busy, total)
+    QHash<int, QPair<qulonglong, qulonglong>> cur;   // cpu number -> (busy, total)
+    QPair<qulonglong, qulonglong> curAll(0, 0);
+    bool haveAll = false;
+
     for (const QByteArray &line : stat.split('\n')) {
         if (line.startsWith("procs_running")) {
             s.runnable = line.mid(14).trimmed().toInt();
@@ -121,28 +198,55 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
                    sirq = f[7].toULongLong();
         qulonglong steal = f.size() > 8 ? f[8].toULongLong() : 0;
         const qulonglong busy = user + nice + sys + irq + sirq + steal;
-        cur.append(qMakePair(busy, busy + idle + iow));
-    }
-    for (int i = 0; i < cur.size(); ++i) {
-        float pct = 0.f;
-        if (i < m_prevCpu.size()) {
-            const qulonglong db = cur[i].first - m_prevCpu[i].first;
-            const qulonglong dt = cur[i].second - m_prevCpu[i].second;
-            if (dt > 0)
-                pct = 100.f * db / dt;
-            if (i == 0)
-                totalDelta = dt;
-        }
-        if (i == 0)
-            s.cpuPct = pct;
-        else
-            s.corePct.append(pct);
-    }
-    m_prevCpu = cur;
+        const QPair<qulonglong, qulonglong> v(busy, busy + idle + iow);
 
-    for (int c = 0; c < s.corePct.size(); ++c) {
-        const QByteArray f = readAll(QStringLiteral("/sys/devices/system/cpu/cpu%1/cpufreq/scaling_cur_freq").arg(c));
-        s.coreFreqKhz.append(f.trimmed().toInt());
+        const QByteArray id = f[0].mid(3);           // empty on the aggregate line
+        if (id.isEmpty()) {
+            curAll = v;
+            haveAll = true;
+        } else {
+            cur.insert(id.toInt(), v);
+        }
+    }
+
+    if (haveAll && m_haveAll
+        && curAll.first >= m_prevAll.first && curAll.second >= m_prevAll.second) {
+        const qulonglong dt = curAll.second - m_prevAll.second;
+        if (dt > 0) {
+            s.cpuPct = qBound(0.f, 100.f * (curAll.first - m_prevAll.first) / dt, 100.f);
+            totalDelta = dt;
+        }
+    }
+    m_prevAll = curAll;
+    m_haveAll = haveAll;
+
+    if (m_cpuCount <= 0)
+        m_cpuCount = cpuPresentCount();
+    for (auto it = cur.constBegin(); it != cur.constEnd(); ++it)
+        m_cpuCount = qMax(m_cpuCount, it.key() + 1);   // fallback if 'present' was unreadable
+
+    s.corePct.fill(SysSnap::CoreOffline, m_cpuCount);
+    s.coreFreqKhz.fill(SysSnap::CoreOffline, m_cpuCount);
+    for (int c = 0; c < m_cpuCount; ++c) {
+        const auto now = cur.constFind(c);
+        if (now == cur.constEnd()) {
+            // parked: leave it flagged offline and forget its counters, which
+            // restart from zero if the core is brought back
+            m_prevCore.remove(c);
+            continue;
+        }
+        float pct = 0.f;
+        const auto prev = m_prevCore.constFind(c);
+        if (prev != m_prevCore.constEnd()
+            && now->first >= prev->first && now->second >= prev->second) {
+            const qulonglong dt = now->second - prev->second;
+            if (dt > 0)
+                pct = qBound(0.f, 100.f * (now->first - prev->first) / dt, 100.f);
+        }
+        s.corePct[c] = pct;
+        m_prevCore.insert(c, now.value());
+        s.coreFreqKhz[c] = readAll(QStringLiteral("/sys/devices/system/cpu/cpu%1/cpufreq/scaling_cur_freq")
+                                   .arg(c)).trimmed().toInt();
     }
 
     const QByteArray mem = readAll(QStringLiteral("/proc/meminfo"));
@@ -288,63 +392,99 @@ void Sampler::sampleProcesses(QVector<ProcSample> &out, qint64 dtMs)
         return;
 
     QHash<int, PrevProc> next;
+    next.reserve(m_prevProc.size() + 32);
+    out.reserve(m_prevProc.size() + 32);
     const double pctFactor = dtMs > 0 ? 100000.0 / (m_clkTck * (double)dtMs) : 0.0;
+    const qulonglong pageSize = (qulonglong)sysconf(_SC_PAGESIZE);
+
+    char path[64];
+    char buf[4096];
 
     struct dirent *de;
     while ((de = readdir(dir))) {
         if (de->d_name[0] < '0' || de->d_name[0] > '9')
             continue;
         const int pid = atoi(de->d_name);
-        const QString base = QStringLiteral("/proc/") + QLatin1String(de->d_name);
-        const QByteArray stat = readAll(base + QStringLiteral("/stat"));
-        const int close = stat.lastIndexOf(')');
-        if (close < 0)
+
+        snprintf(path, sizeof(path), "/proc/%s/stat", de->d_name);
+        if (readRaw(path, buf, sizeof(buf)) <= 0)
+            continue;
+
+        // comm may itself contain parentheses, so the last ')' closes it
+        char *rparen = strrchr(buf, ')');
+        if (!rparen)
+            continue;
+
+        // fields after comm: 0=state 1=ppid ... 11=utime 12=stime 16=nice
+        //                    17=threads 19=starttime 21=rss
+        const char *fld[22];
+        int nf = 0;
+        for (char *c = rparen + 2; *c && nf < 22; ) {
+            fld[nf++] = c;
+            while (*c && *c != ' ')
+                ++c;
+            while (*c == ' ')
+                ++c;
+        }
+        if (nf < 22)
             continue;
 
         ProcSample p;
         p.pid = pid;
-        const int open = stat.indexOf('(');
-        p.name = QString::fromLocal8Bit(stat.mid(open + 1, close - open - 1));
-        // fields after comm: 0=state 1=ppid ... 11=utime 12=stime 16=nice 17=threads 19=starttime 21=rss
-        const QList<QByteArray> f = stat.mid(close + 2).split(' ');
-        if (f.size() < 22)
-            continue;
-        p.state = f[0].isEmpty() ? '?' : f[0].at(0);
-        p.ppid = f[1].toInt();
-        p.jiffies = f[11].toULongLong() + f[12].toULongLong();
-        p.nice = f[16].toInt();
-        p.threads = f[17].toInt();
-        p.startJiffies = f[19].toULongLong();
-        p.rssBytes = f[21].toULongLong() * (qulonglong)sysconf(_SC_PAGESIZE);
-
-        struct stat st;
-        if (::stat(QFile::encodeName(base).constData(), &st) == 0)
-            p.uid = st.st_uid;
+        p.state = fld[0][0];
+        p.ppid = (int)strtol(fld[1], nullptr, 10);
+        p.jiffies = strtoull(fld[11], nullptr, 10) + strtoull(fld[12], nullptr, 10);
+        p.nice = (int)strtol(fld[16], nullptr, 10);
+        p.threads = (int)strtol(fld[17], nullptr, 10);
+        p.startJiffies = strtoull(fld[19], nullptr, 10);
+        p.rssBytes = strtoull(fld[21], nullptr, 10) * pageSize;
 
         const auto prev = m_prevProc.constFind(pid);
         if (prev != m_prevProc.constEnd() && prev->start == p.startJiffies) {
+            // Known process: name, cmdline and uid cannot change while it lives,
+            // so reuse them. That skips a /proc/<pid>/cmdline read, a stat() and
+            // the whole argv[0] derivation for every process on every tick.
             if (p.jiffies > prev->jiffies)
                 p.cpuPct = (float)((p.jiffies - prev->jiffies) * pctFactor);
+            p.name = prev->name;
             p.cmdline = prev->cmdline;
+            p.uid = prev->uid;
+            p.kernelThread = prev->kernelThread;
         } else {
-            const QByteArray cmd = readAll(base + QStringLiteral("/cmdline"));
-            const QList<QByteArray> parts = cmd.split('\0');
+            const char *lparen = strchr(buf, '(');
+            if (lparen && rparen > lparen)
+                p.name = QString::fromLocal8Bit(lparen + 1, (int)(rparen - lparen - 1));
+
+            snprintf(path, sizeof(path), "/proc/%s/cmdline", de->d_name);
+            const int n = readRaw(path, buf, sizeof(buf));   // buf is free again
             QStringList sl;
-            for (const QByteArray &a : parts)
-                if (!a.isEmpty())
-                    sl << QString::fromLocal8Bit(a);
+            for (int i = 0; i < n; ) {
+                const int len = (int)strnlen(buf + i, n - i);
+                if (len > 0)
+                    sl << QString::fromLocal8Bit(buf + i, len);
+                i += len + 1;
+            }
             p.cmdline = sl.join(QLatin1Char(' '));
-        }
-        p.kernelThread = p.cmdline.isEmpty();
-        if (!p.kernelThread) {
-            // display name: argv[0] basename unless comm is more specific
-            const QString arg0 = p.cmdline.section(QLatin1Char(' '), 0, 0);
-            const QString bn = arg0.section(QLatin1Char('/'), -1);
-            if (!bn.isEmpty() && !bn.startsWith(p.name))
-                p.name = bn;
+            p.kernelThread = p.cmdline.isEmpty();
+            if (!p.kernelThread) {
+                // display name: argv[0] basename unless comm is more specific.
+                // The kernel caps comm at 15 chars, so "harbour-sysmetr" is
+                // really "harbour-sysmetrics"; when argv[0] merely continues
+                // comm it is the same name untruncated, when it differs
+                // outright, comm stays.
+                const QString bn = sl.value(0).section(QLatin1Char('/'), -1);
+                if (!bn.isEmpty() && bn != p.name)
+                    p.name = bn;
+            }
+
+            snprintf(path, sizeof(path), "/proc/%s", de->d_name);
+            struct stat st;
+            if (::stat(path, &st) == 0)
+                p.uid = st.st_uid;
         }
 
-        next.insert(pid, { p.startJiffies, p.jiffies, p.name, p.cmdline });
+        next.insert(pid, { p.startJiffies, p.jiffies, p.name, p.cmdline,
+                           p.uid, p.kernelThread });
         out.append(p);
     }
     closedir(dir);

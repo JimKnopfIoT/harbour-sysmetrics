@@ -12,6 +12,7 @@ class SysMon : public QObject
     Q_OBJECT
     Q_PROPERTY(qreal cpuPercent READ cpuPercent NOTIFY updated)
     Q_PROPERTY(int coreCount READ coreCount NOTIFY updated)
+    Q_PROPERTY(int coresOnline READ coresOnline NOTIFY updated)
     Q_PROPERTY(QVariantList corePercents READ corePercents NOTIFY updated)
     Q_PROPERTY(QVariantList coreFreqsMhz READ coreFreqsMhz NOTIFY updated)
     Q_PROPERTY(double memTotal READ memTotal NOTIFY updated)
@@ -58,13 +59,26 @@ class SysMon : public QObject
     Q_PROPERTY(QVariantList txHistory READ txHistory NOTIFY updated)
     Q_PROPERTY(QVariantList battHistory READ battHistory NOTIFY updated)
     Q_PROPERTY(bool paused READ paused WRITE setPaused NOTIFY pausedChanged)
+    // Bound to ApplicationWindow.applicationActive: false means the app is
+    // covered, so nobody is looking at the process list.
+    Q_PROPERTY(bool foreground READ foreground WRITE setForeground NOTIFY foregroundChanged)
     Q_PROPERTY(int intervalMs READ intervalMs WRITE setIntervalMs NOTIFY intervalChanged)
 
 public:
     explicit SysMon(QObject *parent = nullptr);
 
     qreal cpuPercent() const { return m_s.cpuPct; }
+    // coreCount is every CPU the SoC has; on hotplug SoCs some of them are parked
+    // at any moment and report SysSnap::CoreOffline instead of a load.
     int coreCount() const { return m_s.corePct.size(); }
+    int coresOnline() const
+    {
+        int n = 0;
+        for (float f : m_s.corePct)
+            if (f >= 0.f)
+                ++n;
+        return n;
+    }
     QVariantList corePercents() const;
     QVariantList coreFreqsMhz() const;
     double memTotal() const { return m_s.memTotal; }
@@ -112,6 +126,8 @@ public:
     QVariantList battHistory() const { return toList(m_battHist); }
     bool paused() const { return m_paused; }
     void setPaused(bool p);
+    bool foreground() const { return m_foreground; }
+    void setForeground(bool f);
     int intervalMs() const { return m_intervalMs; }
     void setIntervalMs(int ms);
 
@@ -144,6 +160,7 @@ public slots:
 signals:
     void updated();
     void pausedChanged();
+    void foregroundChanged();
     void intervalChanged();
     void pauseRequested(bool paused);
     void intervalRequested(int ms);
@@ -155,5 +172,6 @@ private:
     SysSnap m_s;
     QVector<double> m_cpuHist, m_memHist, m_rxHist, m_txHist, m_battHist;
     bool m_paused = false;
+    bool m_foreground = true;
     int m_intervalMs = 3000;
 };
