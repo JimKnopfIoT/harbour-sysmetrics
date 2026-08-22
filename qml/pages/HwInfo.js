@@ -416,39 +416,49 @@ function batt() {
         // this block works with the root helper switched off.
         if (c.pdos && c.pdos.length) {
             var prows = []
-            if (c.pdContract)
-                prows.push(row(qsTr("Contract"), c.pdContract === "explicit"
-                    ? qsTr("explicit — PD negotiated") : qsTr("implicit — no PD contract")))
-            if (c.ppsVoltage)
-                prows.push(row(qsTr("Active contract"),
-                    qsTr("PPS  %1 V / %2 A").arg(c.ppsVoltage.toFixed(2)).arg(c.ppsCurrent.toFixed(2))
-                    + (c.pdRequestedObject ? "   " + qsTr("(object %1)").arg(c.pdRequestedObject) : ""),
-                    {color:"#8ef94a"}))
-            else if (c.pdRequestedObject)
-                prows.push(row(qsTr("Active contract"), qsTr("object %1 of %2")
-                    .arg(c.pdRequestedObject).arg(c.pdos.length), {color:"#8ef94a"}))
+            var texts = []
             for (var p = 0; p < c.pdos.length; ++p) {
                 var o = c.pdos[p]
-                var t
                 if (o.kind === "fixed")
-                    t = o.voltage.toFixed(1) + " V  ·  " + o.current.toFixed(1) + " A  ·  "
-                        + (o.voltage * o.current).toFixed(0) + " W"
+                    texts.push(o.voltage.toFixed(1) + " V  ·  " + o.current.toFixed(1) + " A  ·  "
+                               + (o.voltage * o.current).toFixed(0) + " W")
                 else if (o.kind === "pps")
-                    t = qsTr("PPS") + "  " + o.voltageMin.toFixed(1) + "–" + o.voltageMax.toFixed(1)
-                        + " V  ·  " + o.current.toFixed(1) + " A"
+                    texts.push(qsTr("PPS") + "  " + o.voltageMin.toFixed(1) + "–" + o.voltageMax.toFixed(1)
+                               + " V  ·  " + o.current.toFixed(1) + " A")
                 else if (o.kind === "variable")
-                    t = qsTr("variable") + "  " + o.voltageMin.toFixed(1) + "–" + o.voltageMax.toFixed(1)
-                        + " V  ·  " + o.current.toFixed(1) + " A"
+                    texts.push(qsTr("variable") + "  " + o.voltageMin.toFixed(1) + "–" + o.voltageMax.toFixed(1)
+                               + " V  ·  " + o.current.toFixed(1) + " A")
                 else if (o.kind === "battery")
-                    t = qsTr("battery") + "  " + o.voltageMin.toFixed(1) + "–" + o.voltageMax.toFixed(1)
-                        + " V  ·  " + o.power.toFixed(0) + " W"
+                    texts.push(qsTr("battery") + "  " + o.voltageMin.toFixed(1) + "–" + o.voltageMax.toFixed(1)
+                               + " V  ·  " + o.power.toFixed(0) + " W")
                 else if (o.kind === "eprAvs")
-                    t = qsTr("EPR adjustable voltage (not decoded, raw 0x%1)").arg(o.raw)
+                    texts.push(qsTr("EPR adjustable voltage (not decoded, raw 0x%1)").arg(o.raw))
                 else
-                    t = qsTr("SPR adjustable voltage (not decoded, raw 0x%1)").arg(o.raw)
-                prows.push(row("PDO " + o.index, t,
-                               {color: c.pdRequestedObject === o.index ? "#8ef94a" : undefined}))
+                    texts.push(qsTr("SPR adjustable voltage (not decoded, raw 0x%1)").arg(o.raw))
             }
+
+            // One line for the outcome. The specification calls this the
+            // "contract"; here it says what was negotiated, which is what the
+            // reader wants at this spot.
+            var outcome
+            if (c.pdContract !== "explicit") {
+                outcome = qsTr("not negotiated — 5 V from the CC resistors")
+            } else if (c.ppsVoltage) {
+                outcome = qsTr("PPS  %1 V / %2 A").arg(c.ppsVoltage.toFixed(2)).arg(c.ppsCurrent.toFixed(2))
+                    + (c.pdRequestedObject ? "   " + qsTr("(object %1)").arg(c.pdRequestedObject) : "")
+            } else if (c.pdRequestedObject && texts[c.pdRequestedObject - 1]) {
+                outcome = texts[c.pdRequestedObject - 1]
+                    + "   " + qsTr("(object %1)").arg(c.pdRequestedObject)
+            } else {
+                outcome = qsTr("negotiated")
+            }
+            prows.push(row(qsTr("Negotiated"), outcome,
+                           {color: c.pdContract === "explicit" ? "#8ef94a" : undefined}))
+
+            for (var q = 0; q < c.pdos.length; ++q)
+                prows.push(row("PDO " + c.pdos[q].index, texts[q],
+                               {color: c.pdRequestedObject === c.pdos[q].index ? "#8ef94a" : undefined}))
+
             if (c.pdMaxPower)
                 prows.push(row(qsTr("Maximum offered"), c.pdMaxPower.toFixed(0) + " W"))
             prows.push(row(qsTr("Extensions"),
