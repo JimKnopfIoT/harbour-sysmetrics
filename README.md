@@ -49,6 +49,35 @@ recognise documented device issues and explain their fixes.
 Everything is read from /proc, /sys, D-Bus and rpm on the device. The base
 app never talks to the network.
 
+## Screenshots
+
+<table>
+<tr>
+<td align="center" width="25%"><a href="screenshots/01.png"><img src="screenshots/01.png" width="200"></a><br><sub><b>1</b> · Process list</sub></td>
+<td align="center" width="25%"><a href="screenshots/02.png"><img src="screenshots/02.png" width="200"></a><br><sub><b>2</b> · System overview</sub></td>
+<td align="center" width="25%"><a href="screenshots/03.png"><img src="screenshots/03.png" width="200"></a><br><sub><b>3</b> · System &amp; CPU</sub></td>
+<td align="center" width="25%"><a href="screenshots/04.png"><img src="screenshots/04.png" width="200"></a><br><sub><b>4</b> · Subsystem cards</sub></td>
+</tr>
+<tr>
+<td align="center"><a href="screenshots/05.png"><img src="screenshots/05.png" width="200"></a><br><sub><b>5</b> · Storage</sub></td>
+<td align="center"><a href="screenshots/06.png"><img src="screenshots/06.png" width="200"></a><br><sub><b>6</b> · Partitions &amp; microSD</sub></td>
+<td align="center"><a href="screenshots/07_Bat1.png"><img src="screenshots/07_Bat1.png" width="200"></a><br><sub><b>7</b> · Battery &amp; thermal</sub></td>
+<td align="center"><a href="screenshots/08_Bat2.png"><img src="screenshots/08_Bat2.png" width="200"></a><br><sub><b>8</b> · Charger handshake</sub></td>
+</tr>
+<tr>
+<td align="center"><a href="screenshots/09_USB.png"><img src="screenshots/09_USB.png" width="200"></a><br><sub><b>9</b> · USB — charging</sub></td>
+<td align="center"><a href="screenshots/10_USB2.png"><img src="screenshots/10_USB2.png" width="200"></a><br><sub><b>10</b> · USB — connected device</sub></td>
+<td align="center"><a href="screenshots/12_Cam1.png"><img src="screenshots/12_Cam1.png" width="200"></a><br><sub><b>11</b> · Camera sensors</sub></td>
+<td align="center"><a href="screenshots/13_Cam2.png"><img src="screenshots/13_Cam2.png" width="200"></a><br><sub><b>12</b> · Camera diagnosis</sub></td>
+</tr>
+<tr>
+<td align="center"><a href="screenshots/14_Audio.png"><img src="screenshots/14_Audio.png" width="200"></a><br><sub><b>13</b> · Audio diagnosis</sub></td>
+<td align="center"><a href="screenshots/15_Bugrepo1.png"><img src="screenshots/15_Bugrepo1.png" width="200"></a><br><sub><b>14</b> · Bug reports</sub></td>
+<td align="center"><a href="screenshots/16_Bugrepo2.png"><img src="screenshots/16_Bugrepo2.png" width="200"></a><br><sub><b>15</b> · Device summary &amp; log info</sub></td>
+<td align="center"><a href="screenshots/17_Ram1.png"><img src="screenshots/17_Ram1.png" width="200"></a><br><sub><b>16</b> · RAM</sub></td>
+</tr>
+</table>
+
 ## Build
 
     mb2 -t SailfishOS-5.0.0.62-aarch64 build
