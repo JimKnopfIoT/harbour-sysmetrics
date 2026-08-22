@@ -592,6 +592,125 @@ static QString chargerProtocol(const QString &t)
     return t;
 }
 
+// USB-PD source capabilities from the Qualcomm usbpd class. The raw PDOs are
+// world-readable (0444), so this needs no privileges. Bit layout per the PD
+// specification, cross-checked against the driver's own macros.
+//
+// The negotiated spec revision in the message header only encodes 1.0/2.0/3.0
+// — PD 3.1 and 3.2 deliberately leave it at 3.0. What the source actually
+// implements is therefore derived from the capabilities it offers:
+// a PPS APDO means 3.0 or later, the EPR-Mode-Capable bit (bit 23 of the
+// vSafe5V fixed PDO, reserved before 3.1) means 3.1, an SPR-AVS APDO means 3.2.
+static void pdSourceCaps(QVariantMap &m)
+{
+    const QString pd = QStringLiteral("/sys/class/usbpd/usbpd0/");
+    if (!QFileInfo::exists(pd))
+        return;
+
+    QVariantList pdos;
+    double maxW = 0;
+    bool pps = false, eprCapable = false, sprAvs = false, eprAvs = false;
+
+    for (int i = 1; i <= 7; ++i) {
+        bool ok = false;
+        const quint32 raw = readTrim(pd + QStringLiteral("pdo%1").arg(i)).toUInt(&ok, 16);
+        if (!ok || raw == 0)
+            continue;
+        QVariantMap p;
+        p.insert(QStringLiteral("index"), i);
+        p.insert(QStringLiteral("raw"), QStringLiteral("%1").arg(raw, 8, 16, QLatin1Char('0')));
+        switch ((raw >> 30) & 3) {
+        case 0: {   // fixed supply
+            const double v = ((raw >> 10) & 0x3FF) * 0.05;
+            const double a = (raw & 0x3FF) * 0.01;
+            p.insert(QStringLiteral("kind"), QStringLiteral("fixed"));
+            p.insert(QStringLiteral("voltage"), v);
+            p.insert(QStringLiteral("current"), a);
+            maxW = qMax(maxW, v * a);
+            if (i == 1) {
+                eprCapable = ((raw >> 23) & 1) != 0;
+                p.insert(QStringLiteral("externallyPowered"), ((raw >> 27) & 1) != 0);
+                p.insert(QStringLiteral("usbComm"), ((raw >> 26) & 1) != 0);
+                p.insert(QStringLiteral("dualRolePower"), ((raw >> 29) & 1) != 0);
+            }
+            break;
+        }
+        case 1: {   // battery supply
+            const double vmax = ((raw >> 20) & 0x3FF) * 0.05;
+            const double vmin = ((raw >> 10) & 0x3FF) * 0.05;
+            const double w = (raw & 0x3FF) * 0.25;
+            p.insert(QStringLiteral("kind"), QStringLiteral("battery"));
+            p.insert(QStringLiteral("voltageMin"), vmin);
+            p.insert(QStringLiteral("voltageMax"), vmax);
+            p.insert(QStringLiteral("power"), w);
+            maxW = qMax(maxW, w);
+            break;
+        }
+        case 2: {   // variable supply
+            const double vmax = ((raw >> 20) & 0x3FF) * 0.05;
+            const double vmin = ((raw >> 10) & 0x3FF) * 0.05;
+            const double a = (raw & 0x3FF) * 0.01;
+            p.insert(QStringLiteral("kind"), QStringLiteral("variable"));
+            p.insert(QStringLiteral("voltageMin"), vmin);
+            p.insert(QStringLiteral("voltageMax"), vmax);
+            p.insert(QStringLiteral("current"), a);
+            maxW = qMax(maxW, vmax * a);
+            break;
+        }
+        default: {  // augmented (APDO)
+            const int sub = (raw >> 28) & 3;
+            if (sub == 0) {
+                pps = true;
+                const double vmax = ((raw >> 17) & 0xFF) * 0.1;
+                const double vmin = ((raw >> 8) & 0xFF) * 0.1;
+                const double a = (raw & 0x7F) * 0.05;
+                p.insert(QStringLiteral("kind"), QStringLiteral("pps"));
+                p.insert(QStringLiteral("voltageMin"), vmin);
+                p.insert(QStringLiteral("voltageMax"), vmax);
+                p.insert(QStringLiteral("current"), a);
+                maxW = qMax(maxW, vmax * a);
+            } else {
+                // AVS objects: recorded, not decoded — no device to verify the
+                // field layout against, and a wrong number is worse than none.
+                eprAvs = eprAvs || sub == 1;
+                sprAvs = sprAvs || sub == 2;
+                p.insert(QStringLiteral("kind"), sub == 1 ? QStringLiteral("eprAvs")
+                                                          : QStringLiteral("sprAvs"));
+            }
+            break;
+        }
+        }
+        pdos.append(p);
+    }
+
+    if (pdos.isEmpty())
+        return;
+
+    m.insert(QStringLiteral("pdos"), pdos);
+    m.insert(QStringLiteral("pdMaxPower"), maxW);
+    m.insert(QStringLiteral("pdPps"), pps);
+    m.insert(QStringLiteral("pdEpr"), eprCapable || eprAvs);
+    m.insert(QStringLiteral("pdAvs"), sprAvs || eprAvs);
+    // Lower bound, never an assertion: absent extensions mean the source did
+    // not offer them here, not that it cannot do them.
+    m.insert(QStringLiteral("pdSpecFloor"), sprAvs ? QStringLiteral("3.2")
+                                          : (eprCapable || eprAvs) ? QStringLiteral("3.1")
+                                          : pps ? QStringLiteral("3.0")
+                                                : QString());
+
+    m.insert(QStringLiteral("pdContract"), readTrim(pd + QStringLiteral("contract")));
+    bool ok = false;
+    const quint32 rdo = readTrim(pd + QStringLiteral("rdo")).toUInt(&ok, 16);
+    if (ok && rdo != 0)
+        m.insert(QStringLiteral("pdRequestedObject"), int((rdo >> 28) & 0xF));
+    const double ppsV = readTrim(pd + QStringLiteral("pps_current_voltage")).toDouble() / 1e6;
+    const double ppsA = readTrim(pd + QStringLiteral("pps_requested_current")).toDouble() / 1e3;
+    if (ppsV > 0) {
+        m.insert(QStringLiteral("ppsVoltage"), ppsV);
+        m.insert(QStringLiteral("ppsCurrent"), ppsA);
+    }
+}
+
 QVariantMap SysMon::chargerDetail() const
 {
     QVariantMap m;
@@ -663,7 +782,11 @@ QVariantMap SysMon::chargerDetail() const
         m.insert(QStringLiteral("typecDataRole"), readTrim(tc + QStringLiteral("data_role")));
         // current the port/cable advertises via CC: "default", "1.5A", "3.0A"
         m.insert(QStringLiteral("typecCurrent"), readTrim(tc + QStringLiteral("power_operation_mode")));
-        m.insert(QStringLiteral("pdRevision"), readTrim(tc + QStringLiteral("usb_power_delivery_revision")));
+        // Qualcomm writes the bare major ("3"), mainline writes "3.0".
+        QString rev = readTrim(tc + QStringLiteral("usb_power_delivery_revision"));
+        if (!rev.isEmpty() && !rev.contains(QLatin1Char('.')))
+            rev += QStringLiteral(".0");
+        m.insert(QStringLiteral("pdRevision"), rev);
         m.insert(QStringLiteral("typecRevision"), readTrim(tc + QStringLiteral("usb_typec_revision")));
         m.insert(QStringLiteral("vconn"), readTrim(tc + QStringLiteral("vconn_source")));
         const QString pn = QStringLiteral("/sys/class/typec/port0-partner/");
@@ -686,6 +809,7 @@ QVariantMap SysMon::chargerDetail() const
             }
         }
     }
+    pdSourceCaps(m);
     return m;
 }
 

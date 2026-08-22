@@ -14,7 +14,10 @@ ApplicationWindow {
     // cover's own figures come from the cheap system sample and keep running.
     onApplicationActiveChanged: sysmon.foreground = applicationActive
 
-    // Root-helper switch, re-applied on launch (default off).
+    // Root-helper switch. Deliberately NOT re-applied on launch: the helper
+    // stops itself once the app is gone, so root mode is per session and the
+    // user grants it in the moment, rather than a stored flag granting it
+    // silently at every start.
     ConfigurationValue {
         id: cfgRootHelper
         key: "/apps/harbour-sysmetrics/rootHelperEnabled"
@@ -22,7 +25,6 @@ ApplicationWindow {
     }
     Component.onCompleted: {
         sysmon.foreground = applicationActive
-        if (cfgRootHelper.value)
-            rootmon.setHelper(true)
+        cfgRootHelper.value = false
     }
 }

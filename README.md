@@ -43,8 +43,10 @@ recognise documented device issues and explain their fixes.
   matching journal/kernel-log lines as one copyable block.
 - Glossary explaining every figure, including the technical background of
   the vulnerability classes and the camera-crash fix.
-- Optional root helper (read-only, off by default) unlocks debugfs details
-  such as the WLAN firmware identity and journal excerpts.
+- Optional root helper (off by default) unlocks debugfs details such as the
+  WLAN firmware identity, the kernel charger log and journal excerpts. Reads
+  are limited to a fixed allow-list; the only write operations are signals and
+  renice on a single process, which the process detail page offers anyway.
 
 Everything is read from /proc, /sys, D-Bus and rpm on the device. The base
 app never talks to the network.

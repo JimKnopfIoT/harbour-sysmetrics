@@ -14,6 +14,23 @@ Page {
         defaultValue: false
     }
 
+    // Turning root mode on is a deliberate act, so it goes through a dialog
+    // that says what is being granted. Not an authentication: on Sailfish the
+    // device-lock daemon is reachable only through /run/nemo-devicelock/socket,
+    // mode 0660 group "privileged", which an unprivileged app is not in —
+    // requests from here are ignored without an error. And it would not be a
+    // security boundary anyway: the helper unit is startable by any process of
+    // this user. What the dialog buys is that nothing starts it silently.
+    function askForRoot() {
+        var dlg = pageStack.push(Qt.resolvedUrl("RootConfirmDialog.qml"))
+        dlg.accepted.connect(page.grantRoot)
+    }
+
+    function grantRoot() {
+        cfgRootHelper.value = true
+        rootmon.setHelper(true)
+    }
+
     function stepInterval(delta) {
         var v = Math.round((sysmon.intervalMs + delta) / 100) * 100
         v = Math.max(500, Math.min(30000, v))
@@ -112,13 +129,19 @@ Page {
                 description: qsTr("Without root, foreign-user processes (system daemons) "
                     + "expose only their basic figures; open files, devices, sockets, "
                     + "the access monitor and connection ownership stay empty. This "
-                    + "starts a root helper service the app reads them through; it "
-                    + "stops itself when the app is gone.")
+                    + "starts a root helper service the app reads them through — it "
+                    + "also unlocks the kernel charger log and journal excerpts for "
+                    + "bug reports. It stops itself when the app is gone and is never "
+                    + "started at boot.")
                 checked: cfgRootHelper.value
                 automaticCheck: false
                 onClicked: {
-                    cfgRootHelper.value = !cfgRootHelper.value
-                    rootmon.setHelper(cfgRootHelper.value)
+                    if (cfgRootHelper.value) {     // giving rights back needs no question
+                        cfgRootHelper.value = false
+                        rootmon.setHelper(false)
+                    } else {
+                        page.askForRoot()
+                    }
                 }
             }
             Item {

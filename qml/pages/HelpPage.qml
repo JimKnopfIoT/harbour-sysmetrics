@@ -167,7 +167,7 @@ Page {
             items: [
                 { t: qsTr("Sampling interval"), d: qsTr("How often the app re-reads /proc and /sys. Shorter is more responsive but uses more CPU.") },
                 { t: qsTr("Record mode"), d: qsTr("Accumulates CPU time per process over a session and ranks the consumers, catching short-lived processes an instant view misses.") },
-                { t: qsTr("Root mode"), d: qsTr("An optional root helper that lets the app inspect processes of other users (system daemons) fully. Read-only.") }
+                { t: qsTr("Root mode"), d: qsTr("An optional root helper that lets the app inspect processes of other users (system daemons) fully, read the kernel charger log and pull journal excerpts for a bug report. Reading is limited to a fixed list of files; signals and renice reach one named process, the same ones the process detail page offers without root.") }
             ]
         },
         {
