@@ -7,7 +7,7 @@
 %bcond_with ultimate
 Name:       harbour-sysmetrics
 Summary:    System diagnostics for Sailfish OS
-Version:    0.2.1
+Version:    0.2.2
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/JimKnopfIoT/harbour-sysmetrics
@@ -41,6 +41,8 @@ On-device only, collects nothing, transmits nothing.
 
 %install
 %qmake5_install
+# Ship a stripped binary: smaller package, and no symbol table to read.
+strip %{buildroot}%{_bindir}/%{name}
 
 %post
 # Apply a changed [X-Sailjail] section without reboot.
@@ -69,6 +71,11 @@ systemctl daemon-reload >/dev/null 2>&1 || :
 %{_datadir}/polkit-1/rules.d/50-harbour-sysmetrics.rules
 
 %changelog
+* Sat Aug 22 2026 harbour-sysmetrics contributors 0.2.2-1
+- USB-PD source capabilities from the raw PDOs; root helper narrowed to a
+  literal read list, validated signal/renice, uid peer check; root mode is
+  per session and asks before it is switched on.
+
 * Thu Aug 20 2026 harbour-sysmetrics contributors 0.1.1-1
 - The root helper is a settings switch (off by default) instead of a manual
   devel-su start: StartUnit/StopUnit over the system bus, polkit rule scoped

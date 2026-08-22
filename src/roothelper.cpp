@@ -1,6 +1,11 @@
-// Root helper: started via `devel-su harbour-sysmetrics --root-helper`. Serves
-// privileged /proc-, /sys-, /dev-reads over a local socket restricted to
-// root and gid 100000 (defaultuser). Whitelisted paths only.
+// Root helper: started by the systemd unit harbour-sysmetrics-helper.service
+// (the switch in Settings, scoped by a polkit rule), or by hand via
+// `devel-su harbour-sysmetrics --root-helper`. Serves a small fixed set of
+// privileged queries over a local socket restricted to root and gid 100000
+// (defaultuser). File reads go to a literal allow-list, not a path prefix.
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE   // struct ucred
+#endif
 #include "roothelper.h"
 
 #include <QCoreApplication>
@@ -14,6 +19,7 @@
 
 #include <dirent.h>
 #include <signal.h>
+#include <sys/socket.h>
 #include <stdio.h>
 #include <sys/klog.h>
 #include <sys/resource.h>
@@ -23,11 +29,23 @@
 namespace {
 
 const char *SOCK_PATH = "/tmp/sysmetrics-root.sock";
+const uid_t DEFAULTUSER_UID = 100000;   // Sailfish's defaultuser, owner of the session
+
+// The app's only privileged file reads are these two debugfs files (WLAN
+// firmware identity and crash counters, sysmon.cpp / diagnostics.cpp, both
+// after an unprivileged attempt). Compared for equality — a prefix test would
+// have to canonicalise, an exact match has nothing left to traverse.
+const char *const ALLOWED_READS[] = {
+    "/sys/kernel/debug/icnss/stats",
+    "/sys/kernel/debug/cnss/stats",
+};
 
 bool pathAllowed(const QString &p)
 {
-    return p.startsWith(QLatin1String("/proc/")) || p.startsWith(QLatin1String("/sys/"))
-        || p.startsWith(QLatin1String("/dev/"));
+    for (const char *a : ALLOWED_READS)
+        if (p == QLatin1String(a))
+            return true;
+    return false;
 }
 
 // Numeric entries of a /proc/<pid>/fd directory, listed via readdir so that
@@ -67,13 +85,6 @@ QByteArray cmdRead(const QString &path)
     if (!f.open(QIODevice::ReadOnly))
         return QByteArray();
     return f.read(4 * 1024 * 1024);
-}
-
-QByteArray cmdSymlink(const QString &path)
-{
-    if (!pathAllowed(path))
-        return QByteArray();
-    return QFile::symLinkTarget(path).toLocal8Bit();
 }
 
 QByteArray cmdFdDump(int pid)
@@ -250,16 +261,52 @@ QByteArray cmdLogGrep(const QByteArray &term)
     return out;
 }
 
+// The two write operations. Restricted to what the process detail page can
+// actually ask for: one existing process (never init, never a process group
+// or "all processes" via pid <= 0) and the four signals behind its buttons.
+bool targetOk(int pid)
+{
+    return pid > 1 && QFile::exists(QStringLiteral("/proc/%1").arg(pid));
+}
+
 QByteArray cmdSignal(const QByteArray &arg)
 {
     const QList<QByteArray> a = arg.split(' ');
-    return ::kill(a.value(0).toInt(), a.value(1).toInt()) == 0 ? "1" : "0";
+    const int pid = a.value(0).toInt();
+    const int sig = a.value(1).toInt();
+    if (!targetOk(pid))
+        return "0";
+    if (sig != SIGTERM && sig != SIGKILL && sig != SIGSTOP && sig != SIGCONT)
+        return "0";
+    return ::kill(pid, sig) == 0 ? "1" : "0";
 }
 
 QByteArray cmdNice(const QByteArray &arg)
 {
     const QList<QByteArray> a = arg.split(' ');
-    return ::setpriority(PRIO_PROCESS, a.value(0).toInt(), a.value(1).toInt()) == 0 ? "1" : "0";
+    const int pid = a.value(0).toInt();
+    const int nice = a.value(1).toInt();
+    if (!targetOk(pid) || nice < -20 || nice > 19)
+        return "0";
+    return ::setpriority(PRIO_PROCESS, pid, nice) == 0 ? "1" : "0";
+}
+
+// Who is on the other end. Identifying *which program* connected is not
+// possible on this platform: Sailfish apps are started by mapplauncherd, so
+// /proc/<pid>/exe of every booster-launched app points at the booster, and
+// argv is whatever the process chose to write there. What is verifiable is
+// the uid — the same thing the socket's group enforces, checked again here
+// where a stray chmod cannot widen it. A process of the user's own uid is
+// inside the trust boundary by construction; that is why the command set
+// above is kept to what the app actually needs.
+bool peerAllowed(QLocalSocket *sock, uid_t *who)
+{
+    struct ucred cr;
+    socklen_t len = sizeof(cr);
+    if (::getsockopt(int(sock->socketDescriptor()), SOL_SOCKET, SO_PEERCRED, &cr, &len) != 0)
+        return false;
+    *who = cr.uid;
+    return cr.uid == 0 || cr.uid == DEFAULTUSER_UID;
 }
 
 void serve(QLocalSocket *sock)
@@ -274,8 +321,6 @@ void serve(QLocalSocket *sock)
             bool ok = true;
             if (cmd == "R")
                 payload = cmdRead(QString::fromLocal8Bit(arg));
-            else if (cmd == "S")
-                payload = cmdSymlink(QString::fromLocal8Bit(arg));
             else if (cmd == "F")
                 payload = cmdFdDump(arg.toInt());
             else if (cmd == "W")
@@ -317,10 +362,17 @@ int rootHelperMain(int argc, char *argv[])
         return 1;
     }
     chmod(SOCK_PATH, 0660);
-    chown(SOCK_PATH, 0, 100000);  // root + defaultuser primary group
+    chown(SOCK_PATH, 0, DEFAULTUSER_UID);  // root + defaultuser primary group
     static int clients = 0;
     QObject::connect(&server, &QLocalServer::newConnection, &server, [&server]() {
         while (QLocalSocket *s = server.nextPendingConnection()) {
+            uid_t who = uid_t(-1);
+            if (!peerAllowed(s, &who)) {
+                fprintf(stderr, "sysmetrics helper: refusing a client of uid %u\n", who);
+                s->abort();
+                s->deleteLater();
+                continue;
+            }
             ++clients;
             QObject::connect(s, &QLocalSocket::disconnected, s, []() { --clients; });
             serve(s);

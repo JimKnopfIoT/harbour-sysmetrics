@@ -72,7 +72,7 @@ Page {
             Label {
                 x: Theme.horizontalPageMargin
                 width: page.width - 2 * Theme.horizontalPageMargin
-                text: qsTr("Name the affected component (e.g. sfmail). Collected: exact package versions, running processes, and — with root mode active — matching journal and kernel-log lines.")
+                text: qsTr("Name the affected component (e.g. sfmail). Collected: exact package versions, running processes, and — with root mode active — matching lines from the system journal (up to 200 of the last 5000) and the kernel log (up to 100). The journal covers all services and all users, not just the named component.")
                 font.pixelSize: Theme.fontSizeTiny
                 color: Theme.secondaryColor
                 wrapMode: Text.Wrap
@@ -104,6 +104,15 @@ Page {
                 font.family: "monospace"
                 color: Theme.primaryColor
                 wrapMode: Text.WrapAnywhere
+            }
+            Label {
+                visible: page.logReport.length > 0
+                x: Theme.horizontalPageMargin
+                width: page.width - 2 * Theme.horizontalPageMargin
+                text: qsTr("Read this before passing it on. Log lines come from the whole system and can contain sensitive data — addresses, identifiers, tokens, file paths.")
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: Diag.red
+                wrapMode: Text.Wrap
             }
             ButtonLayout {
                 Button {

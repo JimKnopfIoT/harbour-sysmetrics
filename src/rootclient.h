@@ -25,7 +25,6 @@ public:
     Q_INVOKABLE QString logGrep(const QString &term);
 
     QByteArray readFile(const QString &path);
-    QString symlinkTarget(const QString &path);
     QStringList fdDump(int pid);        // "fd|target|flags|pos" per line
     QStringList watcherScan(int pid);   // "pid|comm|paths" per line
     QStringList sockMap();              // "inode|pid|comm" per socket fd, system-wide

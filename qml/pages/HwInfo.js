@@ -412,6 +412,56 @@ function batt() {
         sections.push({ title: qsTr("Charging"),
                         note: qsTr("Live charger negotiation and the rate into the battery."), rows: crows })
 
+        // What the source offers, decoded from the raw PDOs. Unprivileged —
+        // this block works with the root helper switched off.
+        if (c.pdos && c.pdos.length) {
+            var prows = []
+            if (c.pdContract)
+                prows.push(row(qsTr("Contract"), c.pdContract === "explicit"
+                    ? qsTr("explicit — PD negotiated") : qsTr("implicit — no PD contract")))
+            if (c.ppsVoltage)
+                prows.push(row(qsTr("Active contract"),
+                    qsTr("PPS  %1 V / %2 A").arg(c.ppsVoltage.toFixed(2)).arg(c.ppsCurrent.toFixed(2))
+                    + (c.pdRequestedObject ? "   " + qsTr("(object %1)").arg(c.pdRequestedObject) : ""),
+                    {color:"#8ef94a"}))
+            else if (c.pdRequestedObject)
+                prows.push(row(qsTr("Active contract"), qsTr("object %1 of %2")
+                    .arg(c.pdRequestedObject).arg(c.pdos.length), {color:"#8ef94a"}))
+            for (var p = 0; p < c.pdos.length; ++p) {
+                var o = c.pdos[p]
+                var t
+                if (o.kind === "fixed")
+                    t = o.voltage.toFixed(1) + " V  ·  " + o.current.toFixed(1) + " A  ·  "
+                        + (o.voltage * o.current).toFixed(0) + " W"
+                else if (o.kind === "pps")
+                    t = qsTr("PPS") + "  " + o.voltageMin.toFixed(1) + "–" + o.voltageMax.toFixed(1)
+                        + " V  ·  " + o.current.toFixed(1) + " A"
+                else if (o.kind === "variable")
+                    t = qsTr("variable") + "  " + o.voltageMin.toFixed(1) + "–" + o.voltageMax.toFixed(1)
+                        + " V  ·  " + o.current.toFixed(1) + " A"
+                else if (o.kind === "battery")
+                    t = qsTr("battery") + "  " + o.voltageMin.toFixed(1) + "–" + o.voltageMax.toFixed(1)
+                        + " V  ·  " + o.power.toFixed(0) + " W"
+                else if (o.kind === "eprAvs")
+                    t = qsTr("EPR adjustable voltage (not decoded, raw 0x%1)").arg(o.raw)
+                else
+                    t = qsTr("SPR adjustable voltage (not decoded, raw 0x%1)").arg(o.raw)
+                prows.push(row("PDO " + o.index, t,
+                               {color: c.pdRequestedObject === o.index ? "#8ef94a" : undefined}))
+            }
+            if (c.pdMaxPower)
+                prows.push(row(qsTr("Maximum offered"), c.pdMaxPower.toFixed(0) + " W"))
+            prows.push(row(qsTr("Extensions"),
+                "PPS " + (c.pdPps ? qsTr("yes") : qsTr("no"))
+                + "  ·  EPR " + (c.pdEpr ? qsTr("yes") : qsTr("no"))
+                + "  ·  AVS " + (c.pdAvs ? qsTr("yes") : qsTr("no"))))
+            if (c.pdSpecFloor)
+                prows.push(row(qsTr("Source implements at least"), "PD " + c.pdSpecFloor))
+            sections.push({ title: qsTr("Power source capabilities"),
+                note: qsTr("Every object the charger offered, read from the raw PDOs. The revision in the PD message header can only express 1.0, 2.0 or 3.0 — 3.1 and 3.2 keep it at 3.0 on purpose. What a source implements beyond 3.0 is therefore derived from the extensions it offers: PPS means 3.0 or later, EPR means 3.1, SPR-AVS means 3.2. An absent extension means it was not offered here, not that the charger cannot do it."),
+                rows: prows })
+        }
+
         // handshake / kernel-log (root mode only; full PD packets are not in sysfs)
         var rootActive = false
         try { rootActive = (typeof rootmon !== "undefined") && rootmon.active } catch (eR) { rootActive = false }

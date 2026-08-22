@@ -88,11 +88,6 @@ QByteArray RootClient::readFile(const QString &path)
     return request("R " + path.toLocal8Bit());
 }
 
-QString RootClient::symlinkTarget(const QString &path)
-{
-    return QString::fromLocal8Bit(request("S " + path.toLocal8Bit()));
-}
-
 QStringList RootClient::fdDump(int pid)
 {
     const QByteArray r = request("F " + QByteArray::number(pid));
