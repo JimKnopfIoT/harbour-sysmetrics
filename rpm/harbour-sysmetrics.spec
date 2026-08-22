@@ -7,7 +7,7 @@
 %bcond_with ultimate
 Name:       harbour-sysmetrics
 Summary:    System diagnostics for Sailfish OS
-Version:    0.2.2
+Version:    0.2.3
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/JimKnopfIoT/harbour-sysmetrics
@@ -71,6 +71,10 @@ systemctl daemon-reload >/dev/null 2>&1 || :
 %{_datadir}/polkit-1/rules.d/50-harbour-sysmetrics.rules
 
 %changelog
+* Sat Aug 22 2026 harbour-sysmetrics contributors 0.2.3-1
+- Charging: the PD contract row says what was negotiated instead of naming
+  the specification's "contract"; glossary keeps the original term.
+
 * Sat Aug 22 2026 harbour-sysmetrics contributors 0.2.2-1
 - USB-PD source capabilities from the raw PDOs; root helper narrowed to a
   literal read list, validated signal/renice, uid peer check; root mode is
