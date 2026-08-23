@@ -601,7 +601,7 @@ void DetailMon::assess()
 
     if (m_energy.value(QStringLiteral("discharging")).toBool()
         && m_energy.value(QStringLiteral("estimateW")).toDouble() > 0.3)
-        notes.append(note(2, tr("Estimated power share %1 mW — noticeable battery drain")
+        notes.append(note(2, tr("Estimated power share %1 mW — above the 300 mW this app treats as noticeable")
                              .arg((int)(m_energy.value(QStringLiteral("estimateW")).toDouble() * 1000))));
 
     m_notes = notes;

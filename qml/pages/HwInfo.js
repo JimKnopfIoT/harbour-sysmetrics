@@ -3,7 +3,14 @@
 
 function row(k, v, opt) {
     var r = { k: k, v: (v === undefined || v === null || v === "") ? "—" : ("" + v) }
-    if (opt) { if (opt.mono) r.mono = true; if (opt.active === false) r.active = false; if (opt.color) r.color = opt.color }
+    if (opt) {
+        if (opt.mono) r.mono = true
+        if (opt.active === false) r.active = false
+        if (opt.color) r.color = opt.color
+        // Second value, pushed to the right edge: lets a list line up in two
+        // columns instead of running the figures together in one string.
+        if (opt.right !== undefined && opt.right !== "") r.vRight = "" + opt.right
+    }
     return r
 }
 
@@ -112,6 +119,29 @@ function cpu() {
         + "Exact error message (verbatim): \n"
         + "Logs around the event (journalctl/app log/dmesg): \n"
         + "Already tried: "
+    // --- where the CPU time went since boot ------------------------------
+    // Belongs to the processor, not to a general balance: it is this chip's
+    // own bookkeeping, and it reads against the load figures above.
+    var acc = sysmon.sinceBootDetail()
+    if (acc.cpu && acc.cpu.total > 0) {
+        var c = acc.cpu, cr = []
+        var cnames = [["idle", qsTr("Idle")], ["user", qsTr("User programs")],
+                      ["system", qsTr("Kernel")], ["iowait", qsTr("Waiting for storage")],
+                      ["irq", qsTr("Interrupts")], ["softirq", qsTr("Soft interrupts")],
+                      ["nice", qsTr("Background (nice)")], ["steal", qsTr("Stolen")]]
+        for (var n = 0; n < cnames.length; ++n) {
+            var val = c[cnames[n][0]]
+            if (val === undefined || val <= 0) continue
+            cr.push(row(cnames[n][1], sysmon.fmtDuration(Math.round(val))
+                        + "  \u00b7  " + Math.round(100 * val / c.total) + " %"))
+        }
+        if (cr.length) {
+            s.push({ title: qsTr("Where the CPU time went"), rows: cr })
+            s.push({ note: qsTr("Counted only while a core was actually running: parked cores and deep sleep stop the bookkeeping. On a phone that keeps the sum well below the uptime even though it covers every core. Idle dominating is the healthy case."),
+                     rows: [] })
+        }
+    }
+
     return { title: qsTr("System & CPU"), helpTopics: ["cpu","diagnosis","monitoring"], sections: s, diagTopic: "cpu", report: rep }
 }
 
@@ -183,7 +213,58 @@ function mem() {
     }
 
     sections.push({ title: qsTr("meminfo (full)"), rows: rows })
+    // --- memory pressure since boot --------------------------------------
+    // The running cost of a full RAM, so it sits with the RAM figures rather
+    // than in a balance of its own.
+    var vacc = sysmon.sinceBootDetail()
+    if (vacc.vm) {
+        var vr = []
+        if (vacc.vm.pgmajfault > 0) vr.push(row(qsTr("Major page faults"), Math.round(vacc.vm.pgmajfault)))
+        if (vacc.vm.pswpin > 0) vr.push(row(qsTr("Swapped back in"), sysmon.fmtBytes(vacc.vm.pswpin * 4096)))
+        if (vacc.vm.pswpout > 0) vr.push(row(qsTr("Swapped out"), sysmon.fmtBytes(vacc.vm.pswpout * 4096)))
+        if (vacc.vm.oom_kill !== undefined)
+            vr.push(row(qsTr("Killed for memory"), Math.round(vacc.vm.oom_kill),
+                        {color: vacc.vm.oom_kill > 0 ? "#ffb44a" : undefined}))
+        if (vr.length) {
+            sections.push({ title: qsTr("Memory pressure since boot"), rows: vr })
+            sections.push({ note: qsTr("Totals since the last start, not a current reading: the kernel counts these up and only a restart puts them back to zero. Swap traffic and major faults are the price of a full RAM — the system had to fetch pages back from storage. Growing slowly is normal; a kill for memory means a process was ended to keep the system alive."),
+                     rows: [] })
+        }
+    }
+
     return { title: qsTr("RAM"), helpTopics: ["mem"], sections: sections }
+}
+
+// Wear rows, shared by the UFS and the eMMC/card block. JEDEC step 0x0B is an
+// overflow, not a band -- the chip says "past my estimate" and gives no upper
+// figure, so it is named rather than turned into a percentage. Pre-EOL is the
+// second, independent register: when it still reads normal while the lifetime
+// estimate claims to be exhausted, the chip contradicts itself and the estimate
+// is not worth much.
+function wearRows(h) {
+    var out = []
+    if (!h.healthVerdict) {
+        out.push(row(qsTr("Assessment"), qsTr("not reported by device")))
+        return out
+    }
+    var vtxt = h.healthVerdict === "good" ? qsTr("good")
+             : h.healthVerdict === "warning" ? qsTr("warning") : qsTr("urgent")
+    var vcol = h.healthVerdict === "good" ? "#31e0a0"
+             : h.healthVerdict === "warning" ? "#ffb44a" : "#ff5a52"
+    out.push(row(qsTr("Wear"),
+                 h.lifeExceeded === true ? qsTr("estimated lifetime exceeded")
+                                         : qsTr("~%1 % life used").arg(h.lifeUsedPct),
+                 h.lifeExceeded === true ? {color: "#ff5a52"} : undefined))
+    if (h.preEol > 0)
+        out.push(row(qsTr("Spare blocks"),
+                     h.preEol === 1 ? qsTr("normal, under 80 % used")
+                   : h.preEol === 2 ? qsTr("80 % used")
+                                    : qsTr("90 % used"),
+                     {color: h.preEol >= 3 ? "#ff5a52" : h.preEol === 2 ? "#ffb44a" : undefined}))
+    // Our reading of the two registers above, not a value the chip reports --
+    // the thresholds behind it are in the glossary.
+    out.push(row(qsTr("Assessment"), vtxt, {color: vcol}))
+    return out
 }
 
 function storage() {
@@ -210,13 +291,11 @@ function storage() {
         if (main.mfrId) mrows.push(row(qsTr("Manufacturer ID"), main.mfrId, {mono:true}))
         if (main.writeBooster !== undefined) mrows.push(row("WriteBooster", main.writeBooster ? qsTr("supported (SLC cache)") : qsTr("no")))
         if (main.queueDepth) mrows.push(row(qsTr("Queue depth"), main.queueDepth))
-        if (main.healthVerdict) {
-            var vtxt = main.healthVerdict === "good" ? qsTr("good") : main.healthVerdict === "warning" ? qsTr("warning") : qsTr("urgent")
-            mrows.push(row(qsTr("Wear"), qsTr("~%1 % life used").arg(main.lifeUsedPct)))
-            mrows.push(row(qsTr("Health"), vtxt,
-                {color: main.healthVerdict === "good" ? "#31e0a0" : main.healthVerdict === "warning" ? "#ffb44a" : "#ff5a52"}))
-        }
+        mrows = mrows.concat(wearRows(main))
         s.push({ title: qsTr("Internal storage (UFS)"), rows: mrows })
+        if (main.lifeExceeded === true && main.preEol === 1)
+            s.push({ note: qsTr("The chip reports its estimated lifetime as exceeded while its spare blocks still read normal. The two registers contradict each other, so the lifetime estimate is unreliable on this device — the spare-block figure is the one to watch."),
+                     rows: [] })
 
         // capacity composition: how the package presents itself
         var crows = []
@@ -252,14 +331,7 @@ function storage() {
             row(qsTr("Size"), sysmon.fmtBytes(h.size))
         ]
         if (h.date) rows.push(row(qsTr("Mfg date"), h.date))
-        if (h.healthVerdict) {
-            var vt = h.healthVerdict === "good" ? qsTr("good") : h.healthVerdict === "warning" ? qsTr("warning") : qsTr("urgent")
-            rows.push(row(qsTr("Wear"), qsTr("~%1 % life used").arg(h.lifeUsedPct)))
-            rows.push(row(qsTr("Health"), vt,
-                {color: h.healthVerdict === "good" ? "#31e0a0" : h.healthVerdict === "warning" ? "#ffb44a" : "#ff5a52"}))
-        } else {
-            rows.push(row(qsTr("Health"), qsTr("not reported by device")))
-        }
+        rows = rows.concat(wearRows(h))
         if (h.hostNode || h.hostDriver)
             rows.push(row(qsTr("Card reader"), (h.hostDriver || "") + (h.hostNode ? "  ·  " + h.hostNode : ""), {mono:true}))
         var busU = ("" + h.bus).toUpperCase()
@@ -267,6 +339,20 @@ function storage() {
                   : busU.indexOf("MMC") >= 0 ? qsTr("Internal storage (eMMC)")
                   : (h.bus + " " + h.dev)
         s.push({ title: title, rows: rows })
+    }
+
+    // bytes actually moved to and from the device since boot -- the wear figures
+    // above are an estimate, this is the traffic that produced them
+    var moved = sysmon.sinceBootDetail()
+    if (moved.disks && moved.disks.length) {
+        var mv = []
+        for (var dk = 0; dk < moved.disks.length; ++dk) {
+            mv.push(row(qsTr("%1 read").arg(moved.disks[dk].name), sysmon.fmtBytes(moved.disks[dk].readBytes)))
+            mv.push(row(qsTr("%1 written").arg(moved.disks[dk].name), sysmon.fmtBytes(moved.disks[dk].writeBytes)))
+        }
+        s.push({ title: qsTr("Data moved"), rows: mv })
+        s.push({ note: qsTr("Counted from the moment the kernel registered the device: for built-in storage that is seconds after the start, for a memory card the moment it was inserted. Only traffic that reached the device is counted, not cache hits — and nothing of what the flash saw before this start."),
+                 rows: [] })
     }
 
     s.push({ note: qsTr("Got a backup? You know what the admins say: no backup, no mercy! Make one if you don't have one yet — and keep it current."),
@@ -283,6 +369,18 @@ function storage() {
     return { title: qsTr("Storage"), helpTopics: ["storage"], sections: s }
 }
 
+// The counters below start with the interface, not with the phone. Name the
+// span they cover, and say when it coincides with the system start.
+function countedSince(n) {
+    if (n.countingSec === undefined) return ""
+    var since = sysmon.fmtDuration(Math.round(n.countingSec))
+    // Interfaces created with the system are a couple of seconds younger than
+    // the uptime; anything later came up with its connection.
+    return (sysmon.uptimeSec - n.countingSec) < 120
+           ? since + "  ·  " + qsTr("since system start")
+           : since + "  ·  " + qsTr("since this interface came up")
+}
+
 function net() {
     var nics = sysmon.networkHardware()
     var wifi = sysmon.wifiDetail()
@@ -297,10 +395,20 @@ function net() {
     })
     var s = []
 
+    // The address is not in sysfs, so it arrives with the interface list; find
+    // the entry belonging to the Wi-Fi interface to fill the connection block.
+    function nicFor(name) {
+        for (var q = 0; q < nics.length; ++q)
+            if (nics[q].iface === name) return nics[q]
+        return {}
+    }
+
     if (wifi.iface !== undefined) {
         if (wifi.connected) {
-            s.push({ title: qsTr("Wi-Fi connection"), rows: [
+            var wn = nicFor(wifi.iface)
+            var wrows = [
                 row(qsTr("SSID"), wifi.ssid),
+                row(qsTr("IP address"), wn.ipv4),
                 row(qsTr("Own MAC"), wifi.mac, {mono:true}),
                 row(qsTr("Access point (BSSID)"), wifi.bssid, {mono:true}),
                 row(qsTr("Band"), wifi.band),
@@ -309,7 +417,14 @@ function net() {
                 row(qsTr("TX rate"), wifi.txBitrate),
                 row(qsTr("RX rate"), wifi.rxBitrate),
                 row(qsTr("TX power"), wifi.txpower)
-            ]})
+            ]
+            if (wn.rxBytes !== undefined) {
+                wrows.push(row(qsTr("Download / Upload"),
+                               sysmon.fmtBytes(wn.rxBytes) + "  /  " + sysmon.fmtBytes(wn.txBytes)))
+                if (countedSince(wn)) wrows.push(row(qsTr("Counted since"), countedSince(wn)))
+            }
+            if (wn.ipv6) wrows.push(row(qsTr("IPv6"), wn.ipv6, {mono:true}))
+            s.push({ title: qsTr("Wi-Fi connection"), rows: wrows })
         } else {
             s.push({ title: qsTr("Wi-Fi connection"), rows: [ row(qsTr("Status"), qsTr("not connected")) ] })
         }
@@ -341,13 +456,17 @@ function net() {
         var rows = [
             row(qsTr("Type"), n.kind),
             row(qsTr("State"), n.state + (n.carrier ? " · " + qsTr("carrier") : "")),
+            row(qsTr("IP address"), n.ipv4),
             row("MAC", n.mac, {mono:true}),
             row("MTU", n.mtu),
             row(qsTr("Driver"), n.driver),
             row(qsTr("Chip"), (n.vendor ? n.vendor : "") + (n.model ? " " + n.model : ""), {mono:true})
         ]
         if (n.speedMbit) rows.push(row(qsTr("Link speed"), n.speedMbit + " Mbit/s"))
-        rows.push(row(qsTr("Traffic"), "↓ " + sysmon.fmtBytes(n.rxBytes) + "   ↑ " + sysmon.fmtBytes(n.txBytes)))
+        if (n.ipv6) rows.push(row(qsTr("IPv6"), n.ipv6, {mono:true}))
+        rows.push(row(qsTr("Download / Upload"),
+                      sysmon.fmtBytes(n.rxBytes) + "  /  " + sysmon.fmtBytes(n.txBytes)))
+        if (countedSince(n)) rows.push(row(qsTr("Counted since"), countedSince(n)))
         if (n.rxErrors || n.txErrors) rows.push(row(qsTr("Errors"), "rx " + n.rxErrors + " · tx " + n.txErrors))
         s.push({ title: n.iface, rows: rows })
     }
@@ -505,15 +624,58 @@ function batt() {
         row(qsTr("Serial"), h.serial, {mono:true}),
         row(qsTr("Technology"), h.technology)
     ]})
-    sections.push({ title: qsTr("Capacity & health"), rows: [
+    var hrows = [
         row(qsTr("Design capacity"), (h.designCapacity ? h.designCapacity.toFixed(0) + " " + h.capacityUnit : "—")),
         row(qsTr("Full capacity"), (h.fullCapacity ? h.fullCapacity.toFixed(0) + " " + h.capacityUnit : "—")),
-        row(qsTr("State of health"), sysmon.battHealthPct >= 0 ? sysmon.battHealthPct + " %" : "—",
-            {color: sysmon.battHealthPct >= 80 ? "#8ef94a" : sysmon.battHealthPct >= 65 ? "#ffb44a" : "#ff5a52"}),
-        row(qsTr("Charge cycles"), h.cycles),
-        row(qsTr("Design voltage"), h.voltageDesign ? h.voltageDesign.toFixed(2) + " V" : "—"),
-        row(qsTr("Driver health"), h.health)
-    ]})
+        row(qsTr("Full ÷ design"), sysmon.battHealthExact >= 0 ? sysmon.battHealthExact.toFixed(1) + " %" : "—",
+            {color: sysmon.battHealthPct >= 80 ? "#8ef94a" : sysmon.battHealthPct >= 65 ? "#ffb44a" : "#ff5a52"})
+    ]
+    // The register that claims to know, kept beside the ratio instead of
+    // replacing it, so a disagreement stays visible.
+    if (sysmon.battSohRegister >= 0)
+        hrows.push(row(qsTr("soh register"), sysmon.battSohRegister + " %", {mono:true}))
+    if (h.learnEvents !== undefined)
+        hrows.push(row(qsTr("Capacity measurements"), h.learnEvents))
+    if (h.profileId) hrows.push(row(qsTr("Battery profile"), h.profileId, {mono:true}))
+    hrows.push(row(qsTr("Design voltage"), h.voltageDesign ? h.voltageDesign.toFixed(2) + " V" : "—"))
+    hrows.push(row(qsTr("Driver health"), h.health))
+    hrows.push(row(qsTr("Quality"), sysmon.battQuality))
+    hrows.push(row(qsTr("Based on"), sysmon.battQualityBasis))
+    sections.push({ title: qsTr("Capacity & health"), rows: hrows })
+
+    // Without a single learned capacity, "full capacity" is a profile entry and
+    // the ratio above compares two catalogue numbers -- worth saying, because
+    // the same figure would be an ageing measurement on a gauge that had learned.
+    if (h.learnEvents === 0)
+        sections.push({ note: qsTr("This gauge has never measured a capacity of its own: all of its learning counters stand at zero, and charge_full comes from the battery profile. The percentage above therefore compares the profile of the installed cell against the design capacity of the original — it is not a measurement of ageing. On a replacement cell with a smaller nominal capacity it will read low from the first day and never move."),
+                        rows: [] })
+
+    // Charge cycles: the headline figure is a mean, and the bands it averages
+    // say more than it does.
+    var crows2 = [ row(qsTr("Equivalent full cycles"), h.cycles) ]
+    if (h.cycleBandTotal !== undefined) {
+        crows2.push(row(qsTr("Band crossings"), Math.round(h.cycleBandTotal)))
+        if (h.cycleBuckets) crows2.push(row(qsTr("Per band"), h.cycleBuckets.join("  ·  "), {mono:true}))
+    }
+    if (h.ageLevel !== undefined)
+        crows2.push(row(qsTr("Ageing profile"), qsTr("step %1").arg(h.ageLevel)))
+    if (h.esrMilliOhm)
+        crows2.push(row(qsTr("Internal resistance (ESR)"), h.esrMilliOhm.toFixed(0) + " mΩ"))
+    if (h.storedMilliOhm)
+        crows2.push(row(qsTr("Total resistance (stored)"), h.storedMilliOhm.toFixed(0) + " mΩ"))
+    if (h.batteryIdOhm)
+        crows2.push(row(qsTr("Battery ID resistor"), (h.batteryIdOhm / 1000).toFixed(1) + " kΩ"))
+    sections.push({ title: qsTr("Wear indicators"), rows: crows2 })
+    if (h.cycleBandTotal !== undefined)
+        sections.push({ note: qsTr("The gauge counts how often each of eight state-of-charge bands was crossed; the cycle figure it reports is the mean of those eight, which is why it reads far lower than the charging actually done. The resistances come from three separate registers of the Qualcomm gauge, each on its own scale — the ESR is the one that tracks ageing, while the ID resistor only identifies the cell."),
+                        rows: [] })
+    // Both numbers are on the page now; flag it when they contradict each other,
+    // because then at most one of them can be describing the cell.
+    if (sysmon.battSohRegister >= 0 && sysmon.battHealthExact > 0
+            && Math.abs(sysmon.battSohRegister - sysmon.battHealthExact) >= 5)
+        sections.push({ note: qsTr("The soh register claims %1 % while the capacities work out to %2 %. Both cannot describe the same cell. A flat 100 from that register is a common stand-in on Qualcomm gauges — it is answering, not measuring.")
+                              .arg(sysmon.battSohRegister).arg(sysmon.battHealthExact.toFixed(1)),
+                        rows: [] })
     sections.push({ title: qsTr("Live"), rows: [
         row(qsTr("Level"), sysmon.battCapacity + " %  ·  " + sysmon.battStatus),
         row(qsTr("Voltage"), sysmon.battVoltageV.toFixed(3) + " V"),
@@ -958,10 +1120,24 @@ function sinceBoot() {
     if (d.suspend) {
         var su = d.suspend, sr = []
         var ok = parseFloat(su.success), bad = parseFloat(su.fail)
-        if (!isNaN(ok)) sr.push(row(qsTr("Went to sleep"), ok))
+        // Result first, mechanism after. A five-figure count of aborted attempts
+        // at the top of the section reads as a fault; it is the rhythm of the
+        // autosleep loop, and the reader has to see the outcome before the tally.
+        if (d.awakeSec !== undefined && up > d.awakeSec)
+            sr.push(row(qsTr("Time asleep"),
+                        sysmon.fmtDuration(Math.round(up - d.awakeSec))
+                        + "  ·  " + Math.round(100 * (up - d.awakeSec) / up) + " " + qsTr("% of uptime")))
+        if (!isNaN(ok)) {
+            var avg = ""
+            if (d.awakeSec !== undefined && ok > 0 && up > d.awakeSec)
+                avg = "  ·  " + qsTr("~%1 s at a time").arg(((up - d.awakeSec) / ok).toFixed(1))
+            sr.push(row(qsTr("Sleep mode entered"), qsTr("%1 ×").arg(ok) + avg))
+        }
+        // "Failed" is the kernel's word, not a verdict: something arrived and
+        // interrupted the attempt, and the next one follows seconds later.
         if (!isNaN(bad)) {
-            var quota = (!isNaN(ok) && ok + bad > 0) ? "  ·  " + Math.round(100 * bad / (ok + bad)) + " %" : ""
-            sr.push(row(qsTr("Attempts that failed"), bad + quota))
+            var rate = up > 0 ? "  ·  " + qsTr("~%1 / hour").arg(Math.round(bad / (up / 3600))) : ""
+            sr.push(row(qsTr("Attempts interrupted"), qsTr("%1 ×").arg(bad) + rate))
         }
         var steps = [["failed_freeze", qsTr("blocked while freezing tasks")],
                      ["failed_prepare", qsTr("blocked while preparing")],
@@ -980,8 +1156,8 @@ function sinceBoot() {
             var meaning = en === -16 ? qsTr("device busy") : en === -11 ? qsTr("try again") : ""
             sr.push(row(qsTr("Error code"), su.last_failed_errno + (meaning ? "  ·  " + meaning : "")))
         }
-        s.push({ title: qsTr("Falling asleep"), rows: sr })
-        s.push({ note: qsTr("A failed attempt is not a fault. The kernel retries continuously, and any wakeup arriving mid-attempt is counted as a failure, so a high share is normal. What carries meaning is the device named above and the step it stopped at: that is who was still busy when the phone tried to go down."),
+        s.push({ title: qsTr("Sleep mode"), rows: sr })
+        s.push({ note: qsTr("Nothing is broken when attempts are interrupted — that is how the phone works. Whenever nothing holds it awake it halts, freezes the processes and asks every driver for permission; anything arriving in between interrupts the attempt, and the next one follows seconds later. Hundreds an hour are the rhythm of that loop, and the kernel files them under \"failed\", which is its word and not a verdict. What is worth reading is the time asleep at the top, how long it stays down each time, and the device and step named below — that is who was still busy at the last attempt. The per-step figures need not add up to the total exactly; some aborts belong to no single step. Note that the average is an average: long spells at night and second-long ones during the day both feed it."),
                  rows: [] })
     }
 
@@ -990,80 +1166,13 @@ function sinceBoot() {
         var wr = []
         for (var w = 0; w < d.wakers.length && w < 12; ++w) {
             var k = d.wakers[w]
-            wr.push(row(k.name, qsTr("%1 ×").arg(k.count)
-                        + (k.heldSec > 1 ? "  ·  " + dur(k.heldSec) : ""), {mono:true}))
+            // Count on the left, held time on the right: as one string the two
+            // figures ran together and no column lined up.
+            wr.push(row(k.name, qsTr("%1 ×").arg(k.count),
+                        {mono:true, right: k.heldSec > 1 ? dur(k.heldSec) : ""}))
         }
         s.push({ title: qsTr("What wakes the phone"), rows: wr })
         s.push({ note: qsTr("How often each source signalled a wakeup, and how long it held the system awake in total. A high count is not automatically bad — the clock ticking and the modem receiving are what a phone does. It becomes interesting when a single source dominates and deep sleep is short."),
-                 rows: [] })
-    }
-
-    // --- data moved -------------------------------------------------------
-    var dr = []
-    if (d.disks) {
-        for (var k2 = 0; k2 < d.disks.length; ++k2) {
-            dr.push(row(qsTr("%1 read").arg(d.disks[k2].name), sysmon.fmtBytes(d.disks[k2].readBytes)))
-            dr.push(row(qsTr("%1 written").arg(d.disks[k2].name), sysmon.fmtBytes(d.disks[k2].writeBytes)))
-        }
-    }
-    if (sysmon.netRxTotal > 0 || sysmon.netTxTotal > 0) {
-        dr.push(row(qsTr("Network received"), sysmon.fmtBytes(sysmon.netRxTotal)))
-        dr.push(row(qsTr("Network sent"), sysmon.fmtBytes(sysmon.netTxTotal)))
-    }
-    if (dr.length) {
-        s.push({ title: qsTr("Data moved"), rows: dr })
-        s.push({ note: qsTr("Storage figures count traffic that reached the device, not cache hits. Network counters restart whenever an interface goes down, so they can be younger than the uptime."),
-                 rows: [] })
-    }
-
-    // --- CPU budget -------------------------------------------------------
-    if (d.cpu && d.cpu.total > 0) {
-        var c = d.cpu, cr = []
-        var names = [["idle", qsTr("Idle")], ["user", qsTr("User programs")],
-                     ["system", qsTr("Kernel")], ["iowait", qsTr("Waiting for storage")],
-                     ["irq", qsTr("Interrupts")], ["softirq", qsTr("Soft interrupts")],
-                     ["nice", qsTr("Background (nice)")], ["steal", qsTr("Stolen")]]
-        for (var n = 0; n < names.length; ++n) {
-            var val = c[names[n][0]]
-            if (val === undefined || val <= 0) continue
-            cr.push(row(names[n][1], dur(val) + "  ·  " + Math.round(100 * val / c.total) + " %"))
-        }
-        if (cr.length) {
-            s.push({ title: qsTr("Where the CPU time went"), rows: cr })
-            s.push({ note: qsTr("Summed over all cores since boot, which is why the total runs well past the uptime. Idle dominating is the healthy case."),
-                     rows: [] })
-        }
-    }
-
-    // --- memory pressure --------------------------------------------------
-    if (d.vm) {
-        var vr = []
-        if (d.vm.pgmajfault > 0) vr.push(row(qsTr("Major page faults"), Math.round(d.vm.pgmajfault)))
-        if (d.vm.pswpin > 0) vr.push(row(qsTr("Swapped back in"), sysmon.fmtBytes(d.vm.pswpin * 4096)))
-        if (d.vm.pswpout > 0) vr.push(row(qsTr("Swapped out"), sysmon.fmtBytes(d.vm.pswpout * 4096)))
-        if (d.vm.oom_kill !== undefined)
-            vr.push(row(qsTr("Killed for memory"), Math.round(d.vm.oom_kill),
-                        {color: d.vm.oom_kill > 0 ? "#ffb44a" : undefined}))
-        if (vr.length) {
-            s.push({ title: qsTr("Memory pressure"), rows: vr })
-            s.push({ note: qsTr("Swap traffic and major faults are the price of a full RAM: the system had to fetch pages back from storage. Steady numbers are normal; a kill for memory means a process was ended to keep the system alive."),
-                     rows: [] })
-        }
-    }
-
-    // --- lifetime counters, which predate this boot -----------------------
-    var lr = []
-    if (sysmon.battCycles > 0) lr.push(row(qsTr("Charge cycles"), sysmon.battCycles))
-    if (sysmon.battHealthPct > 0 && sysmon.battChargeDesign > 0)
-        lr.push(row(qsTr("Battery capacity left"), sysmon.battHealthPct + " %"))
-    var hw = sysmon.storageHardware()
-    for (var h = 0; h < hw.length; ++h) {
-        if (hw[h].lifeUsedPct !== undefined && hw[h].healthVerdict)
-            lr.push(row(qsTr("Flash wear"), qsTr("~%1 % of endurance used").arg(hw[h].lifeUsedPct)))
-    }
-    if (lr.length) {
-        s.push({ title: qsTr("Over the device's life"), rows: lr })
-        s.push({ note: qsTr("These three survive a restart: they are kept by the battery gauge and the flash controller themselves, and count from the factory, not from this boot."),
                  rows: [] })
     }
 

@@ -38,13 +38,16 @@ struct SysSnap {
     double load1 = 0, load5 = 0, load15 = 0;
     qlonglong uptimeSec = 0;
     int processCount = 0, threadCount = 0, runnable = 0;
-    double netRxRate = 0, netTxRate = 0;       // B/s
+    double netRxRate = 0, netTxRate = 0;       // B/s, active interface only
+    QString netIface;                          // interface carrying the default route
     qulonglong netRxTotal = 0, netTxTotal = 0;
     double diskReadRate = 0, diskWriteRate = 0;
     QVector<QPair<QString, float>> thermal;    // zone type, degC
     int battCapacity = -1;
     double battCurrentA = 0, battVoltageV = 0, battTempC = 0, battPowerW = 0;
     int battHealthPct = -1;
+    double battHealthExact = -1;   // same figure, undivided by rounding
+    int battSohRegister = -1;      // what the gauge's soh register claims
     bool battHealthFromGauge = false;
     int battCycles = -1;
     double battChargeFull = 0, battChargeDesign = 0;  // µAh
@@ -98,6 +101,7 @@ private:
     bool m_haveAll = false;
     int m_cpuCount = 0;          // every CPU present, parked ones included
     qulonglong m_prevRx = 0, m_prevTx = 0;
+    QString m_prevIface;
     qulonglong m_prevDiskRd = 0, m_prevDiskWr = 0;
     qint64 m_prevMs = 0;
     // Everything here is either needed for the next delta or is immutable for the

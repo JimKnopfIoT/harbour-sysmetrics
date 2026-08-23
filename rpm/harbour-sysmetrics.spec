@@ -7,7 +7,7 @@
 %bcond_with ultimate
 Name:       harbour-sysmetrics
 Summary:    System diagnostics for Sailfish OS
-Version:    0.2.3
+Version:    0.2.4
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/JimKnopfIoT/harbour-sysmetrics
@@ -71,6 +71,23 @@ systemctl daemon-reload >/dev/null 2>&1 || :
 %{_datadir}/polkit-1/rules.d/50-harbour-sysmetrics.rules
 
 %changelog
+* Sun Aug 23 2026 harbour-sysmetrics contributors 0.2.4-1
+- "Since boot" keeps only what belongs to no single part: times, sleep mode,
+  wake sources. CPU time moved to the processor page, memory pressure to RAM,
+  bytes moved to storage; network volume was already on the network page.
+- Figures that are our reading say so: battery quality names its basis, the
+  storage assessment is labelled as ours, the colour scale and every threshold
+  are written out in the glossary. Wear step 0x0B is named "exceeded" instead
+  of being turned into 100 %.
+- Battery: state of health is full ÷ design, with the soh register beside it
+  rather than instead of it, and a note when the two disagree or when the gauge
+  has never learned a capacity. Adds cycle bands, ageing profile, ESR, stored
+  and ID resistance, each with its documented unit.
+- Network: IP address per interface from getifaddrs, rates follow the default
+  route instead of summing every interface, download and upload sit under their
+  own graphs.
+- Storage detail page gains bytes moved; glossary gains Backup.
+
 * Sun Aug 23 2026 harbour-sysmetrics contributors 0.2.3-1
 - New "Since boot" section: screen-on time from the MCE wakelock, awake time
   against deep sleep, suspend attempts with the device that blocked them,

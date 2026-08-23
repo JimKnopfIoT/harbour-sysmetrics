@@ -1,5 +1,6 @@
 #include "sysmon.h"
 
+#include <QDateTime>
 #include <QDir>
 #include <QFile>
 #include <algorithm>
@@ -23,6 +24,9 @@
 #include <time.h>
 #include <unistd.h>
 #include <sys/statvfs.h>
+#include <ifaddrs.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 static const int HIST_MAX = 180;
 
@@ -315,10 +319,17 @@ QVariantList SysMon::storageHardware() const
         }
         if (lifeA > 0 || lifeB > 0 || eol > 0) {
             const int worst = qMax(lifeA, lifeB);
-            m.insert(QStringLiteral("lifeUsedPct"), worst > 0 ? (worst - 1) * 10 : 0); // lower bound of 10% band
+            // Steps 0x01..0x0A are 10% bands; 0x0B is not a band but an
+            // overflow -- "past the estimated lifetime", with no upper figure.
+            // Rendering it as 100% would claim a measurement the chip never
+            // made, so it is flagged instead of converted.
+            const bool exceeded = worst >= 11;
+            m.insert(QStringLiteral("lifeExceeded"), exceeded);
+            if (!exceeded)
+                m.insert(QStringLiteral("lifeUsedPct"), worst > 0 ? (worst - 1) * 10 : 0); // lower bound of the band
             m.insert(QStringLiteral("preEol"), eol);
             QString verdict;
-            if (eol >= 3) verdict = QStringLiteral("urgent");
+            if (eol >= 3 || exceeded) verdict = QStringLiteral("urgent");
             else if (eol == 2 || worst >= 8) verdict = QStringLiteral("warning");
             else if (worst >= 1) verdict = QStringLiteral("good");
             m.insert(QStringLiteral("healthVerdict"), verdict);
@@ -468,9 +479,39 @@ QVariantMap SysMon::wifiDetail() const
     return m;
 }
 
+// Addresses per interface. sysfs has none of this -- it knows the hardware, not
+// what the interface currently answers to -- so the list comes from getifaddrs.
+static QHash<QString, QStringList> ifaceAddresses()
+{
+    QHash<QString, QStringList> out;
+    struct ifaddrs *first = nullptr;
+    if (getifaddrs(&first) != 0)
+        return out;
+    for (struct ifaddrs *a = first; a; a = a->ifa_next) {
+        if (!a->ifa_addr || !a->ifa_name)
+            continue;
+        char buf[INET6_ADDRSTRLEN] = {0};
+        if (a->ifa_addr->sa_family == AF_INET) {
+            const auto *in = reinterpret_cast<struct sockaddr_in *>(a->ifa_addr);
+            if (!inet_ntop(AF_INET, &in->sin_addr, buf, sizeof buf))
+                continue;
+        } else if (a->ifa_addr->sa_family == AF_INET6) {
+            const auto *in6 = reinterpret_cast<struct sockaddr_in6 *>(a->ifa_addr);
+            if (!inet_ntop(AF_INET6, &in6->sin6_addr, buf, sizeof buf))
+                continue;
+        } else {
+            continue;
+        }
+        out[QString::fromLatin1(a->ifa_name)].append(QString::fromLatin1(buf));
+    }
+    freeifaddrs(first);
+    return out;
+}
+
 QVariantList SysMon::networkHardware() const
 {
     QVariantList out;
+    const QHash<QString, QStringList> addrs = ifaceAddresses();
     auto rd = [](const QString &p) {
         QFile f(p);
         if (!f.open(QIODevice::ReadOnly))
@@ -483,6 +524,26 @@ QVariantList SysMon::networkHardware() const
         QVariantMap m;
         m.insert(QStringLiteral("iface"), iface);
         m.insert(QStringLiteral("mac"), rd(base + QStringLiteral("address")));
+        // How long this counter has been running. The totals start when the
+        // interface is created, which for built-in hardware is seconds after
+        // boot but for a mobile-data interface is the moment it came up -- the
+        // sysfs directory carries that creation time.
+        const QDateTime born = QFileInfo(QStringLiteral("/sys/class/net/") + iface).lastModified();
+        if (born.isValid()) {
+            const qint64 age = born.secsTo(QDateTime::currentDateTime());
+            if (age >= 0)
+                m.insert(QStringLiteral("countingSec"), (double)age);
+        }
+
+        // Split by family: the v4 address is what a user recognises, the v6 ones
+        // are usually several and mostly link-local.
+        QStringList v4, v6;
+        for (const QString &a : addrs.value(iface))
+            (a.contains(QLatin1Char(':')) ? v6 : v4).append(a);
+        if (!v4.isEmpty())
+            m.insert(QStringLiteral("ipv4"), v4.join(QStringLiteral(", ")));
+        if (!v6.isEmpty())
+            m.insert(QStringLiteral("ipv6"), v6.join(QStringLiteral(", ")));
         m.insert(QStringLiteral("state"), rd(base + QStringLiteral("operstate")));
         m.insert(QStringLiteral("mtu"), rd(base + QStringLiteral("mtu")).toInt());
         m.insert(QStringLiteral("carrier"), rd(base + QStringLiteral("carrier")) == QLatin1String("1"));
@@ -565,6 +626,64 @@ QVariantMap SysMon::batteryHardware() const
     m.insert(QStringLiteral("technology"), readTrim(b + QStringLiteral("technology")));
     m.insert(QStringLiteral("health"), readTrim(b + QStringLiteral("health")));
     m.insert(QStringLiteral("cycles"), readTrim(b + QStringLiteral("cycle_count")));
+
+    // Qualcomm's gauge keeps far more than the one cycle figure it advertises.
+    // These live under bms/ next to the battery node; every one of them is
+    // optional, so each is gated on being readable and sane.
+    {
+        const QString g = QStringLiteral("/sys/class/power_supply/bms/");
+        // Eight counters, one per state-of-charge band. cycle_count is their
+        // mean, which is why it reads far lower than the charging actually done.
+        const QString buckets = readTrim(g + QStringLiteral("cycle_counts"));
+        if (!buckets.isEmpty()) {
+            const QStringList parts = buckets.split(QLatin1Char(' '), QString::SkipEmptyParts);
+            QVariantList vals;
+            qulonglong sum = 0;
+            for (const QString &p : parts) {
+                vals.append(p.toInt());
+                sum += p.toULongLong();
+            }
+            if (!vals.isEmpty()) {
+                m.insert(QStringLiteral("cycleBuckets"), vals);
+                m.insert(QStringLiteral("cycleBandTotal"), (double)sum);
+            }
+        }
+        const QString age = readTrim(g + QStringLiteral("batt_age_level"));
+        if (!age.isEmpty())
+            m.insert(QStringLiteral("ageLevel"), age.toInt());
+        // Three resistances on three scales, per the Qualcomm QG driver:
+        // RESISTANCE_NOW is the last measured ESR in mOhm, RESISTANCE is the
+        // stored value converted to microOhm (SDAM keeps it in mOhm and the
+        // driver multiplies by 1000), RESISTANCE_ID is the battery
+        // identification resistor in Ohm and says nothing about wear.
+        const QString rNow = readTrim(g + QStringLiteral("resistance_now"));
+        if (!rNow.isEmpty() && rNow.toDouble() > 0)
+            m.insert(QStringLiteral("esrMilliOhm"), rNow.toDouble());
+        const QString rBase = readTrim(g + QStringLiteral("resistance"));
+        if (!rBase.isEmpty() && rBase.toDouble() > 0)
+            m.insert(QStringLiteral("storedMilliOhm"), rBase.toDouble() / 1000.0);
+        const QString rId = readTrim(g + QStringLiteral("resistance_id"));
+        if (!rId.isEmpty() && rId.toDouble() > 0)
+            m.insert(QStringLiteral("batteryIdOhm"), rId.toDouble());
+        // Whether the gauge ever measured a capacity of its own. All zero means
+        // charge_full comes from the battery profile, not from a measurement --
+        // which decides whether the health figure means anything.
+        bool haveLearn = false;
+        qulonglong learn = 0;
+        for (const char *k : { "learning_counter", "learning_trial_counter",
+                               "full_counter", "recharge_counter" }) {
+            const QString v = readTrim(g + QLatin1String(k));
+            if (v.isEmpty())
+                continue;
+            haveLearn = true;
+            learn += v.toULongLong();
+        }
+        if (haveLearn)
+            m.insert(QStringLiteral("learnEvents"), (double)learn);
+        const QString prof = readTrim(g + QStringLiteral("battery_type"));
+        if (!prof.isEmpty())
+            m.insert(QStringLiteral("profileId"), prof);
+    }
     double designUah = readTrim(b + QStringLiteral("charge_full_design")).toDouble();
     double fullUah = readTrim(b + QStringLiteral("charge_full")).toDouble();
     QString capUnit = QStringLiteral("mAh");
@@ -1943,6 +2062,10 @@ QString SysMon::battQuality() const
     if (!drv.isEmpty() && drv != QLatin1String("Good") && drv != QLatin1String("Unknown"))
         return drv;   // driver reports Overheat/Cold/Dead/Over voltage etc.
 
+    // The wording below is our reading of the number, not something the battery
+    // reports: the thresholds are ours and are spelled out in the glossary. Say
+    // where the number came from, so a verdict built on a calculated SoH is not
+    // mistaken for one the gauge stands behind.
     QString base;
     if (soh >= 90)      base = tr("as new");
     else if (soh >= 80) base = tr("good");
@@ -1950,17 +2073,37 @@ QString SysMon::battQuality() const
     else if (soh >= 50) base = tr("worn");
     else if (soh >= 0)  base = tr("poor — consider replacement");
     else if (cyc >= 0) {
-        // no SoH available: fall back to cycle count alone
-        if (cyc < 300)      return tr("good (%1 cycles)").arg(cyc);
-        if (cyc < 600)      return tr("aged (%1 cycles)").arg(cyc);
-        if (cyc < 1000)     return tr("worn (%1 cycles)").arg(cyc);
-        return tr("poor (%1 cycles)").arg(cyc);
+        // No SoH at all: this is the weakest case, a guess from the cycle count
+        // alone, and it has to say so.
+        QString c;
+        if (cyc < 300)       c = tr("good");
+        else if (cyc < 600)  c = tr("aged");
+        else if (cyc < 1000) c = tr("worn");
+        else                 c = tr("poor");
+        return c;
     } else {
         return tr("unknown");
     }
-    if (cyc > 0)
-        base += tr(" · %1 cycles").arg(cyc);
+    // The basis and the cycle count used to be appended here, which wrapped the
+    // overview row onto a second line. The card gets the verdict alone; the
+    // detail page states what it rests on.
     return base;
+}
+
+// What the quality verdict above rests on. Kept apart from the verdict so the
+// overview can stay to one line while the detail page can be explicit.
+QString SysMon::battQualityBasis() const
+{
+    const QString drv = m_s.battHealthReport;
+    if (!drv.isEmpty() && drv != QLatin1String("Good") && drv != QLatin1String("Unknown"))
+        return tr("reported by the driver");
+    if (m_s.battHealthPct >= 0)
+        return m_s.battHealthFromGauge
+                ? tr("state of health from the gauge")
+                : tr("state of health calculated from full ÷ design capacity");
+    if (m_s.battCycles >= 0)
+        return tr("no state of health available — estimated from the cycle count alone");
+    return QString();
 }
 
 QString SysMon::fmtBytes(double b) const

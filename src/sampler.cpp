@@ -265,8 +265,29 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
     }
     s.uptimeSec = (qlonglong)readAll(QStringLiteral("/proc/uptime")).split(' ').value(0).toDouble();
 
+    // The interface carrying the default route: rates are quoted for the path
+    // packets actually take, not for a sum over every interface. Adding wifi to
+    // the modem's counters (which on Qualcomm may see the same traffic twice)
+    // produced a figure that described nothing.
+    QString defIface;
+    {
+        qulonglong bestMetric = ~0ull;
+        for (const QByteArray &line : readAll(QStringLiteral("/proc/net/route")).split('\n')) {
+            const QList<QByteArray> f = line.simplified().split(' ');
+            if (f.size() < 7 || f[1] != "00000000")
+                continue;
+            const qulonglong metric = f[6].toULongLong();
+            if (metric < bestMetric) {
+                bestMetric = metric;
+                defIface = QString::fromLatin1(f[0]);
+            }
+        }
+    }
+    s.netIface = defIface;
+
     // network totals over all non-lo interfaces
     qulonglong rx = 0, tx = 0;
+    qulonglong defRx = 0, defTx = 0;
     for (const QByteArray &line : readAll(QStringLiteral("/proc/net/dev")).split('\n')) {
         const int colon = line.indexOf(':');
         if (colon < 0)
@@ -281,6 +302,10 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
         const qulonglong itx = f[8].toULongLong();
         rx += irx;
         tx += itx;
+        if (!defIface.isEmpty() && name == defIface.toLatin1()) {
+            defRx = irx;
+            defTx = itx;
+        }
         if (irx || itx)
             s.ifaces.append(qMakePair(QString::fromLatin1(name),
                                       QStringLiteral("%1|%2").arg(irx).arg(itx)));
@@ -306,13 +331,19 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
     const qint64 dt = m_prevMs > 0 ? now - m_prevMs : 0;
     if (dt > 0) {
-        s.netRxRate = (rx - m_prevRx) * 1000.0 / dt;
-        s.netTxRate = (tx - m_prevTx) * 1000.0 / dt;
+        // A rate only means something while the counter belongs to the same
+        // interface; when the route moves, the previous total is another
+        // device's and the difference would be nonsense.
+        if (defIface == m_prevIface && defRx >= m_prevRx && defTx >= m_prevTx) {
+            s.netRxRate = (defRx - m_prevRx) * 1000.0 / dt;
+            s.netTxRate = (defTx - m_prevTx) * 1000.0 / dt;
+        }
         s.diskReadRate = (rd - m_prevDiskRd) * 1000.0 / dt;
         s.diskWriteRate = (wr - m_prevDiskWr) * 1000.0 / dt;
     }
-    m_prevRx = rx;
-    m_prevTx = tx;
+    m_prevRx = defRx;
+    m_prevTx = defTx;
+    m_prevIface = defIface;
     m_prevDiskRd = rd;
     m_prevDiskWr = wr;
 
@@ -364,15 +395,23 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
         s.battChargeFull = full;
         s.battChargeDesign = design;
         // prefer the gauge's own state-of-health; fall back to full/design ratio
+        // The soh register is a black box, and on this platform it answers with a
+        // flat 100 while the gauge's own capacity registers say otherwise. The
+        // ratio wins because it can be checked against the two capacities shown
+        // beside it; the register is kept as a figure of its own instead of
+        // deciding what is displayed.
         int soh = readAll(bat + QStringLiteral("/soh")).trimmed().toInt();
         if (soh <= 0)
             soh = readAll(QStringLiteral("/sys/class/power_supply/bms/soh")).trimmed().toInt();
-        if (soh > 0 && soh <= 100) {
-            s.battHealthPct = soh;
-            s.battHealthFromGauge = true;
-        } else if (full && design) {
-            s.battHealthPct = (int)(100 * full / design);
+        s.battSohRegister = (soh > 0 && soh <= 100) ? soh : -1;
+        if (full && design) {
+            s.battHealthExact = 100.0 * full / design;
+            s.battHealthPct = (int)(s.battHealthExact + 0.5);
             s.battHealthFromGauge = false;
+        } else if (s.battSohRegister > 0) {
+            s.battHealthExact = s.battSohRegister;
+            s.battHealthPct = s.battSohRegister;
+            s.battHealthFromGauge = true;
         }
         s.battCycles = readAll(bat + QStringLiteral("/cycle_count")).trimmed().toInt();
         s.battTech = QString::fromLatin1(readAll(bat + QStringLiteral("/technology")).trimmed());
