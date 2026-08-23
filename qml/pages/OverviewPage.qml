@@ -140,8 +140,13 @@ Page {
                 width: page.width - 2 * Theme.horizontalPageMargin
                 x: Theme.horizontalPageMargin
                 title: qsTr("Network")
-                value: sysmon.fmtRate(sysmon.netRxRate + sysmon.netTxRate)
-                accent: Diag.cyan
+                // The headline says which interface carries the traffic, not a
+                // rate: the rates are one line below, and repeating the download
+                // figure here filled the most prominent spot with nothing new.
+                value: sysmon.netIface.length ? sysmon.netIface : qsTr("none")
+                note: sysmon.netIface.length ? "\u00b7  " + qsTr("default route")
+                                             : "\u00b7  " + qsTr("no route out")
+                accent: Diag.green
                 drilldown: true
                 diagLevel: page.diagLevels["network"] || 0
                 onClicked: page.openDetail(HwInfo.net())
@@ -164,14 +169,65 @@ Page {
                             gridColor: Diag.grid
                         }
                     }
-                    KeyValue { label: qsTr("Down / Up"); value:
-                        "↓ " + sysmon.fmtRate(sysmon.netRxRate) + "   ↑ " + sysmon.fmtRate(sysmon.netTxRate) }
+                    // Each figure sits under the graph it belongs to, in the
+                    // same halves: the colour alone had to carry the pairing
+                    // while both numbers stood together on the left.
+                    Row {
+                        width: parent.width
+                        spacing: Theme.paddingMedium
+                        Column {
+                            width: (parent.width - Theme.paddingMedium) / 2
+                            Label {
+                                width: parent.width
+                                horizontalAlignment: Text.AlignHCenter
+                                text: qsTr("Download")
+                                font.pixelSize: Theme.fontSizeTiny
+                                color: Theme.secondaryColor
+                            }
+                            Label {
+                                width: parent.width
+                                horizontalAlignment: Text.AlignHCenter
+                                text: sysmon.fmtRate(sysmon.netRxRate)
+                                font.pixelSize: Theme.fontSizeExtraSmall
+                                color: Diag.green
+                            }
+                        }
+                        Column {
+                            width: (parent.width - Theme.paddingMedium) / 2
+                            Label {
+                                width: parent.width
+                                horizontalAlignment: Text.AlignHCenter
+                                text: qsTr("Upload")
+                                font.pixelSize: Theme.fontSizeTiny
+                                color: Theme.secondaryColor
+                            }
+                            Label {
+                                width: parent.width
+                                horizontalAlignment: Text.AlignHCenter
+                                text: sysmon.fmtRate(sysmon.netTxRate)
+                                font.pixelSize: Theme.fontSizeExtraSmall
+                                color: Diag.amber
+                            }
+                        }
+                    }
+                    // The two rows above are a rate and move with every sample;
+                    // everything below is a running total and only ever grows.
+                    // Nothing but the unit said so, which is why the changing
+                    // figures read as erratic.
+                    Label {
+                        text: qsTr("Total per interface")
+                        font.pixelSize: Theme.fontSizeTiny
+                        font.letterSpacing: 1.2
+                        color: Theme.secondaryHighlightColor
+                        topPadding: Theme.paddingSmall
+                    }
                     Repeater {
                         model: page.ifaceExpanded ? sysmon.interfaces
                                                   : sysmon.interfaces.slice(0, page.listCap)
+                        // Same order as the two rows above: download, then upload.
                         KeyValue {
                             label: modelData.name
-                            value: "↓ " + sysmon.fmtBytes(modelData.rx) + "   ↑ " + sysmon.fmtBytes(modelData.tx)
+                            value: sysmon.fmtBytes(modelData.rx) + "  /  " + sysmon.fmtBytes(modelData.tx)
                         }
                     }
                     MoreToggle {
@@ -336,8 +392,12 @@ Page {
                         color: sysmon.battHealthPct >= 80 ? Diag.green
                             : sysmon.battHealthPct >= 65 ? Diag.amber : Diag.red
                         label: qsTr("State of health")
-                        caption: sysmon.battHealthPct + " % "
-                            + (sysmon.battHealthFromGauge ? qsTr("(gauge)") : qsTr("(calc.)"))
+                        // The ratio of the two capacities, to one decimal, and
+                        // named as such: the gauge's own soh register answers a
+                        // flat 100 here and is shown on the detail page instead.
+                        caption: (sysmon.battHealthExact >= 0
+                                  ? sysmon.battHealthExact.toFixed(1) : sysmon.battHealthPct) + " % "
+                            + (sysmon.battHealthFromGauge ? qsTr("(gauge)") : qsTr("(full ÷ design)"))
                     }
                     KeyValue { visible: sysmon.battChargeDesign > 0
                         label: qsTr("Capacity"); value:

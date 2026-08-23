@@ -101,13 +101,26 @@ Page {
                                 wrapMode: Text.Wrap
                             }
                             Label {
+                                // vRight present: this label takes the left part
+                                // of the value column and the second one is set
+                                // flush right, so lists line up in two columns.
                                 width: parent.width - parent.spacing - Math.round(parent.width * 0.4)
+                                       - (modelData.vRight !== undefined
+                                          ? Math.round(parent.width * 0.22) : 0)
                                 text: modelData.v + (modelData.active === false ? "  ·  " + qsTr("unused") : "")
                                 font.pixelSize: Theme.fontSizeExtraSmall
                                 font.family: modelData.mono === true ? "monospace" : Theme.fontFamily
                                 color: modelData.active === false ? Theme.secondaryColor
                                        : (modelData.color ? modelData.color : Theme.primaryColor)
                                 wrapMode: Text.WrapAnywhere
+                            }
+                            Label {
+                                visible: modelData.vRight !== undefined
+                                width: visible ? Math.round(parent.width * 0.22) : 0
+                                horizontalAlignment: Text.AlignRight
+                                text: modelData.vRight ? modelData.vRight : ""
+                                font.pixelSize: Theme.fontSizeExtraSmall
+                                color: Theme.secondaryColor
                             }
                         }
                     }

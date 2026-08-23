@@ -199,9 +199,13 @@ Page {
                         sysmon.fmtRate(d.io.readRate || 0) + " / " + sysmon.fmtRate(d.io.writeRate || 0) }
                     KeyValue { label: qsTr("Total read/write"); value:
                         sysmon.fmtBytes(d.io.readTotal || 0) + " / " + sysmon.fmtBytes(d.io.writeTotal || 0) }
+                    // Rounded to 10 mW on purpose: this is the process's CPU share
+                    // times the whole device's draw, not a per-app meter, and a
+                    // single-milliwatt figure would claim a precision it has not got.
                     KeyValue { label: qsTr("Est. power share"); value:
-                        d.energy.discharging ? (d.energy.estimateW * 1000).toFixed(0) + " mW ("
-                            + (d.energy.sharePct || 0).toFixed(1) + " %)" : qsTr("charging");
+                        d.energy.discharging
+                            ? (Math.round(d.energy.estimateW * 100) * 10) + " mW ("
+                              + (d.energy.sharePct || 0).toFixed(1) + " %)" : qsTr("charging");
                         valueColor: (d.energy.estimateW || 0) > 0.3 ? Diag.amber : Theme.primaryColor }
                 }
             }

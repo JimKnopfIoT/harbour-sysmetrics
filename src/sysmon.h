@@ -29,6 +29,7 @@ class SysMon : public QObject
     Q_PROPERTY(int processCount READ processCount NOTIFY updated)
     Q_PROPERTY(int threadCount READ threadCount NOTIFY updated)
     Q_PROPERTY(int runnable READ runnable NOTIFY updated)
+    Q_PROPERTY(QString netIface READ netIface NOTIFY updated)
     Q_PROPERTY(double netRxRate READ netRxRate NOTIFY updated)
     Q_PROPERTY(double netTxRate READ netTxRate NOTIFY updated)
     Q_PROPERTY(double netRxTotal READ netRxTotal NOTIFY updated)
@@ -43,6 +44,8 @@ class SysMon : public QObject
     Q_PROPERTY(double battTempC READ battTempC NOTIFY updated)
     Q_PROPERTY(double battPowerW READ battPowerW NOTIFY updated)
     Q_PROPERTY(int battHealthPct READ battHealthPct NOTIFY updated)
+    Q_PROPERTY(double battHealthExact READ battHealthExact NOTIFY updated)
+    Q_PROPERTY(int battSohRegister READ battSohRegister NOTIFY updated)
     Q_PROPERTY(bool battHealthFromGauge READ battHealthFromGauge NOTIFY updated)
     Q_PROPERTY(int battCycles READ battCycles NOTIFY updated)
     Q_PROPERTY(double battChargeFull READ battChargeFull NOTIFY updated)
@@ -51,6 +54,7 @@ class SysMon : public QObject
     Q_PROPERTY(QString battModel READ battModel NOTIFY updated)
     Q_PROPERTY(QString battHealthReport READ battHealthReport NOTIFY updated)
     Q_PROPERTY(QString battQuality READ battQuality NOTIFY updated)
+    Q_PROPERTY(QString battQualityBasis READ battQualityBasis NOTIFY updated)
     Q_PROPERTY(QString battStatus READ battStatus NOTIFY updated)
     Q_PROPERTY(QString kernel READ kernel NOTIFY updated)
     Q_PROPERTY(QVariantList cpuHistory READ cpuHistory NOTIFY updated)
@@ -95,6 +99,7 @@ public:
     int processCount() const { return m_s.processCount; }
     int threadCount() const { return m_s.threadCount; }
     int runnable() const { return m_s.runnable; }
+    QString netIface() const { return m_s.netIface; }
     double netRxRate() const { return m_s.netRxRate; }
     double netTxRate() const { return m_s.netTxRate; }
     double netRxTotal() const { return m_s.netRxTotal; }
@@ -109,6 +114,8 @@ public:
     double battTempC() const { return m_s.battTempC; }
     double battPowerW() const { return m_s.battPowerW; }
     int battHealthPct() const { return m_s.battHealthPct; }
+    double battHealthExact() const { return m_s.battHealthExact; }
+    int battSohRegister() const { return m_s.battSohRegister; }
     bool battHealthFromGauge() const { return m_s.battHealthFromGauge; }
     int battCycles() const { return m_s.battCycles; }
     double battChargeFull() const { return m_s.battChargeFull; }
@@ -117,6 +124,7 @@ public:
     QString battModel() const { return m_s.battModel; }
     QString battHealthReport() const { return m_s.battHealthReport; }
     QString battQuality() const;
+    QString battQualityBasis() const;
     QString battStatus() const { return m_s.battStatus; }
     QString kernel() const { return m_s.kernel; }
     QVariantList cpuHistory() const { return toList(m_cpuHist); }

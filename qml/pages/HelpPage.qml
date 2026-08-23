@@ -28,7 +28,9 @@ Page {
                 { t: qsTr("Nice"), d: qsTr("Scheduling politeness, -20 (greedy) to 19 (yielding). Higher nice = less CPU. Lowering it needs privilege.") },
                 { t: qsTr("Priority"), d: qsTr("Kernel scheduling priority derived from nice; lower runs sooner.") },
                 { t: qsTr("CPU affinity"), d: qsTr("The set of cores a process is allowed to run on.") },
-                { t: qsTr("Share of busy CPU"), d: qsTr("How much of all the work the CPU did in the interval was this one process.") }
+                { t: qsTr("Share of busy CPU"), d: qsTr("How much of all the work the CPU did in the interval was this one process.") },
+                { t: qsTr("CPU time since boot"), d: qsTr("The kernel tallies every tick of every core into user, kernel, idle and waiting. Summed over all cores, which is why the total exceeds the uptime — eight cores accumulate eight seconds per second.") },
+                { t: qsTr("Waiting for storage"), d: qsTr("Time a core sat idle only because a read or write had not come back yet. Constantly high means storage, not the processor, is the limit.") }
             ]
         },
         {
@@ -63,14 +65,16 @@ Page {
                 { t: qsTr("LPDDR"), d: qsTr("Low-Power DDR — the mobile DRAM standard. The type (e.g. LPDDR4X, LPDDR5) fixes the clock range, bus width and command set. Read here from the bootloader's device-tree entry.") },
                 { t: qsTr("Mode registers (MR5–MR8)"), d: qsTr("Small on-die registers a DRAM reports at boot: MR5 = manufacturer, MR6 = revision, MR8 = density and I/O width. The bootloader reads them into SMEM, but this platform does not surface them to software — so maker and organisation stay unknown.") },
                 { t: qsTr("Ranks / channels / banks"), d: qsTr("How the DRAM is built: a package holds one or more channels (independent buses), each channel one or more ranks (sets of dies selected together), each die a fixed number of banks. This organisation is a JEDEC/datasheet property of the part, not a runtime-readable value here.") },
-                { t: qsTr("Physical memory map"), d: qsTr("The address regions the kernel maps, carved around firmware-reserved areas. It reflects how RAM sits in the address space — not the chip's internal rank/channel layout.") }
+                { t: qsTr("Physical memory map"), d: qsTr("The address regions the kernel maps, carved around firmware-reserved areas. It reflects how RAM sits in the address space — not the chip's internal rank/channel layout.") },
+                { t: qsTr("Swapped in / out"), d: qsTr("The running total of memory pages moved between RAM and storage since the last start. Swapped out is what left, swapped back in is what had to be fetched again — the round trip costs time and write cycles.") },
+                { t: qsTr("Killed for memory"), d: qsTr("The out-of-memory killer ends a process when RAM runs out, to keep the system usable. Any number above zero means the phone was at its limit.") }
             ]
         },
         {
             title: qsTr("I/O & energy"), key: "ioenergy",
             items: [
                 { t: qsTr("Disk read/write"), d: qsTr("Bytes per second the process moves to and from storage (actual device I/O, not cache hits).") },
-                { t: qsTr("Estimated power share"), d: qsTr("Rough milliwatts attributed to the process: its CPU share times the battery's measured power draw. An estimate, not a per-app meter.") },
+                { t: qsTr("Estimated power share"), d: qsTr("Milliwatts attributed to a process: its share of CPU time multiplied by the draw the battery gauge measures for the whole device. An estimate, not a per-app meter — a process that keeps the screen or the radio busy costs far more than its CPU share suggests, and one that only waits costs less. Shown rounded to 10 mW because nothing finer is measured, and marked amber above 300 mW, a line this app draws; the hardware reports no per-process limit.") },
                 { t: qsTr("Power draw"), d: qsTr("Whole-device power right now, current times voltage from the fuel gauge.") }
             ]
         },
@@ -107,7 +111,9 @@ Page {
                 { t: "LISTEN", d: qsTr("A server socket accepting new connections.") },
                 { t: "TIME_WAIT / CLOSE_WAIT", d: qsTr("A connection being torn down; briefly lingers before the socket is freed.") },
                 { t: qsTr("Activity dot"), d: qsTr("Lit when data currently sits in the socket's send/receive queue — the connection is exchanging data now.") },
-                { t: qsTr("Socket owner"), d: qsTr("The process holding the socket, found by matching the socket's inode to a process's open handles. Needs root for other users' sockets.") }
+                { t: qsTr("Socket owner"), d: qsTr("The process holding the socket, found by matching the socket's inode to a process's open handles. Needs root for other users' sockets.") },
+                { t: qsTr("Default route"), d: qsTr("The way out. A phone has several interfaces up at once — Wi-Fi, mobile data, tunnels — and the routing table decides which one a packet takes when no more specific rule applies: the default route. That is the interface actually carrying your traffic, which is why the network card names it. With Wi-Fi and mobile data both connected, each offers a default route and the one with the lower metric wins; on Sailfish that is normally Wi-Fi. It changes by itself when you leave the house.") },
+                { t: qsTr("Traffic per interface"), d: qsTr("Bytes an interface has carried since it was created — not since the phone started. The counter belongs to the network device and lives exactly as long as that device does. Switching the radio off is not enough to reset it: on the Xperia 10 III up to SFOS 5.1.0.11, flight mode left both the interface and its total untouched. It starts over only when the device itself is torn down and built anew, as after a driver reload or a firmware crash. Interfaces that exist only while a connection does, like the mobile data ones, count from the moment they appeared. Linux keeps no counter that sums network volume across the whole uptime, which is why none is offered here.") }
             ]
         },
         {
@@ -141,6 +147,15 @@ Page {
             items: [
                 { t: qsTr("Capacity"), d: qsTr("Current charge level in percent.") },
                 { t: qsTr("State of health"), d: qsTr("Usable capacity versus the design capacity when new. Taken from the fuel gauge's own value when it reports one, otherwise computed from charge_full ÷ charge_full_design.") },
+                { t: qsTr("Quality — our reading"), d: qsTr("The word beside the battery is not something the battery reports; it is this app's reading of the state of health. The lines are drawn at 90 % (as new), 80 % (good), 65 % (aged) and 50 % (worn), and below that it suggests considering a replacement. Because the basis matters, the line says where the number came from: a state of health the gauge stands behind, or one computed from charge_full ÷ charge_full_design. Where there is no state of health at all, the wording falls back to the cycle count alone — under 300, 600, 1000 — and says so. That last case is the weakest of the three: cells age very differently for the same number of cycles.") },
+                { t: qsTr("Band crossings"), d: qsTr("The gauge keeps eight counters, one per state-of-charge band, and raises one whenever that band is crossed. Their sum is the charging actually done; the cycle figure the gauge reports is their mean, which is why it comes out far lower. Charging mostly in the upper bands — plugging in at 60 % rather than running the cell down — fills those counters unevenly and drags the mean further from the real load.") },
+                { t: qsTr("Capacity measurements"), d: qsTr("How often the gauge has completed a learning pass and derived a capacity of its own. At zero it has never measured one, and the full capacity it reports comes from the battery profile rather than from this cell — which decides whether a health percentage means ageing or merely compares two catalogue figures.") },
+                { t: qsTr("Battery profile"), d: qsTr("The identifier of the parameter set the gauge loaded for the installed cell: nominal capacity, voltage curve, resistance. A replacement cell can bring a different profile, and with it different nominal figures than the original.") },
+                { t: qsTr("soh register"), d: qsTr("A value the gauge offers as \"state of health\" — but in the Qualcomm driver it is not measured at all: the register is written from outside, by whatever component claims to know better, and simply returned on read. Where nothing ever writes it, it keeps its initial value, which is why a flat 100 is so common. It is shown as its own line rather than as the health figure, so it can be compared with the capacities instead of standing in for them.") },
+                { t: qsTr("Ageing profile"), d: qsTr("Some devices ship several battery profiles, one per stage of ageing, and the gauge switches to a later one as the cell wears — a lower end-of-charge voltage, a different voltage curve. The number is the index of the profile in use, counted from zero; how many exist is fixed in the device tree of that phone, so \"step 0\" means the original profile and not a score out of anything.") },
+                { t: qsTr("Internal resistance (ESR)"), d: qsTr("The equivalent series resistance the gauge last measured, in milliohm. It is what makes the voltage sag under load, and it rises as a cell ages — the most direct wear signal the gauge offers. Measured in pulses rather than continuously, so it does not follow the current draw from moment to moment. Useful as a trend on one device; the absolute figure depends on the cell type.") },
+                { t: qsTr("Total resistance (stored)"), d: qsTr("A calibration figure held in the gauge's persistent storage, covering the whole path — cell plus contacts and wiring — and written there by the platform rather than measured by the gauge itself. It therefore sits higher than the cell's own ESR and does not move as the cell ages. Comparing the two numbers says nothing: one is what was filed away about the whole path, the other is what was just measured across the cell. Only the ESR is worth watching over time.") },
+                { t: qsTr("Battery ID resistor"), d: qsTr("A resistor in the battery pack, in ohm, that tells the phone which cell is fitted so the right profile is loaded. It identifies the battery and says nothing about its condition.") },
                 { t: qsTr("Full cycles"), d: qsTr("Equivalent full charge/discharge cycles counted by the gauge — accumulated charge throughput, not the number of times you plugged in, so it is lower than expected.") },
                 { t: qsTr("Current / Voltage"), d: qsTr("Momentary current (mA, negative when charging) and pack voltage from the gauge.") },
                 { t: qsTr("Health flag"), d: qsTr("The driver's own verdict (Good, Overheat, Cold, Over voltage, Dead …).") },
@@ -148,6 +163,7 @@ Page {
                 { t: qsTr("USB Power Delivery (PD)"), d: qsTr("A protocol where charger and device agree on a voltage/current profile (e.g. 9 V / 3 A), enabling fast charging well beyond standard USB's 2.5 W.") },
                 { t: qsTr("Charging power"), d: qsTr("The actual watts flowing into the battery right now — battery charge current times battery voltage. Lower than the charger's rating due to losses and thermal limits.") },
                 { t: qsTr("Charge type"), d: qsTr("The charging phase: Fast (constant current, bulk of the charge), Taper (constant voltage, slowing as it fills), Trickle (topping off / protecting a low battery).") },
+                { t: qsTr("Where these battery figures come from"), d: qsTr("Each value on the battery page is a register of the kernel's power-supply interface, and what it means is fixed by the driver behind it. On Qualcomm phones that is the QG gauge, drivers/power/supply/qcom/qpnp-qg.c — readable in any copyleft kernel release for the device. There: RESISTANCE_NOW hands out esr_last, the resistance computed in qg_esr_estimate() as ΔV·1000 ÷ ΔI from a measurement pulse and then filtered, in milliohm. RESISTANCE hands out the RBAT value from the gauge's persistent store multiplied by 1000, so microohm, and it covers the whole path including contacts. RESISTANCE_ID hands out batt_id_ohm, the identification resistor, in ohm. SOH hands back whatever was last written into that register — the driver measures nothing for it. ESR_ACTUAL and ESR_NOMINAL answer -22, which is -EINVAL passed through, whenever they were never set. Other chips use other drivers, so this holds for Qualcomm gauges and not for every phone.") },
                 { t: qsTr("Top consumers (drain proxy)"), d: qsTr("CPU time is the single biggest battery drain on a phone, so ranking processes by CPU use approximates who is draining the battery. It is an estimate — a process can also drain via wakeups, radio or screen without much CPU.") }
             ]
         },
@@ -167,7 +183,8 @@ Page {
             items: [
                 { t: qsTr("Sampling interval"), d: qsTr("How often the app re-reads /proc and /sys. Shorter is more responsive but uses more CPU.") },
                 { t: qsTr("Record mode"), d: qsTr("Accumulates CPU time per process over a session and ranks the consumers, catching short-lived processes an instant view misses.") },
-                { t: qsTr("Root mode"), d: qsTr("An optional root helper that lets the app inspect processes of other users (system daemons) fully, read the kernel charger log and pull journal excerpts for a bug report. Reading is limited to a fixed list of files; signals and renice reach one named process, the same ones the process detail page offers without root.") }
+                { t: qsTr("Root mode"), d: qsTr("An optional root helper that lets the app inspect processes of other users (system daemons) fully, read the kernel charger log and pull journal excerpts for a bug report. Reading is limited to a fixed list of files; signals and renice reach one named process, the same ones the process detail page offers without root.") },
+                { t: qsTr("Colour scale"), d: qsTr("Green, amber and red are this app's grading, not a signal from the device. Processor load turns amber at 50 % and red at 80 %. A filesystem turns amber above 75 % and red above 90 %. Battery charge turns red below 20 %. State of health turns amber below 80 % and red below 65 %. Where a colour stands next to a figure, the figure is the evidence and the colour only the opinion about it.") }
             ]
         },
         {
@@ -236,9 +253,12 @@ Page {
                 { t: qsTr("SCSI / LUN"), d: qsTr("UFS speaks the SCSI command set. The chip presents several Logical Units (LUNs): one large user area plus small boot and RPMB units. The capacity shown is the user LUN.") },
                 { t: qsTr("Raw vs usable capacity"), d: qsTr("Marketing capacity counts raw NAND in powers of ten (64 GB = 64·10⁹). The OS counts usable space in powers of two (GiB) after over-provisioning and metadata, so 64 GB shows as ~59.6 GiB.") },
                 { t: qsTr("Over-provisioning"), d: qsTr("Spare NAND the controller keeps hidden for wear-levelling and bad-block replacement — part of why raw and usable differ.") },
-                { t: qsTr("Wear / lifetime"), d: qsTr("UFS reports a health estimate (bDeviceLifeTimeEst) in 10% steps from the count of program/erase cycles used. \"Good\" means most of the endurance budget is unused.") },
+                { t: qsTr("Wear / lifetime"), d: qsTr("UFS and eMMC report a health estimate (bDeviceLifeTimeEst) from the program/erase cycles used — not a percentage, but a step: 0x01 is 0–10 % used, 0x0A is 90–100 %, and 0x0B means the estimated lifetime is exceeded, with no upper figure attached. The percentage shown is the lower edge of the reported band; the exceeded step is named instead of converted.") },
+                { t: qsTr("Spare blocks (pre-EOL)"), d: qsTr("A second, independent register: the controller keeps reserve blocks to replace worn ones, and reports whether under 80 %, 80 % or 90 % of them are consumed. It is the more telling of the two — if the lifetime estimate claims to be exhausted while the spare blocks still read normal, the chip contradicts itself and the estimate should not be trusted.") },
+                { t: qsTr("Assessment — our reading"), d: qsTr("Not a value the chip reports but this app's summary of the two registers above. Urgent when the chip calls its lifetime exceeded or 90 % of the spare blocks consumed; warning at 80 % of spare blocks or from wear step 8 of 11, which is 70 % of the estimated endurance; good below that. The two registers are the better evidence — this line only saves reading them.") },
                 { t: qsTr("Block / erase block"), d: qsTr("NAND is read/written in pages but erased in larger blocks. Logical blocks (sectors, usually 4 KiB) are the unit the filesystem addresses.") },
                 { t: qsTr("RPMB"), d: qsTr("Replay-Protected Memory Block — a small authenticated LUN for anti-rollback and secure counters, not general storage.") },
+                { t: qsTr("Data moved"), d: qsTr("Bytes read from and written to a storage device, counted by the kernel from the moment it registered that device — not from the start of the phone. For built-in storage the two are seconds apart; a memory card counts from when it was inserted, and starts again if it is taken out and put back. Only requests that reached the device are counted: anything served from the cache never appears, so the figure is lower than what programs asked for.") },
                 { t: qsTr("Backup"), d: qsTr("Better to have it and not need it than to need it and not have it. A regular backup — a copy of your data on a second medium — protects you from losing what matters when storage fails, the phone goes missing or something is deleted by mistake. Flash gives no warning before it goes; the copy has to exist beforehand.") }
             ]
         },
@@ -253,13 +273,7 @@ Page {
                 { t: qsTr("Wake source"), d: qsTr("Hardware or a driver that can end deep sleep: an incoming packet, the modem, a timer, a key. The count says how often it did, not whether it was justified.") },
                 { t: qsTr("Suspend attempt"), d: qsTr("The kernel tries to go down whenever nothing holds it awake. Each try either succeeds or is abandoned — a wakeup arriving mid-attempt is enough to abort it, which is why failed attempts are ordinary and not a defect in themselves.") },
                 { t: qsTr("Freezing tasks"), d: qsTr("First step of a suspend: all processes are halted at a safe point. If one refuses or a driver is still busy, the attempt stops right there and the step is recorded.") },
-                { t: qsTr("EBUSY (-16)"), d: qsTr("The error a driver returns when it cannot be put to sleep at that moment because it is still working. It names the device that blocked the attempt.") },
-                { t: qsTr("CPU time since boot"), d: qsTr("The kernel tallies every tick of every core into user, kernel, idle and waiting. Summed over all cores, which is why the total exceeds the uptime — eight cores accumulate eight seconds per second.") },
-                { t: qsTr("Waiting for storage"), d: qsTr("Time a core sat idle only because a read or write had not come back yet. Constantly high means storage, not the processor, is the limit.") },
-                { t: qsTr("Major page fault"), d: qsTr("A memory access that had to be served from storage because the page was not in RAM. A few are normal; many mean memory is tight.") },
-                { t: qsTr("Swap"), d: qsTr("Memory pages parked on storage to make room in RAM. Swapped out is what left, swapped back in is what had to be fetched again — the round trip costs time and write cycles.") },
-                { t: qsTr("Killed for memory"), d: qsTr("The out-of-memory killer ends a process when RAM runs out, to keep the system usable. Any number above zero means the phone was at its limit.") },
-                { t: qsTr("Charge cycles"), d: qsTr("Full charges counted by the battery gauge, summed from partial ones. Kept in the gauge itself, so it survives a restart and counts from the factory.") }
+                { t: qsTr("EBUSY (-16)"), d: qsTr("The error a driver returns when it cannot be put to sleep at that moment because it is still working. It names the device that blocked the attempt.") }
             ]
         }
     ]
