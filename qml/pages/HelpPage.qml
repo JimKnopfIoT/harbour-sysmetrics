@@ -238,7 +238,28 @@ Page {
                 { t: qsTr("Over-provisioning"), d: qsTr("Spare NAND the controller keeps hidden for wear-levelling and bad-block replacement — part of why raw and usable differ.") },
                 { t: qsTr("Wear / lifetime"), d: qsTr("UFS reports a health estimate (bDeviceLifeTimeEst) in 10% steps from the count of program/erase cycles used. \"Good\" means most of the endurance budget is unused.") },
                 { t: qsTr("Block / erase block"), d: qsTr("NAND is read/written in pages but erased in larger blocks. Logical blocks (sectors, usually 4 KiB) are the unit the filesystem addresses.") },
-                { t: qsTr("RPMB"), d: qsTr("Replay-Protected Memory Block — a small authenticated LUN for anti-rollback and secure counters, not general storage.") }
+                { t: qsTr("RPMB"), d: qsTr("Replay-Protected Memory Block — a small authenticated LUN for anti-rollback and secure counters, not general storage.") },
+                { t: qsTr("Backup"), d: qsTr("Better to have it and not need it than to need it and not have it. A regular backup — a copy of your data on a second medium — protects you from losing what matters when storage fails, the phone goes missing or something is deleted by mistake. Flash gives no warning before it goes; the copy has to exist beforehand.") }
+            ]
+        },
+        {
+            title: qsTr("Since boot"), key: "sinceboot",
+            items: [
+                { t: qsTr("Uptime"), d: qsTr("Time since the last start, deep sleep included — the phone counts it even while suspended.") },
+                { t: qsTr("Awake"), d: qsTr("The part of the uptime the system was really running. Two kernel clocks make it visible: one stops during suspend, the other keeps going, and the gap between them is sleep.") },
+                { t: qsTr("Deep sleep"), d: qsTr("Suspend-to-RAM: the CPU is off, memory is kept alive, only a wakeup source can bring the phone back. This is where a phone spends most of its day, and where it saves almost all of its energy.") },
+                { t: qsTr("Screen-on time"), d: qsTr("How long the display was up since the last start. MCE, the Sailfish power daemon, holds a wakelock for exactly that period and the kernel sums it — so the figure exists without anything recording it. It runs a few seconds over per switch-off, because the lock is released after the display is already dark.") },
+                { t: qsTr("Wakelock"), d: qsTr("A request that keeps the system from suspending, held by a driver or a program for as long as it needs the phone awake. The kernel counts how often each one was taken and how long it was held.") },
+                { t: qsTr("Wake source"), d: qsTr("Hardware or a driver that can end deep sleep: an incoming packet, the modem, a timer, a key. The count says how often it did, not whether it was justified.") },
+                { t: qsTr("Suspend attempt"), d: qsTr("The kernel tries to go down whenever nothing holds it awake. Each try either succeeds or is abandoned — a wakeup arriving mid-attempt is enough to abort it, which is why failed attempts are ordinary and not a defect in themselves.") },
+                { t: qsTr("Freezing tasks"), d: qsTr("First step of a suspend: all processes are halted at a safe point. If one refuses or a driver is still busy, the attempt stops right there and the step is recorded.") },
+                { t: qsTr("EBUSY (-16)"), d: qsTr("The error a driver returns when it cannot be put to sleep at that moment because it is still working. It names the device that blocked the attempt.") },
+                { t: qsTr("CPU time since boot"), d: qsTr("The kernel tallies every tick of every core into user, kernel, idle and waiting. Summed over all cores, which is why the total exceeds the uptime — eight cores accumulate eight seconds per second.") },
+                { t: qsTr("Waiting for storage"), d: qsTr("Time a core sat idle only because a read or write had not come back yet. Constantly high means storage, not the processor, is the limit.") },
+                { t: qsTr("Major page fault"), d: qsTr("A memory access that had to be served from storage because the page was not in RAM. A few are normal; many mean memory is tight.") },
+                { t: qsTr("Swap"), d: qsTr("Memory pages parked on storage to make room in RAM. Swapped out is what left, swapped back in is what had to be fetched again — the round trip costs time and write cycles.") },
+                { t: qsTr("Killed for memory"), d: qsTr("The out-of-memory killer ends a process when RAM runs out, to keep the system usable. Any number above zero means the phone was at its limit.") },
+                { t: qsTr("Charge cycles"), d: qsTr("Full charges counted by the battery gauge, summed from partial ones. Kept in the gauge itself, so it survives a restart and counts from the factory.") }
             ]
         }
     ]

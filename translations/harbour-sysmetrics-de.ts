@@ -2377,12 +2377,177 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
         <translation>Replay-Protected Memory Block — eine kleine authentifizierte LUN für Anti-Rollback und sichere Zähler, kein allgemeiner Speicher.</translation>
     </message>
     <message>
+        <location filename="../qml/pages/HelpPage.qml" line="242"/>
+        <source>Backup</source>
+        <translation>Backup</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="242"/>
+        <source>Better to have it and not need it than to need it and not have it. A regular backup — a copy of your data on a second medium — protects you from losing what matters when storage fails, the phone goes missing or something is deleted by mistake. Flash gives no warning before it goes; the copy has to exist beforehand.</source>
+        <translation>Etwas zu haben und nicht zu brauchen ist besser als etwas zu brauchen und nicht zu haben. Eine regelmäßige Datensicherung — eine Kopie der Daten auf einem zweiten Medium — schützt davor, Wichtiges zu verlieren, wenn der Speicher ausfällt, das Telefon abhandenkommt oder etwas versehentlich gelöscht wird. Flash kündigt seinen Ausfall nicht an; die Kopie muss vorher existieren.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="246"/>
+        <source>Since boot</source>
+        <translation>Seit dem Start</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="248"/>
+        <source>Uptime</source>
+        <translation>Laufzeit</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="248"/>
+        <source>Time since the last start, deep sleep included — the phone counts it even while suspended.</source>
+        <translation>Zeit seit dem letzten Start, Tiefschlaf eingerechnet — das Telefon zählt sie auch im Suspend weiter.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="249"/>
+        <source>Awake</source>
+        <translation>Wach</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="249"/>
+        <source>The part of the uptime the system was really running. Two kernel clocks make it visible: one stops during suspend, the other keeps going, and the gap between them is sleep.</source>
+        <translation>Der Teil der Laufzeit, in dem das System wirklich lief. Zwei Kernel-Uhren machen ihn sichtbar: die eine steht im Suspend still, die andere läuft weiter, und der Abstand zwischen beiden ist der Schlaf.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="250"/>
+        <source>Deep sleep</source>
+        <translation>Tiefschlaf</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="250"/>
+        <source>Suspend-to-RAM: the CPU is off, memory is kept alive, only a wakeup source can bring the phone back. This is where a phone spends most of its day, and where it saves almost all of its energy.</source>
+        <translation>Suspend-to-RAM: der Prozessor ist aus, der Speicher bleibt versorgt, nur eine Weckquelle holt das Telefon zurück. Hier verbringt ein Telefon den größten Teil des Tages, und hier spart es fast seine gesamte Energie.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="251"/>
+        <source>Screen-on time</source>
+        <translation>Bildschirmzeit</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="251"/>
+        <source>How long the display was up since the last start. MCE, the Sailfish power daemon, holds a wakelock for exactly that period and the kernel sums it — so the figure exists without anything recording it. It runs a few seconds over per switch-off, because the lock is released after the display is already dark.</source>
+        <translation>Wie lange der Bildschirm seit dem letzten Start an war. MCE, der Energie-Dienst von Sailfish, hält genau für diese Dauer einen Wakelock, und der Kernel summiert ihn — der Wert existiert also, ohne dass etwas mitschreibt. Pro Abschaltvorgang läuft er einige Sekunden nach, weil der Wakelock erst losgelassen wird, wenn der Bildschirm schon dunkel ist.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="252"/>
+        <source>Wakelock</source>
+        <translation>Wakelock</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="252"/>
+        <source>A request that keeps the system from suspending, held by a driver or a program for as long as it needs the phone awake. The kernel counts how often each one was taken and how long it was held.</source>
+        <translation>Eine Anforderung, die das System am Einschlafen hindert, gehalten von einem Treiber oder einem Programm, solange es das Telefon wach braucht. Der Kernel zählt, wie oft jeder genommen und wie lange er gehalten wurde.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="253"/>
+        <source>Wake source</source>
+        <translation>Weckquelle</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="253"/>
+        <source>Hardware or a driver that can end deep sleep: an incoming packet, the modem, a timer, a key. The count says how often it did, not whether it was justified.</source>
+        <translation>Hardware oder ein Treiber, die den Tiefschlaf beenden können: ein eintreffendes Paket, das Modem, ein Zeitgeber, eine Taste. Die Zahl sagt, wie oft das geschah, nicht ob es berechtigt war.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="254"/>
+        <source>Suspend attempt</source>
+        <translation>Einschlafversuch</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="254"/>
+        <source>The kernel tries to go down whenever nothing holds it awake. Each try either succeeds or is abandoned — a wakeup arriving mid-attempt is enough to abort it, which is why failed attempts are ordinary and not a defect in themselves.</source>
+        <translation>Der Kernel versucht einzuschlafen, sobald ihn nichts mehr wach hält. Jeder Versuch gelingt oder wird abgebrochen — ein Wecksignal mitten im Versuch genügt zum Abbruch, weshalb fehlgeschlagene Versuche gewöhnlich sind und für sich genommen kein Defekt.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="255"/>
+        <source>Freezing tasks</source>
+        <translation>Einfrieren der Prozesse</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="255"/>
+        <source>First step of a suspend: all processes are halted at a safe point. If one refuses or a driver is still busy, the attempt stops right there and the step is recorded.</source>
+        <translation>Erster Schritt eines Suspends: alle Prozesse werden an einer sicheren Stelle angehalten. Weigert sich einer oder ist ein Treiber noch beschäftigt, endet der Versuch genau dort, und der Schritt wird vermerkt.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="256"/>
+        <source>EBUSY (-16)</source>
+        <translation>EBUSY (-16)</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="256"/>
+        <source>The error a driver returns when it cannot be put to sleep at that moment because it is still working. It names the device that blocked the attempt.</source>
+        <translation>Der Fehler, den ein Treiber zurückgibt, wenn er in diesem Moment nicht schlafen gelegt werden kann, weil er noch arbeitet. Er benennt das Gerät, das den Versuch blockiert hat.</translation>
+    </message>
+    <message>
         <location filename="../qml/pages/HelpPage.qml" line="257"/>
+        <source>CPU time since boot</source>
+        <translation>CPU-Zeit seit dem Start</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="257"/>
+        <source>The kernel tallies every tick of every core into user, kernel, idle and waiting. Summed over all cores, which is why the total exceeds the uptime — eight cores accumulate eight seconds per second.</source>
+        <translation>Der Kernel verbucht jeden Takt jedes Kerns auf Benutzer, Kernel, Leerlauf und Warten. Summiert über alle Kerne — deshalb übersteigt die Summe die Laufzeit: acht Kerne sammeln acht Sekunden je Sekunde.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="258"/>
+        <source>Waiting for storage</source>
+        <translation>Warten auf den Speicher</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="258"/>
+        <source>Time a core sat idle only because a read or write had not come back yet. Constantly high means storage, not the processor, is the limit.</source>
+        <translation>Zeit, in der ein Kern nur deshalb untätig war, weil ein Lese- oder Schreibvorgang noch nicht zurückkam. Dauerhaft hoch heißt: der Speicher ist die Grenze, nicht der Prozessor.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="259"/>
+        <source>Major page fault</source>
+        <translation>Großer Seitenfehler</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="259"/>
+        <source>A memory access that had to be served from storage because the page was not in RAM. A few are normal; many mean memory is tight.</source>
+        <translation>Ein Speicherzugriff, der aus dem Massenspeicher bedient werden musste, weil die Seite nicht im RAM lag. Ein paar sind normal; viele bedeuten knappen Speicher.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="260"/>
+        <source>Swap</source>
+        <translation>Swap</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="260"/>
+        <source>Memory pages parked on storage to make room in RAM. Swapped out is what left, swapped back in is what had to be fetched again — the round trip costs time and write cycles.</source>
+        <translation>Speicherseiten, die auf den Massenspeicher ausgelagert werden, um Platz im RAM zu schaffen. Ausgelagert ist, was ging; zurückgeholt ist, was wieder hereingeholt werden musste — der Weg hin und zurück kostet Zeit und Schreibzyklen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="261"/>
+        <source>Killed for memory</source>
+        <translation>Wegen Speichermangel beendet</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="261"/>
+        <source>The out-of-memory killer ends a process when RAM runs out, to keep the system usable. Any number above zero means the phone was at its limit.</source>
+        <translation>Der Out-of-Memory-Killer beendet einen Prozess, wenn das RAM ausgeht, um das System bedienbar zu halten. Jede Zahl über null heißt: das Telefon war an seiner Grenze.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="262"/>
+        <source>Charge cycles</source>
+        <translation>Ladezyklen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="262"/>
+        <source>Full charges counted by the battery gauge, summed from partial ones. Kept in the gauge itself, so it survives a restart and counts from the factory.</source>
+        <translation>Vollständige Ladungen, gezählt von der Akku-Elektronik und aus Teilladungen aufsummiert. Sie liegt in der Elektronik selbst, übersteht also einen Neustart und zählt ab Werk.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="278"/>
         <source>Glossary</source>
         <translation>Glossar</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="265"/>
+        <location filename="../qml/pages/HelpPage.qml" line="286"/>
         <source>Every figure the app shows, explained. Tap a term to reveal its details.</source>
         <translation>Jede Zahl, die die App zeigt, erklärt. Tippe einen Begriff an, um die Details zu sehen.</translation>
     </message>
@@ -2433,6 +2598,7 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="24"/>
+        <location filename="../qml/pages/HwInfo.js" line="1023"/>
         <source>Kernel</source>
         <translation>Kernel</translation>
     </message>
@@ -3652,6 +3818,281 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
         <translation>gesperrt</translation>
     </message>
     <message>
+        <location filename="../qml/pages/HwInfo.js" line="936"/>
+        <source>Uptime</source>
+        <translation>Laufzeit</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="938"/>
+        <source>Awake</source>
+        <translation>Wach</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="939"/>
+        <source>Deep sleep</source>
+        <translation>Tiefschlaf</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="942"/>
+        <source>Screen on</source>
+        <translation>Bildschirm an</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="943"/>
+        <source>Times switched on</source>
+        <translation>Einschaltvorgänge</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="944"/>
+        <source>Longest session</source>
+        <translation>Längste Sitzung</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="948"/>
+        <source>Awake, screen off</source>
+        <translation>Wach, Bildschirm aus</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="950"/>
+        <source>Times</source>
+        <translation>Zeiten</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="953"/>
+        <source>Screen-on time is MCE&apos;s own tally, good to about 1 %: the counter is released a few seconds after the display goes dark, so every switch-off adds a little surplus. Time on the charger is counted in and cannot be separated out — the kernel keeps no cumulative charging time, and two totals never yield their overlap. Read it as usage, not as battery drain.</source>
+        <translation>Die Bildschirmzeit ist MCEs eigene Buchführung, auf etwa 1 % genau: der Zähler wird erst einige Sekunden nach dem Verdunkeln losgelassen, jeder Abschaltvorgang legt also ein wenig drauf. Zeit am Ladegerät ist mitgezählt und lässt sich nicht herausrechnen — der Kernel führt keine kumulierte Ladezeit, und zwei Summen ergeben nie ihre Schnittmenge. Zu lesen als Nutzung, nicht als Akkuverbrauch.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="961"/>
+        <source>Went to sleep</source>
+        <translation>Eingeschlafen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="964"/>
+        <source>Attempts that failed</source>
+        <translation>Fehlgeschlagene Versuche</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="966"/>
+        <source>blocked while freezing tasks</source>
+        <translation>beim Einfrieren der Prozesse blockiert</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="967"/>
+        <source>blocked while preparing</source>
+        <translation>beim Vorbereiten blockiert</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="968"/>
+        <source>blocked by a driver</source>
+        <translation>von einem Treiber blockiert</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="969"/>
+        <source>blocked late in suspend</source>
+        <translation>spät im Einschlafen blockiert</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="970"/>
+        <source>blocked with interrupts off</source>
+        <translation>bei abgeschalteten Interrupts blockiert</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="971"/>
+        <source>failed on the way back up</source>
+        <translation>beim Aufwachen fehlgeschlagen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="976"/>
+        <source>Last blocked by</source>
+        <translation>Zuletzt blockiert von</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="977"/>
+        <source>Stopped at step</source>
+        <translation>Abgebrochen bei Schritt</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="980"/>
+        <source>device busy</source>
+        <translation>Gerät beschäftigt</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="980"/>
+        <source>try again</source>
+        <translation>erneut versuchen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="981"/>
+        <source>Error code</source>
+        <translation>Fehlercode</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="983"/>
+        <source>Falling asleep</source>
+        <translation>Einschlafen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="984"/>
+        <source>A failed attempt is not a fault. The kernel retries continuously, and any wakeup arriving mid-attempt is counted as a failure, so a high share is normal. What carries meaning is the device named above and the step it stopped at: that is who was still busy when the phone tried to go down.</source>
+        <translation>Ein fehlgeschlagener Versuch ist kein Fehler. Der Kernel versucht es fortlaufend, und jedes Wecksignal mitten im Versuch zählt als Fehlschlag — ein hoher Anteil ist also normal. Aussagekräftig sind das oben genannte Gerät und der Schritt, bei dem es abbrach: das war, wer noch beschäftigt war, als das Telefon einschlafen wollte.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="993"/>
+        <source>%1 ×</source>
+        <translation>%1 ×</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="996"/>
+        <source>What wakes the phone</source>
+        <translation>Was das Telefon weckt</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="997"/>
+        <source>How often each source signalled a wakeup, and how long it held the system awake in total. A high count is not automatically bad — the clock ticking and the modem receiving are what a phone does. It becomes interesting when a single source dominates and deep sleep is short.</source>
+        <translation>Wie oft jede Quelle ein Wecksignal gegeben hat und wie lange sie das System insgesamt wach hielt. Eine hohe Zahl ist nicht automatisch schlecht — die Uhr, die tickt, und das Modem, das empfängt, sind das, was ein Telefon tut. Interessant wird es, wenn eine einzelne Quelle heraussticht und der Tiefschlaf kurz ist.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1005"/>
+        <source>%1 read</source>
+        <translation>%1 gelesen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1006"/>
+        <source>%1 written</source>
+        <translation>%1 geschrieben</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1010"/>
+        <source>Network received</source>
+        <translation>Netzwerk empfangen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1011"/>
+        <source>Network sent</source>
+        <translation>Netzwerk gesendet</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1014"/>
+        <source>Data moved</source>
+        <translation>Bewegte Daten</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1015"/>
+        <source>Storage figures count traffic that reached the device, not cache hits. Network counters restart whenever an interface goes down, so they can be younger than the uptime.</source>
+        <translation>Die Speicherwerte zählen den Verkehr, der wirklich das Gerät erreicht hat, keine Cache-Treffer. Die Netzwerkzähler beginnen neu, sobald eine Schnittstelle abgeschaltet wird — sie können also jünger sein als die Laufzeit.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1022"/>
+        <source>Idle</source>
+        <translation>Leerlauf</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1022"/>
+        <source>User programs</source>
+        <translation>Benutzerprogramme</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1023"/>
+        <source>Waiting for storage</source>
+        <translation>Warten auf den Speicher</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1024"/>
+        <source>Interrupts</source>
+        <translation>Interrupts</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1024"/>
+        <source>Soft interrupts</source>
+        <translation>Soft-Interrupts</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1025"/>
+        <source>Background (nice)</source>
+        <translation>Hintergrund (nice)</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1025"/>
+        <source>Stolen</source>
+        <translation>Entzogen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1032"/>
+        <source>Where the CPU time went</source>
+        <translation>Wohin die CPU-Zeit ging</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1033"/>
+        <source>Summed over all cores since boot, which is why the total runs well past the uptime. Idle dominating is the healthy case.</source>
+        <translation>Summiert über alle Kerne seit dem Start — deshalb liegt die Summe weit über der Laufzeit. Dass der Leerlauf überwiegt, ist der gesunde Fall.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1041"/>
+        <source>Major page faults</source>
+        <translation>Große Seitenfehler</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1042"/>
+        <source>Swapped back in</source>
+        <translation>Zurückgeholt</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1043"/>
+        <source>Swapped out</source>
+        <translation>Ausgelagert</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1045"/>
+        <source>Killed for memory</source>
+        <translation>Wegen Speichermangel beendet</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1048"/>
+        <source>Memory pressure</source>
+        <translation>Speicherdruck</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1049"/>
+        <source>Swap traffic and major faults are the price of a full RAM: the system had to fetch pages back from storage. Steady numbers are normal; a kill for memory means a process was ended to keep the system alive.</source>
+        <translation>Swap-Verkehr und große Seitenfehler sind der Preis eines vollen Arbeitsspeichers: das System musste Seiten aus dem Massenspeicher zurückholen. Gleichbleibende Zahlen sind normal; ein Beenden wegen Speichermangel heißt, dass ein Prozess abgebrochen wurde, damit das System weiterlaufen konnte.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1058"/>
+        <source>Battery capacity left</source>
+        <translation>Verbleibende Akkukapazität</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1062"/>
+        <source>Flash wear</source>
+        <translation>Flash-Verschleiß</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1062"/>
+        <source>~%1 % of endurance used</source>
+        <translation>~%1 % der Lebensdauer verbraucht</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1065"/>
+        <source>Over the device&apos;s life</source>
+        <translation>Über die Lebensdauer des Geräts</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1066"/>
+        <source>These three survive a restart: they are kept by the battery gauge and the flash controller themselves, and count from the factory, not from this boot.</source>
+        <translation>Diese Werte überstehen einen Neustart: Akku-Elektronik und Flash-Controller führen sie selbst, und sie zählen ab Werk, nicht ab diesem Start.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1071"/>
+        <source>This kernel exposes none of the accumulated counters.</source>
+        <translation>Dieser Kernel gibt keinen der akkumulierten Zähler preis.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HwInfo.js" line="1073"/>
+        <source>Since boot</source>
+        <translation>Seit dem Start</translation>
+    </message>
+    <message>
         <location filename="../qml/pages/HwInfo.js" line="486"/>
         <source>no charger events in the kernel buffer</source>
         <translation>keine Ladegerät-Ereignisse im Kernel-Puffer</translation>
@@ -3752,6 +4193,7 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
     </message>
     <message>
         <location filename="../qml/pages/HwInfo.js" line="513"/>
+        <location filename="../qml/pages/HwInfo.js" line="1056"/>
         <source>Charge cycles</source>
         <translation>Ladezyklen</translation>
     </message>
@@ -4198,140 +4640,165 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
 <context>
     <name>MainPage</name>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="65"/>
+        <location filename="../qml/pages/MainPage.qml" line="74"/>
         <source>Resume</source>
         <translation>Fortsetzen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="65"/>
+        <location filename="../qml/pages/MainPage.qml" line="74"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="69"/>
+        <location filename="../qml/pages/MainPage.qml" line="78"/>
         <source>Bug reports</source>
         <translation>Bugreports</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="73"/>
+        <location filename="../qml/pages/MainPage.qml" line="82"/>
         <source>Record load</source>
         <translation>Last aufzeichnen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="77"/>
+        <location filename="../qml/pages/MainPage.qml" line="86"/>
         <source>Connections</source>
         <translation>Verbindungen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="81"/>
+        <location filename="../qml/pages/MainPage.qml" line="90"/>
         <source>System overview</source>
         <translation>Systemübersicht</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="61"/>
+        <location filename="../qml/pages/MainPage.qml" line="70"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="91"/>
+        <location filename="../qml/pages/MainPage.qml" line="100"/>
         <source>SysMetrics</source>
         <translation>SysMetrics</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="92"/>
+        <location filename="../qml/pages/MainPage.qml" line="101"/>
         <source>%1 processes · %2 threads</source>
         <translation>%1 Prozesse · %2 Threads</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="122"/>
-        <location filename="../qml/pages/MainPage.qml" line="224"/>
+        <location filename="../qml/pages/MainPage.qml" line="131"/>
+        <location filename="../qml/pages/MainPage.qml" line="233"/>
         <source>CPU</source>
         <translation>CPU</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="137"/>
+        <location filename="../qml/pages/MainPage.qml" line="146"/>
         <source>load %1  ·  %2 of %3 cores</source>
         <translation>Last %1  ·  %2 von %3 Kernen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="140"/>
+        <location filename="../qml/pages/MainPage.qml" line="149"/>
         <source>load %1  ·  %2 cores</source>
         <translation>Last %1  ·  %2 Kerne</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="168"/>
+        <location filename="../qml/pages/MainPage.qml" line="177"/>
         <source>Cores</source>
         <translation>Kerne</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="174"/>
+        <location filename="../qml/pages/MainPage.qml" line="183"/>
         <source>avg %1%</source>
         <translation>Ø %1 %</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="195"/>
+        <location filename="../qml/pages/MainPage.qml" line="204"/>
         <source>c%1</source>
         <translation>K%1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="196"/>
+        <location filename="../qml/pages/MainPage.qml" line="205"/>
         <source>offline</source>
         <translation>offline</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="208"/>
+        <location filename="../qml/pages/MainPage.qml" line="217"/>
         <source>Filter by name, cmdline or PID</source>
         <translation>Nach Name, Kommandozeile oder PID filtern</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="225"/>
+        <location filename="../qml/pages/MainPage.qml" line="234"/>
         <source>Memory</source>
         <translation>Speicher</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="226"/>
+        <location filename="../qml/pages/MainPage.qml" line="235"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="227"/>
+        <location filename="../qml/pages/MainPage.qml" line="236"/>
         <source>PID</source>
         <translation>PID</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="228"/>
+        <location filename="../qml/pages/MainPage.qml" line="237"/>
         <source>Threads</source>
         <translation>Threads</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="252"/>
+        <location filename="../qml/pages/MainPage.qml" line="261"/>
         <source>Apps only</source>
         <translation>Nur Apps</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="257"/>
+        <location filename="../qml/pages/MainPage.qml" line="266"/>
         <source>Kernel threads</source>
         <translation>Kernel-Threads</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="269"/>
+        <location filename="../qml/pages/MainPage.qml" line="278"/>
         <source>All processes (%1)</source>
         <translation>Alle Prozesse (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="270"/>
+        <location filename="../qml/pages/MainPage.qml" line="279"/>
         <source>Top consumers</source>
         <translation>Top-Verbraucher</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="313"/>
+        <location filename="../qml/pages/MainPage.qml" line="326"/>
         <source>Collapse</source>
         <translation>Einklappen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="314"/>
+        <location filename="../qml/pages/MainPage.qml" line="327"/>
         <source>Show all %1 processes</source>
         <translation>Alle %1 Prozesse anzeigen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="347"/>
+        <source>Since boot</source>
+        <translation>Seit dem Start</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="349"/>
+        <source>uptime</source>
+        <translation>Laufzeit</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="363"/>
+        <source>Deep sleep</source>
+        <translation>Tiefschlaf</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="373"/>
+        <source>Screen on</source>
+        <translation>Bildschirm an</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="384"/>
+        <source>Awake, screen off</source>
+        <translation>Wach, Bildschirm aus</translation>
     </message>
 </context>
 <context>
@@ -5322,57 +5789,57 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
 <context>
     <name>SysMon</name>
     <message>
-        <location filename="../src/sysmon.cpp" line="1944"/>
+        <location filename="../src/sysmon.cpp" line="1947"/>
         <source>as new</source>
         <translation>wie neu</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1945"/>
+        <location filename="../src/sysmon.cpp" line="1948"/>
         <source>good</source>
         <translation>gut</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1946"/>
+        <location filename="../src/sysmon.cpp" line="1949"/>
         <source>aged</source>
         <translation>gealtert</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1947"/>
+        <location filename="../src/sysmon.cpp" line="1950"/>
         <source>worn</source>
         <translation>verschlissen</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1948"/>
+        <location filename="../src/sysmon.cpp" line="1951"/>
         <source>poor — consider replacement</source>
         <translation>schlecht — Austausch erwägen</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1951"/>
+        <location filename="../src/sysmon.cpp" line="1954"/>
         <source>good (%1 cycles)</source>
         <translation>gut (%1 Zyklen)</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1952"/>
+        <location filename="../src/sysmon.cpp" line="1955"/>
         <source>aged (%1 cycles)</source>
         <translation>gealtert (%1 Zyklen)</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1953"/>
+        <location filename="../src/sysmon.cpp" line="1956"/>
         <source>worn (%1 cycles)</source>
         <translation>verschlissen (%1 Zyklen)</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1954"/>
+        <location filename="../src/sysmon.cpp" line="1957"/>
         <source>poor (%1 cycles)</source>
         <translation>schlecht (%1 Zyklen)</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1956"/>
+        <location filename="../src/sysmon.cpp" line="1959"/>
         <source>unknown</source>
         <translation>unbekannt</translation>
     </message>
     <message>
-        <location filename="../src/sysmon.cpp" line="1959"/>
+        <location filename="../src/sysmon.cpp" line="1962"/>
         <source> · %1 cycles</source>
         <translation> · %1 Zyklen</translation>
     </message>

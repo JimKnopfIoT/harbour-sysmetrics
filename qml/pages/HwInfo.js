@@ -918,3 +918,157 @@ function modem() {
     }
     return { title: qsTr("Modem / SIM"), helpTopics: ["modem"], sections: s }
 }
+
+// ---- accumulated: what the kernel has been tallying all along --------------
+// Every figure here is read once from a counter the system keeps anyway. The
+// app writes nothing and remembers nothing between runs — which is also the
+// limit of the section: it can show totals, never a history.
+function sinceBoot() {
+    var d = sysmon.sinceBootDetail()
+    var s = []
+    var up = d.uptimeSec > 0 ? d.uptimeSec : 0
+    function pctOfUp(sec) { return up > 0 ? Math.round(100 * sec / up) + " %" : "" }
+    function dur(sec) { return sysmon.fmtDuration(Math.round(sec)) }
+    function withPct(sec) { var p = pctOfUp(sec); return dur(sec) + (p ? "  ·  " + p : "") }
+
+    // --- times ------------------------------------------------------------
+    var t = []
+    if (up > 0) t.push(row(qsTr("Uptime"), dur(up)))
+    if (d.awakeSec !== undefined) {
+        t.push(row(qsTr("Awake"), withPct(d.awakeSec)))
+        t.push(row(qsTr("Deep sleep"), withPct(up - d.awakeSec)))
+    }
+    if (d.screenSec !== undefined) {
+        t.push(row(qsTr("Screen on"), withPct(d.screenSec)))
+        if (d.screenCycles > 0) t.push(row(qsTr("Times switched on"), d.screenCycles))
+        if (d.screenLongestSec > 0) t.push(row(qsTr("Longest session"), dur(d.screenLongestSec)))
+        // The interesting residue: awake with nobody looking. Small is healthy;
+        // large means something kept the phone up on its own.
+        if (d.awakeSec !== undefined && d.awakeSec > d.screenSec)
+            t.push(row(qsTr("Awake, screen off"), withPct(d.awakeSec - d.screenSec)))
+    }
+    if (t.length) s.push({ title: qsTr("Times"), rows: t })
+
+    if (d.screenSec !== undefined) {
+        s.push({ note: qsTr("Screen-on time is MCE's own tally, good to about 1 %: the counter is released a few seconds after the display goes dark, so every switch-off adds a little surplus. Time on the charger is counted in and cannot be separated out — the kernel keeps no cumulative charging time, and two totals never yield their overlap. Read it as usage, not as battery drain."),
+                 rows: [] })
+    }
+
+    // --- suspend ----------------------------------------------------------
+    if (d.suspend) {
+        var su = d.suspend, sr = []
+        var ok = parseFloat(su.success), bad = parseFloat(su.fail)
+        if (!isNaN(ok)) sr.push(row(qsTr("Went to sleep"), ok))
+        if (!isNaN(bad)) {
+            var quota = (!isNaN(ok) && ok + bad > 0) ? "  ·  " + Math.round(100 * bad / (ok + bad)) + " %" : ""
+            sr.push(row(qsTr("Attempts that failed"), bad + quota))
+        }
+        var steps = [["failed_freeze", qsTr("blocked while freezing tasks")],
+                     ["failed_prepare", qsTr("blocked while preparing")],
+                     ["failed_suspend", qsTr("blocked by a driver")],
+                     ["failed_suspend_late", qsTr("blocked late in suspend")],
+                     ["failed_suspend_noirq", qsTr("blocked with interrupts off")],
+                     ["failed_resume", qsTr("failed on the way back up")]]
+        for (var i = 0; i < steps.length; ++i) {
+            var v = parseFloat(su[steps[i][0]])
+            if (!isNaN(v) && v > 0) sr.push(row(steps[i][1], v))
+        }
+        if (su.last_failed_dev) sr.push(row(qsTr("Last blocked by"), su.last_failed_dev, {mono:true}))
+        if (su.last_failed_step) sr.push(row(qsTr("Stopped at step"), su.last_failed_step, {mono:true}))
+        if (su.last_failed_errno) {
+            var en = parseFloat(su.last_failed_errno)
+            var meaning = en === -16 ? qsTr("device busy") : en === -11 ? qsTr("try again") : ""
+            sr.push(row(qsTr("Error code"), su.last_failed_errno + (meaning ? "  ·  " + meaning : "")))
+        }
+        s.push({ title: qsTr("Falling asleep"), rows: sr })
+        s.push({ note: qsTr("A failed attempt is not a fault. The kernel retries continuously, and any wakeup arriving mid-attempt is counted as a failure, so a high share is normal. What carries meaning is the device named above and the step it stopped at: that is who was still busy when the phone tried to go down."),
+                 rows: [] })
+    }
+
+    // --- wake sources -----------------------------------------------------
+    if (d.wakers && d.wakers.length) {
+        var wr = []
+        for (var w = 0; w < d.wakers.length && w < 12; ++w) {
+            var k = d.wakers[w]
+            wr.push(row(k.name, qsTr("%1 ×").arg(k.count)
+                        + (k.heldSec > 1 ? "  ·  " + dur(k.heldSec) : ""), {mono:true}))
+        }
+        s.push({ title: qsTr("What wakes the phone"), rows: wr })
+        s.push({ note: qsTr("How often each source signalled a wakeup, and how long it held the system awake in total. A high count is not automatically bad — the clock ticking and the modem receiving are what a phone does. It becomes interesting when a single source dominates and deep sleep is short."),
+                 rows: [] })
+    }
+
+    // --- data moved -------------------------------------------------------
+    var dr = []
+    if (d.disks) {
+        for (var k2 = 0; k2 < d.disks.length; ++k2) {
+            dr.push(row(qsTr("%1 read").arg(d.disks[k2].name), sysmon.fmtBytes(d.disks[k2].readBytes)))
+            dr.push(row(qsTr("%1 written").arg(d.disks[k2].name), sysmon.fmtBytes(d.disks[k2].writeBytes)))
+        }
+    }
+    if (sysmon.netRxTotal > 0 || sysmon.netTxTotal > 0) {
+        dr.push(row(qsTr("Network received"), sysmon.fmtBytes(sysmon.netRxTotal)))
+        dr.push(row(qsTr("Network sent"), sysmon.fmtBytes(sysmon.netTxTotal)))
+    }
+    if (dr.length) {
+        s.push({ title: qsTr("Data moved"), rows: dr })
+        s.push({ note: qsTr("Storage figures count traffic that reached the device, not cache hits. Network counters restart whenever an interface goes down, so they can be younger than the uptime."),
+                 rows: [] })
+    }
+
+    // --- CPU budget -------------------------------------------------------
+    if (d.cpu && d.cpu.total > 0) {
+        var c = d.cpu, cr = []
+        var names = [["idle", qsTr("Idle")], ["user", qsTr("User programs")],
+                     ["system", qsTr("Kernel")], ["iowait", qsTr("Waiting for storage")],
+                     ["irq", qsTr("Interrupts")], ["softirq", qsTr("Soft interrupts")],
+                     ["nice", qsTr("Background (nice)")], ["steal", qsTr("Stolen")]]
+        for (var n = 0; n < names.length; ++n) {
+            var val = c[names[n][0]]
+            if (val === undefined || val <= 0) continue
+            cr.push(row(names[n][1], dur(val) + "  ·  " + Math.round(100 * val / c.total) + " %"))
+        }
+        if (cr.length) {
+            s.push({ title: qsTr("Where the CPU time went"), rows: cr })
+            s.push({ note: qsTr("Summed over all cores since boot, which is why the total runs well past the uptime. Idle dominating is the healthy case."),
+                     rows: [] })
+        }
+    }
+
+    // --- memory pressure --------------------------------------------------
+    if (d.vm) {
+        var vr = []
+        if (d.vm.pgmajfault > 0) vr.push(row(qsTr("Major page faults"), Math.round(d.vm.pgmajfault)))
+        if (d.vm.pswpin > 0) vr.push(row(qsTr("Swapped back in"), sysmon.fmtBytes(d.vm.pswpin * 4096)))
+        if (d.vm.pswpout > 0) vr.push(row(qsTr("Swapped out"), sysmon.fmtBytes(d.vm.pswpout * 4096)))
+        if (d.vm.oom_kill !== undefined)
+            vr.push(row(qsTr("Killed for memory"), Math.round(d.vm.oom_kill),
+                        {color: d.vm.oom_kill > 0 ? "#ffb44a" : undefined}))
+        if (vr.length) {
+            s.push({ title: qsTr("Memory pressure"), rows: vr })
+            s.push({ note: qsTr("Swap traffic and major faults are the price of a full RAM: the system had to fetch pages back from storage. Steady numbers are normal; a kill for memory means a process was ended to keep the system alive."),
+                     rows: [] })
+        }
+    }
+
+    // --- lifetime counters, which predate this boot -----------------------
+    var lr = []
+    if (sysmon.battCycles > 0) lr.push(row(qsTr("Charge cycles"), sysmon.battCycles))
+    if (sysmon.battHealthPct > 0 && sysmon.battChargeDesign > 0)
+        lr.push(row(qsTr("Battery capacity left"), sysmon.battHealthPct + " %"))
+    var hw = sysmon.storageHardware()
+    for (var h = 0; h < hw.length; ++h) {
+        if (hw[h].lifeUsedPct !== undefined && hw[h].healthVerdict)
+            lr.push(row(qsTr("Flash wear"), qsTr("~%1 % of endurance used").arg(hw[h].lifeUsedPct)))
+    }
+    if (lr.length) {
+        s.push({ title: qsTr("Over the device's life"), rows: lr })
+        s.push({ note: qsTr("These three survive a restart: they are kept by the battery gauge and the flash controller themselves, and count from the factory, not from this boot."),
+                 rows: [] })
+    }
+
+    if (!s.length)
+        s.push({ note: qsTr("This kernel exposes none of the accumulated counters."), rows: [] })
+
+    return { title: qsTr("Since boot"), helpTopics: ["sinceboot"], sections: s }
+}

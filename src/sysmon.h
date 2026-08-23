@@ -140,6 +140,7 @@ public:
     Q_INVOKABLE QVariantMap batteryHardware() const;
     Q_INVOKABLE QVariantMap chargerDetail() const;
     Q_INVOKABLE QVariantMap memoryDetail() const;
+    Q_INVOKABLE QVariantMap sinceBootDetail() const;
     Q_INVOKABLE QVariantMap cpuDetail() const;
     Q_INVOKABLE QVariantMap graphicsDetail() const;
     Q_INVOKABLE QVariantMap audioDetail() const;

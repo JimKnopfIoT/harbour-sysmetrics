@@ -2,13 +2,22 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.sysmetrics 1.0
 import "../components"
+import "HwInfo.js" as HwInfo
 
 Page {
     id: page
     allowedOrientations: Orientation.All
 
     property bool _helpAttached: false
-    property var helpTopics: ["cpu","procstate","sched","mem","procid","monitoring"]
+    property var helpTopics: ["cpu","procstate","sched","mem","procid","monitoring","sinceboot"]
+
+    // Counters the kernel has been keeping since boot. They crawl, so they are
+    // read on entry and every half minute -- reading them at sampling speed
+    // would cost more than the figures are worth.
+    property var acc: ({})
+    function refreshAcc() { acc = sysmon.sinceBootDetail() }
+    Component.onCompleted: refreshAcc()
+    Timer { interval: 30000; running: true; repeat: true; onTriggered: page.refreshAcc() }
     function _attachHelp() {
         if (_helpAttached) return
         if (helpTopics && helpTopics.length === 0) { _helpAttached = true; return }
@@ -301,26 +310,85 @@ Page {
                                       { pid: pid, pname: name })
         }
 
-        footer: BackgroundItem {
+        footer: Column {
             width: list.width
-            height: Theme.itemSizeMedium
-            visible: procs.search.length === 0 && procs.count > page.topCount
-            onClicked: page.expanded = !page.expanded
-            Row {
-                anchors.centerIn: parent
-                spacing: Theme.paddingSmall
-                Label {
-                    text: page.expanded ? qsTr("Collapse")
-                          : qsTr("Show all %1 processes").arg(procs.count)
-                    color: Diag.cyan
-                    font.pixelSize: Theme.fontSizeSmall
-                }
-                Label {
-                    text: page.expanded ? "▲" : "▼"
-                    color: Diag.cyan
-                    font.pixelSize: Theme.fontSizeSmall
+            spacing: Theme.paddingMedium
+
+            BackgroundItem {
+                width: parent.width
+                height: visible ? Theme.itemSizeMedium : 0
+                visible: procs.search.length === 0 && procs.count > page.topCount
+                onClicked: page.expanded = !page.expanded
+                Row {
+                    anchors.centerIn: parent
+                    spacing: Theme.paddingSmall
+                    Label {
+                        text: page.expanded ? qsTr("Collapse")
+                              : qsTr("Show all %1 processes").arg(procs.count)
+                        color: Diag.cyan
+                        font.pixelSize: Theme.fontSizeSmall
+                    }
+                    Label {
+                        text: page.expanded ? "▲" : "▼"
+                        color: Diag.cyan
+                        font.pixelSize: Theme.fontSizeSmall
+                    }
                 }
             }
+
+            // ---- what the kernel has been tallying all along -------------
+            // Not hardware, so it does not belong in the system overview; it
+            // sits at the foot of the live view instead, where the running
+            // figures end and the balance begins.
+            MetricCard {
+                x: Theme.horizontalPageMargin
+                width: parent.width - 2 * Theme.horizontalPageMargin
+                visible: page.acc.uptimeSec > 0
+                title: qsTr("Since boot")
+                value: sysmon.fmtDuration(sysmon.uptimeSec)
+                note: "\u00b7  " + qsTr("uptime")
+                accent: Diag.teal
+                drilldown: true
+                onClicked: {
+                    var d = HwInfo.sinceBoot()
+                    pageStack.push(Qt.resolvedUrl("InfoDetailPage.qml"),
+                                   { title: d.title, sections: d.sections,
+                                     helpTopics: (d.helpTopics ? d.helpTopics : []) })
+                }
+                Column {
+                    width: parent.width; spacing: Theme.paddingSmall / 2
+                    KeyValue {
+                        visible: page.acc.awakeSec !== undefined
+                        height: visible ? implicitHeight : 0
+                        label: qsTr("Deep sleep")
+                        value: page.acc.awakeSec === undefined ? "" :
+                               sysmon.fmtDuration(Math.round(page.acc.uptimeSec - page.acc.awakeSec))
+                               + "  \u00b7  " + Math.round(100 * (page.acc.uptimeSec - page.acc.awakeSec)
+                                                          / page.acc.uptimeSec) + " %"
+                        valueColor: Diag.teal
+                    }
+                    KeyValue {
+                        visible: page.acc.screenSec !== undefined
+                        height: visible ? implicitHeight : 0
+                        label: qsTr("Screen on")
+                        value: page.acc.screenSec === undefined ? "" :
+                               sysmon.fmtDuration(Math.round(page.acc.screenSec))
+                               + "  \u00b7  " + Math.round(100 * page.acc.screenSec
+                                                          / page.acc.uptimeSec) + " %"
+                    }
+                    KeyValue {
+                        // awake with the screen dark: the part nobody asked for
+                        visible: page.acc.awakeSec !== undefined && page.acc.screenSec !== undefined
+                                 && page.acc.awakeSec > page.acc.screenSec
+                        height: visible ? implicitHeight : 0
+                        label: qsTr("Awake, screen off")
+                        value: (page.acc.awakeSec === undefined || page.acc.screenSec === undefined) ? "" :
+                               sysmon.fmtDuration(Math.round(page.acc.awakeSec - page.acc.screenSec))
+                    }
+                }
+            }
+
+            Item { width: 1; height: Theme.paddingLarge }
         }
 
         VerticalScrollDecorator {}
