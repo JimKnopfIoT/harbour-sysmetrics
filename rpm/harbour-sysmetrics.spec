@@ -71,7 +71,12 @@ systemctl daemon-reload >/dev/null 2>&1 || :
 %{_datadir}/polkit-1/rules.d/50-harbour-sysmetrics.rules
 
 %changelog
-* Sat Aug 22 2026 harbour-sysmetrics contributors 0.2.3-1
+* Sun Aug 23 2026 harbour-sysmetrics contributors 0.2.3-1
+- New "Since boot" section: screen-on time from the MCE wakelock, awake time
+  against deep sleep, suspend attempts with the device that blocked them,
+  wake sources, data moved, CPU time budget, memory pressure and the counters
+  that predate this boot. Card in the main page footer; glossary group and a
+  Backup entry.
 - Charging: the PD contract row says what was negotiated instead of naming
   the specification's "contract"; glossary keeps the original term.
 

@@ -2,6 +2,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <algorithm>
 #include <QFileInfo>
 #include <QHash>
 #include <QProcess>
@@ -19,6 +20,8 @@
 
 #include <signal.h>
 #include <sys/resource.h>
+#include <time.h>
+#include <unistd.h>
 #include <sys/statvfs.h>
 
 static const int HIST_MAX = 180;
@@ -1986,4 +1989,185 @@ QString SysMon::fmtDuration(int sec) const
     if (h > 0)
         return QStringLiteral("%1h %2m").arg(h).arg(m);
     return QStringLiteral("%1m %2s").arg(m).arg(sec % 60);
+}
+
+// ---- accumulated counters -------------------------------------------------
+// Everything here is a tally the kernel keeps anyway; the app reads it once, on
+// demand, and stores nothing. That is the whole point of the section: figures
+// that would otherwise need a logging daemon are already lying around.
+//
+// Screen-on time is MCE's own bookkeeping. MCE holds the mce_display_on
+// wakelock for exactly as long as the display is up, and the kernel sums the
+// hold time in wakeup_sources. total_time already contains the hold in
+// progress (verified against a blank/unblank cycle on Xperia 10 III, SFOS
+// 5.1.0.11: the column tracks wall clock 1:1 while the screen is on and freezes
+// while it is off), so it is read as-is.
+QVariantMap SysMon::sinceBootDetail() const
+{
+    QVariantMap m;
+
+    // Uptime vs. awake time: CLOCK_BOOTTIME keeps running across suspend,
+    // CLOCK_MONOTONIC stops in it, so the gap between them is deep sleep.
+    struct timespec ts;
+    double upSec = -1, awakeSec = -1;
+    if (clock_gettime(CLOCK_BOOTTIME, &ts) == 0)
+        upSec = ts.tv_sec + ts.tv_nsec / 1e9;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
+        awakeSec = ts.tv_sec + ts.tv_nsec / 1e9;
+    if (upSec <= 0)
+        upSec = readTrim(QStringLiteral("/proc/uptime")).split(QLatin1Char(' ')).value(0).toDouble();
+    if (upSec > 0)
+        m.insert(QStringLiteral("uptimeSec"), upSec);
+    // Only claim a deep-sleep figure where the two clocks actually diverge --
+    // on a kernel that ticks both in suspend the difference is noise.
+    if (awakeSec > 0 && upSec > awakeSec + 1.0)
+        m.insert(QStringLiteral("awakeSec"), awakeSec);
+
+    // --- wakeup sources: screen-on time, and who keeps waking the phone -----
+    QFile ws(QStringLiteral("/sys/kernel/debug/wakeup_sources"));
+    if (ws.open(QIODevice::ReadOnly)) {
+        const QList<QByteArray> lines = ws.readAll().split('\n');
+        // Column count and order have changed across kernel versions, so the
+        // header decides where each figure sits instead of a fixed index.
+        const QList<QByteArray> head = lines.value(0).simplified().split(' ');
+        const int cActive = head.indexOf(QByteArray("active_count"));
+        const int cWakeup = head.indexOf(QByteArray("wakeup_count"));
+        const int cTotal  = head.indexOf(QByteArray("total_time"));
+        const int cMax    = head.indexOf(QByteArray("max_time"));
+
+        QVariantList wakers;
+        for (int i = 1; i < lines.size(); ++i) {
+            const QList<QByteArray> f = lines.at(i).simplified().split(' ');
+            if (f.size() < head.size() || head.isEmpty())
+                continue;
+            // A source name may contain spaces; the numeric columns are anchored
+            // at the end, so any surplus fields belong to the name.
+            const int extra = f.size() - head.size();
+            QByteArray nameBytes = f.value(0);
+            for (int e = 1; e <= extra; ++e)
+                nameBytes += ' ' + f.value(e);
+            const QString name = QString::fromLatin1(nameBytes);
+            const auto col = [&](int c) -> qulonglong {
+                return c < 0 ? 0 : f.value(c + extra).toULongLong();
+            };
+
+            if (name == QLatin1String("mce_display_on")) {
+                m.insert(QStringLiteral("screenSec"), col(cTotal) / 1000.0);
+                m.insert(QStringLiteral("screenCycles"), (int)col(cActive));
+                m.insert(QStringLiteral("screenLongestSec"), col(cMax) / 1000.0);
+            }
+            const qulonglong wc = col(cWakeup);
+            if (wc > 0) {
+                QVariantMap w;
+                w.insert(QStringLiteral("name"), name);
+                w.insert(QStringLiteral("count"), (double)wc);
+                w.insert(QStringLiteral("heldSec"), col(cTotal) / 1000.0);
+                wakers.append(w);
+            }
+        }
+        // Rank by wake count: the question this answers is who interrupts sleep,
+        // not who holds the CPU longest once awake.
+        std::sort(wakers.begin(), wakers.end(), [](const QVariant &a, const QVariant &b) {
+            return a.toMap().value(QStringLiteral("count")).toDouble()
+                 > b.toMap().value(QStringLiteral("count")).toDouble();
+        });
+        if (!wakers.isEmpty())
+            m.insert(QStringLiteral("wakers"), wakers);
+    }
+
+    // --- suspend attempts ---------------------------------------------------
+    // Moved out of debugfs into /sys/power in newer kernels; try both.
+    QVariantMap sus;
+    static const char *susKeys[] = { "success", "fail", "failed_freeze", "failed_prepare",
+                                     "failed_suspend", "failed_suspend_late",
+                                     "failed_suspend_noirq", "failed_resume",
+                                     "failed_resume_early", "failed_resume_noirq",
+                                     "last_failed_dev", "last_failed_errno",
+                                     "last_failed_step", nullptr };
+    for (const QString &base : { QStringLiteral("/sys/power/suspend_stats/"),
+                                 QStringLiteral("/sys/kernel/debug/suspend_stats/") }) {
+        if (!QFileInfo::exists(base))
+            continue;
+        for (int k = 0; susKeys[k]; ++k) {
+            const QString v = readTrim(base + QLatin1String(susKeys[k]));
+            if (!v.isEmpty())
+                sus.insert(QString::fromLatin1(susKeys[k]), v);
+        }
+        break;
+    }
+    if (!sus.isEmpty())
+        m.insert(QStringLiteral("suspend"), sus);
+
+    // --- CPU time budget ----------------------------------------------------
+    // /proc/stat's first line is cumulative jiffies per state since boot.
+    const long tck = sysconf(_SC_CLK_TCK) > 0 ? sysconf(_SC_CLK_TCK) : 100;
+    QFile st(QStringLiteral("/proc/stat"));
+    if (st.open(QIODevice::ReadOnly)) {
+        const QList<QByteArray> f = st.readLine().simplified().split(' ');
+        static const char *names[] = { "user", "nice", "system", "idle",
+                                       "iowait", "irq", "softirq", "steal", nullptr };
+        QVariantMap cpu;
+        double total = 0;
+        for (int i = 0; names[i]; ++i) {
+            if (f.size() <= i + 1)
+                break;
+            const double s = f.value(i + 1).toULongLong() / (double)tck;
+            cpu.insert(QString::fromLatin1(names[i]), s);
+            total += s;
+        }
+        if (total > 0) {
+            cpu.insert(QStringLiteral("total"), total);
+            m.insert(QStringLiteral("cpu"), cpu);
+        }
+    }
+
+    // --- memory pressure over the whole uptime ------------------------------
+    QFile vm(QStringLiteral("/proc/vmstat"));
+    if (vm.open(QIODevice::ReadOnly)) {
+        QVariantMap out;
+        static const QSet<QByteArray> want = { "pswpin", "pswpout", "pgmajfault",
+                                               "oom_kill", "pgfault" };
+        for (const QByteArray &line : vm.readAll().split('\n')) {
+            const int sp = line.indexOf(' ');
+            if (sp < 0)
+                continue;
+            const QByteArray key = line.left(sp);
+            if (want.contains(key))
+                out.insert(QString::fromLatin1(key), line.mid(sp + 1).trimmed().toDouble());
+        }
+        if (!out.isEmpty())
+            m.insert(QStringLiteral("vm"), out);
+    }
+
+    // --- bytes moved to and from storage ------------------------------------
+    QFile ds(QStringLiteral("/proc/diskstats"));
+    if (ds.open(QIODevice::ReadOnly)) {
+        QVariantList disks;
+        for (const QByteArray &line : ds.readAll().split('\n')) {
+            const QList<QByteArray> f = line.simplified().split(' ');
+            if (f.size() < 10)
+                continue;
+            const QString name = QString::fromLatin1(f.value(2));
+            // Whole devices only: partitions repeat the same traffic, and the
+            // virtual ones (zram, loop) are not what "written to flash" means.
+            if (!QFileInfo::exists(QStringLiteral("/sys/block/") + name)
+                    || name.startsWith(QLatin1String("loop"))
+                    || name.startsWith(QLatin1String("zram"))
+                    || name.startsWith(QLatin1String("ram")))
+                continue;
+            const double rd = f.value(5).toULongLong() * 512.0;
+            const double wr = f.value(9).toULongLong() * 512.0;
+            if (rd + wr <= 0)
+                continue;
+            QVariantMap d;
+            d.insert(QStringLiteral("name"), name);
+            d.insert(QStringLiteral("readBytes"), rd);
+            d.insert(QStringLiteral("writeBytes"), wr);
+            disks.append(d);
+        }
+        if (!disks.isEmpty())
+            m.insert(QStringLiteral("disks"), disks);
+    }
+
+    return m;
 }
