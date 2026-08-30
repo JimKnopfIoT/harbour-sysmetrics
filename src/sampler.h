@@ -42,7 +42,15 @@ struct SysSnap {
     QString netIface;                          // interface carrying the default route
     qulonglong netRxTotal = 0, netTxTotal = 0;
     double diskReadRate = 0, diskWriteRate = 0;
-    QVector<QPair<QString, float>> thermal;    // zone type, degC
+    // corrected marks a reading this app recomputed instead of passing the
+    // kernel's through unchanged — see fixFlashTherm() in sampler.cpp
+    // suspect: the reading does not belong with the others on this board.
+    // A zone carrying millivolts reads as a plausible temperature; what
+    // gives it away is standing far below every other sensor in the same
+    // phone, which cannot happen to a real one.
+    struct ThermalZone { QString name; float degC = 0; bool corrected = false;
+                         bool suspect = false; };
+    QVector<ThermalZone> thermal;
     int battCapacity = -1;
     double battCurrentA = 0, battVoltageV = 0, battTempC = 0, battPowerW = 0;
     int battHealthPct = -1;

@@ -7,7 +7,7 @@
 %bcond_with ultimate
 Name:       harbour-sysmetrics
 Summary:    System diagnostics for Sailfish OS
-Version:    0.2.4
+Version:    0.3.0
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/JimKnopfIoT/harbour-sysmetrics
@@ -71,6 +71,43 @@ systemctl daemon-reload >/dev/null 2>&1 || :
 %{_datadir}/polkit-1/rules.d/50-harbour-sysmetrics.rules
 
 %changelog
+* Sun Aug 30 2026 harbour-sysmetrics contributors 0.3.0-1
+- Detail pages reorganised: the figures needed for an overview stay open at the
+  top; catalogues, firmware, module list, device tree and raw nodes are folded
+  away at the end and open on tap. From four sections of the same kind on --
+  power-supply nodes, network interfaces, USB devices, raw nodes -- they share
+  a single header.
+- Diagnosis is placed by the page instead of appended. On System & CPU it sits
+  directly under the kernel hardening switches, which is what it reads against.
+- Nothing behind a closed header is built, and a section whose rows cost real
+  time builds them on first open. The HAL listing is one of those: it runs an
+  external tool that never returns on some adaptations, and it cost three
+  seconds on every visit to System & CPU.
+- Android HAL services: all three binder domains are asked, each naming the
+  service manager that answers for it. An Android 13+ base runs no
+  hwservicemanager and registers its HALs as AIDL on /dev/binder; HIDL on
+  /dev/hwbinder is the older way, and asking only that one answered nothing on
+  a current device.
+- Raw nodes carry a unit wherever the kernel's own interface fixes one -- module
+  section sizes, thermal zone temperature, interface counters and MTU, link
+  speed -- with the figure the kernel wrote kept beside it. Everything else
+  stays the driver's own number.
+- Byte sizes are labelled KiB, MiB and GiB, which is what they have always been.
+- Thermal: the limiter units were built with QLatin1String from a UTF-8 literal
+  and printed as "Â°C"; the unit now sits on the last number, so a list ending
+  in a sentinel no longer reads "no limit K", and "no limit" / "no sensor" go
+  through the translations.
+- Thermal zones that are not temperatures are dropped: Qualcomm's BCL watchdogs
+  (*-vbat-lvl, *-ibat-lvl, *-vph-lvl, *-bcl-lvl, soc) report mA, mV and percent
+  through the thermal framework, and the battery card shows all three in their
+  own units. camera-therm-usr on the Xperia 10 III is corrected for a 400k
+  pull-up read through a 100k lookup table (1/T_true = 1/T_read + ln(4)/4250),
+  verified radiometrically; recomputed figures carry an asterisk.
+- Value columns wrap on word boundaries: a figure is never split across lines.
+- The overview cards no longer swallow taps meant for their "show all" toggle.
+- Network: the radio's firmware blobs are a folded list with the directory of
+  each, instead of one long line.
+
 * Sun Aug 23 2026 harbour-sysmetrics contributors 0.2.4-1
 - "Since boot" keeps only what belongs to no single part: times, sleep mode,
   wake sources. CPU time moved to the processor page, memory pressure to RAM,

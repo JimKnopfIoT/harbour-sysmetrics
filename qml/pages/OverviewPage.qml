@@ -19,6 +19,16 @@ Page {
     onStatusChanged: if (status === PageStatus.Active) _attachHelp()
 
     property bool thermalExpanded: false
+    property bool thermalSuspect: {
+        for (var i = 0; i < sysmon.thermalZones.length; ++i)
+            if (sysmon.thermalZones[i].suspect) return true
+        return false
+    }
+    property bool thermalCorrected: {
+        for (var i = 0; i < sysmon.thermalZones.length; ++i)
+            if (sysmon.thermalZones[i].corrected) return true
+        return false
+    }
     property bool ifaceExpanded: false
     readonly property int listCap: 10
 
@@ -421,15 +431,23 @@ Page {
                 x: Theme.horizontalPageMargin
                 visible: sysmon.thermalZones.length > 0
                 title: qsTr("Thermal")
-                value: {
-                    var m = 0
-                    for (var i = 0; i < sysmon.thermalZones.length; ++i)
-                        m = Math.max(m, sysmon.thermalZones[i].temp)
-                    return m.toFixed(1)
+                property var maxZone: {
+                    var best = null
+                    for (var i = 0; i < sysmon.thermalZones.length; ++i) {
+                        if (sysmon.thermalZones[i].suspect) continue
+                        if (!best || sysmon.thermalZones[i].temp > best.temp)
+                            best = sysmon.thermalZones[i]
+                    }
+                    return best
                 }
+                value: maxZone ? maxZone.temp.toFixed(1) : "0.0"
                 unit: "°C"
-                note: "max"
+                // A corrected figure must not look like a plain reading, not
+                // even when it happens to be the hottest one.
+                note: maxZone && maxZone.corrected ? "max *" : "max"
                 accent: Diag.red
+                drilldown: true
+                onClicked: page.openDetail(HwInfo.thermal())
                 Column {
                     width: parent.width; spacing: Theme.paddingSmall / 2
                     Repeater {
@@ -439,14 +457,32 @@ Page {
                             width: parent.width
                             value: modelData.temp; maxValue: 90
                             color: modelData.temp > 70 ? Diag.red : modelData.temp > 55 ? Diag.amber : Diag.teal
-                            label: modelData.name
+                            label: modelData.name + (modelData.suspect ? "  ⚠" : "")
                             caption: modelData.temp.toFixed(1) + " °C"
+                                     + (modelData.corrected ? " *" : "")
+                                     + (modelData.suspect ? " ⚠" : "")
                         }
                     }
                     MoreToggle {
                         total: sysmon.thermalZones.length; shown: page.listCap
                         expanded: page.thermalExpanded
                         onToggle: page.thermalExpanded = !page.thermalExpanded
+                    }
+                    Label {
+                        width: parent.width
+                        visible: page.thermalSuspect
+                        text: qsTr("⚠  This zone sits far below every other sensor in the phone, which cannot happen to a real one — it is most likely a voltage or a current that the vendor registered in the thermal framework. It is left out of the maximum above. Tap for the raw figure.")
+                        font.pixelSize: Theme.fontSizeExtraSmall
+                        color: Diag.amber
+                        wrapMode: Text.Wrap
+                    }
+                    Label {
+                        width: parent.width
+                        visible: page.thermalCorrected
+                        text: qsTr("*  Recomputed by this app: the kernel reads this zone through the wrong lookup table. See Help → Thermal.")
+                        font.pixelSize: Theme.fontSizeExtraSmall
+                        color: Theme.secondaryColor
+                        wrapMode: Text.Wrap
                     }
                 }
             }

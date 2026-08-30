@@ -23,6 +23,7 @@ Row {
         font.family: mono ? "monospace" : Theme.fontFamily
         color: valueColor
         width: parent.width - parent.spacing - Math.round(parent.width * 0.34)
-        wrapMode: Text.WrapAnywhere
+        // Word wrap: a figure must never be split across two lines.
+        wrapMode: Text.Wrap
     }
 }

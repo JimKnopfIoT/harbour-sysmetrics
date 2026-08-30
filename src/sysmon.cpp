@@ -2,11 +2,14 @@
 
 #include <QDateTime>
 #include <QDir>
+#include <QDirIterator>
+#include <QDateTime>
 #include <QFile>
 #include <algorithm>
 #include <QFileInfo>
 #include <QHash>
 #include <QProcess>
+#include <QRegExp>
 #include <QSet>
 #include <QStringList>
 #include <QVariantMap>
@@ -23,8 +26,15 @@
 #include <sys/resource.h>
 #include <time.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/statvfs.h>
 #include <ifaddrs.h>
+#include <linux/ethtool.h>
+#include <linux/sockios.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <string.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -87,8 +97,10 @@ QVariantList SysMon::thermalZones() const
     QVariantList l;
     for (const auto &z : m_s.thermal) {
         QVariantMap m;
-        m.insert(QStringLiteral("name"), z.first);
-        m.insert(QStringLiteral("temp"), (double)z.second);
+        m.insert(QStringLiteral("name"), z.name);
+        m.insert(QStringLiteral("temp"), (double)z.degC);
+        m.insert(QStringLiteral("corrected"), z.corrected);
+        m.insert(QStringLiteral("suspect"), z.suspect);
         l.append(m);
     }
     return l;
@@ -597,10 +609,22 @@ QVariantList SysMon::networkHardware() const
 
 static QString readTrim(const QString &p)
 {
-    QFile f(p);
-    if (!f.open(QIODevice::ReadOnly))
+    // Deliberately not QFile: a detail page reads a few hundred of these, and
+    // QFile sets up an I/O engine and a buffer for every one. open/read/close
+    // does the same job for a sysfs attribute at a fraction of the cost --
+    // the sampler reached the same conclusion for its own hot path.
+    const QByteArray path = p.toLocal8Bit();
+    const int fd = ::open(path.constData(), O_RDONLY | O_CLOEXEC);
+    if (fd < 0)
         return QString();
-    return QString::fromLatin1(f.readAll().trimmed());
+    char buf[4096];
+    int total = 0;
+    ssize_t r;
+    while (total < (int)sizeof(buf) - 1
+           && (r = ::read(fd, buf + total, sizeof(buf) - 1 - total)) > 0)
+        total += (int)r;
+    ::close(fd);
+    return QString::fromLatin1(QByteArray(buf, total).trimmed());
 }
 
 QVariantMap SysMon::batteryHardware() const
@@ -935,9 +959,1574 @@ QVariantMap SysMon::chargerDetail() const
     return m;
 }
 
+// ---------------------------------------------------------------------------
+// The vendor charging path -- everything the charger exports below the
+// standard power-supply class.
+//
+// On MediaTek platforms the charger driver keeps a directory of its own with
+// ADC readings, the negotiated adapter type and its throttling flags, and the
+// battery framework adds a small procfs command directory next to it. All of
+// it is world-readable, so this works with the root helper switched off.
+//
+// Units are deliberately not normalised. Vendor nodes mix them -- on the Jolla
+// Phone (2026) ADC_Charging_Current counts milliamps while battery/current_now
+// in the directory beside it counts microamps -- and nothing in sysfs says
+// which one a node uses. Only the two ADC readings are converted, because
+// their scale was checked against the battery node at the same operating
+// point; everything else is passed through exactly as the kernel wrote it.
+// ---------------------------------------------------------------------------
+
+// Attributes that must not be read, because reading them is not a read.
+// A few vendor nodes do work in their show() handler: the DRAM driver's
+// binning_test runs a memory test, MediaTek's gpu_loading sleeps 100 ms inside
+// the kernel, the Wi-Fi firmware nodes each cost a blocking round trip to the
+// chip, and opening the camera's pdaf_type issues a sensor feature call. An
+// exhaustive dump has to know where to stop, and this is the list.
+static bool sysfsUnsafe(const QString &name)
+{
+    static const QStringList never = { QStringLiteral("binning_test"),
+                                       QStringLiteral("gpu_loading"),
+                                       QStringLiteral("efuse_dump"),
+                                       QStringLiteral("mcr"),
+                                       QStringLiteral("roam_param"),
+                                       QStringLiteral("pdaf_type"),
+                                       // The flash LED controller latches its
+                                       // faults and clears them when the flag
+                                       // register is read -- the datasheet
+                                       // names that read as the way to re-arm
+                                       // a chip that has shut itself off. A
+                                       // 0444 file whose read is a write.
+                                       QStringLiteral("flash_fault"),
+                                       QStringLiteral("brightness"),
+                                       QStringLiteral("flash_brightness"),
+                                       QStringLiteral("flash_strobe"),
+                                       // Vendor forks add raw register windows
+                                       // under these names.
+                                       QStringLiteral("reg"),
+                                       QStringLiteral("registers") };
+    return never.contains(name);
+}
+
+static QVariantList sysfsAttributes(const QString &dir)
+{
+    static const QStringList skip = { QStringLiteral("uevent"),
+                                      QStringLiteral("modalias"),
+                                      QStringLiteral("driver_override") };
+    QVariantList out;
+    const QFileInfoList files =
+        QDir(dir).entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Name);
+    for (const QFileInfo &fi : files) {
+        if (skip.contains(fi.fileName()) || sysfsUnsafe(fi.fileName()) || !fi.isReadable())
+            continue;
+        QString v = readTrim(fi.absoluteFilePath());
+        v.replace(QLatin1Char('\n'), QStringLiteral("  ·  "));
+        if (v.size() > 200)
+            v = v.left(200) + QStringLiteral(" …");
+        QVariantMap a;
+        a.insert(QStringLiteral("name"), fi.fileName());
+        a.insert(QStringLiteral("value"), v);
+        out.append(a);
+    }
+    return out;
+}
+
+QVariantMap SysMon::chargingPath() const
+{
+    QVariantMap m;
+
+    const QString mtk = QStringLiteral("/sys/devices/platform/charger/");
+    if (QFileInfo::exists(mtk)) {
+        m.insert(QStringLiteral("vendor"), QStringLiteral("MediaTek"));
+        m.insert(QStringLiteral("path"), mtk);
+        // The two ADC readings are the only figures here with an established
+        // scale: millivolt on the bus, milliamp into the battery.
+        // Converted only inside a window the quantity can physically occupy.
+        // The unit of a vendor node is an assumption, and an assumption that is
+        // wrong by a factor of a thousand produces a number that still looks
+        // like an answer. Outside the window the raw figure is passed through
+        // with its unit called unknown, which is the honest failure.
+        const double mv = readTrim(mtk + QStringLiteral("ADC_Charger_Voltage")).toDouble();
+        if (mv >= 3000 && mv <= 30000)          // 3 V … 30 V, expressed in mV
+            m.insert(QStringLiteral("vbus"), mv / 1000.0);
+        else if (mv > 0)
+            m.insert(QStringLiteral("vbusRaw"), mv);
+        const double ma = readTrim(mtk + QStringLiteral("ADC_Charging_Current")).toDouble();
+        // Negative is discharge, and the node reports it while unplugged --
+        // an earlier window that started at zero threw a real reading away.
+        if (ma >= -20000 && ma <= 20000)        // ±20 A, expressed in mA
+            m.insert(QStringLiteral("adcCurrent"), ma / 1000.0);
+        else if (ma != 0)
+            m.insert(QStringLiteral("adcCurrentRaw"), ma);
+
+        m.insert(QStringLiteral("chargingMode"), readTrim(mtk + QStringLiteral("Charging_mode")));
+        m.insert(QStringLiteral("adapterType"), readTrim(mtk + QStringLiteral("ta_type")));
+        m.insert(QStringLiteral("chargerType"), readTrim(mtk + QStringLiteral("chr_type")));
+        m.insert(QStringLiteral("pumpExpress"), readTrim(mtk + QStringLiteral("Pump_Express")));
+        m.insert(QStringLiteral("highVoltage"), readTrim(mtk + QStringLiteral("High_voltage_chg_enable")));
+        m.insert(QStringLiteral("rustDetect"), readTrim(mtk + QStringLiteral("Rust_detect")));
+        m.insert(QStringLiteral("throttleFlag"), readTrim(mtk + QStringLiteral("Thermal_throttle")));
+        m.insert(QStringLiteral("swJeita"), readTrim(mtk + QStringLiteral("sw_jeita")));
+        const double ovp = readTrim(mtk + QStringLiteral("sw_ovp_threshold")).toDouble();
+        if (ovp >= 3e6 && ovp <= 30e6)          // 3 V … 30 V, expressed in µV
+            m.insert(QStringLiteral("ovpVolt"), ovp / 1e6);
+        else if (ovp > 0)
+            m.insert(QStringLiteral("ovpRaw"), ovp);
+        m.insert(QStringLiteral("powerPath"), readTrim(mtk + QStringLiteral("enable_power_path")));
+        m.insert(QStringLiteral("smartCharging"), readTrim(mtk + QStringLiteral("enable_sc")));
+        // The smart-charging schedule: hold at a target percentage, resume in
+        // time for a start hour. Its current limit is in milliamp and its
+        // over-voltage threshold in microvolt, in the same directory.
+        m.insert(QStringLiteral("scTargetSoc"), readTrim(mtk + QStringLiteral("sc_tuisoc")));
+        m.insert(QStringLiteral("scCurrentLimit"), readTrim(mtk + QStringLiteral("sc_ibat_limit")));
+        m.insert(QStringLiteral("scStart"), readTrim(mtk + QStringLiteral("sc_stime")));
+        m.insert(QStringLiteral("scEnd"), readTrim(mtk + QStringLiteral("sc_etime")));
+        m.insert(QStringLiteral("fastChargeIndicator"), readTrim(mtk + QStringLiteral("fast_chg_indicator")));
+        m.insert(QStringLiteral("safetyTimer"), readTrim(QStringLiteral("/proc/mtk_battery_cmd/en_safety_timer")));
+        m.insert(QStringLiteral("setCv"), readTrim(QStringLiteral("/proc/mtk_battery_cmd/set_cv")));
+    }
+
+    // Which charging protocols this kernel implements at all. PD, PPS, Pump
+    // Express and UFCS each ship as their own module, so the module list says
+    // what the hardware can negotiate -- independently of what is plugged in
+    // right now. Names are the drivers' own; nothing here is interpreted.
+    QFile mods(QStringLiteral("/proc/modules"));
+    if (mods.open(QIODevice::ReadOnly)) {
+        QStringList names;
+        while (!mods.atEnd()) {
+            const QString n =
+                QString::fromLatin1(mods.readLine().split(' ').value(0)).trimmed();
+            if (n.isEmpty())
+                continue;
+            const QString l = n.toLower();
+            if (l.contains(QLatin1String("charg")) || l.contains(QLatin1String("chg"))
+                || l.contains(QLatin1String("ufcs")) || l.contains(QLatin1String("tcpc"))
+                || l.contains(QLatin1String("pep")) || l.contains(QLatin1String("_pd_"))
+                || l.contains(QLatin1String("adapter")) || l.contains(QLatin1String("gauge"))
+                || l.contains(QLatin1String("battery")))
+                names.append(n);
+        }
+        names.sort();
+        if (!names.isEmpty())
+            m.insert(QStringLiteral("modules"), names);
+    }
+    return m;
+}
+
+// Every power-supply node with every attribute it exports. On a Qualcomm
+// device that is battery, bms, usb and dc; on the MediaTek platform of the
+// Jolla Phone (2026) it is ten nodes, because every stage of the charging
+// chain -- master, slave, and two divider stages each in a plain and a
+// high-voltage variant -- registers separately, and the fuel gauge exports one
+// file per register. The list is complete rather than curated: which node
+// carries the interesting figure differs per device, and an attribute this app
+// has never heard of is still worth seeing.
+QVariantList SysMon::powerSupplyDump() const
+{
+    QVariantList out;
+    const QDir psy(QStringLiteral("/sys/class/power_supply"));
+    for (const QString &name : psy.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+        const QString base = psy.filePath(name) + QLatin1Char('/');
+        QVariantMap s;
+        s.insert(QStringLiteral("name"), name);
+        s.insert(QStringLiteral("type"), readTrim(base + QStringLiteral("type")));
+        s.insert(QStringLiteral("online"), readTrim(base + QStringLiteral("online")));
+        s.insert(QStringLiteral("present"), readTrim(base + QStringLiteral("present")));
+        s.insert(QStringLiteral("status"), readTrim(base + QStringLiteral("status")));
+        s.insert(QStringLiteral("manufacturer"), readTrim(base + QStringLiteral("manufacturer")));
+        s.insert(QStringLiteral("model"), readTrim(base + QStringLiteral("model_name")));
+        // The driver behind the node names the charger IC, where the supply
+        // name only says which stage of the chain it is.
+        const QString drv = QFileInfo(base + QStringLiteral("device/driver")).symLinkTarget();
+        if (!drv.isEmpty())
+            s.insert(QStringLiteral("driver"), QFileInfo(drv).fileName());
+        // "[Unknown] SDP DCP CDP PD PD_PPS": the bracketed entry is the one in
+        // force, the rest is what this stage is able to negotiate.
+        const QString ut = readTrim(base + QStringLiteral("usb_type"));
+        if (!ut.isEmpty()) {
+            QStringList all = ut.split(QLatin1Char(' '), QString::SkipEmptyParts);
+            for (QString &t : all)
+                if (t.startsWith(QLatin1Char('[')) && t.endsWith(QLatin1Char(']'))) {
+                    t = t.mid(1, t.size() - 2);
+                    s.insert(QStringLiteral("usbTypeActive"), t);
+                }
+            s.insert(QStringLiteral("usbTypes"), all.join(QStringLiteral("  ")));
+        }
+        s.insert(QStringLiteral("attrs"), sysfsAttributes(psy.filePath(name)));
+        out.append(s);
+    }
+    return out;
+}
+
+// The thermal framework in full: every zone the kernel registers, its trip
+// points, and the cooling devices -- plus which zone each cooling device is
+// bound to. The live card on the overview shows only zones that carry a
+// temperature; this is the complete register, including the ones it drops and
+// the reason each one was dropped.
+// Two values in MediaTek's thermal interface are not measurements at all, and
+// both look entirely plausible if taken as numbers.
+//
+// 666666666 is the driver's way of saying no limit is set. Printed as a power
+// budget it reads as 666 kW; printed as a frequency, as 666 GHz.
+//
+// -274000 millidegrees is "no sensor" -- deliberately below absolute zero, so
+// that nothing can mistake it for a reading. Printed as a temperature it reads
+// as -274 °C, which is exactly the kind of figure that ends up in a bug report.
+//
+// Both were seen on the Jolla Phone (2026) the first time this code ran on it.
+static bool thermalSentinel(double v)
+{
+    return v == 666666666.0 || v <= -273150.0;
+}
+
+// A comma- or space-separated list of millidegrees, as degrees. The vendor's
+// own separators are inconsistent -- min_throttle_freq mixes commas and a
+// space in one line -- so both are accepted.
+static QString fmtThermalList(const QString &raw, double divisor, const QString &unit,
+                              const QString &sentinelWord)
+{
+    if (raw.isEmpty())
+        return QString();
+    QStringList out;
+    int lastNumber = -1;
+    const QStringList parts = raw.split(QRegExp(QStringLiteral("[,\\s]+")),
+                                        QString::SkipEmptyParts);
+    for (const QString &p : parts) {
+        bool ok = false;
+        const double v = p.trimmed().toDouble(&ok);
+        if (!ok)
+            return raw;                 // not a number list after all
+        if (thermalSentinel(v)) {
+            out << sentinelWord;
+        } else {
+            lastNumber = out.size();
+            out << QString::number(v / divisor, 'f', divisor >= 1000 ? 1 : 0);
+        }
+    }
+    if (out.isEmpty())
+        return QString();
+    // The unit goes on the last figure, not on the end of the line: a list
+    // whose final entry is a sentinel would otherwise read "no limit K".
+    // Non-breaking space, so a wrap cannot leave the unit starting a line.
+    if (!unit.isEmpty() && lastNumber >= 0)
+        out[lastNumber] += QChar(0x00A0) + unit;
+    return out.join(QStringLiteral(", "));
+}
+
+QVariantMap SysMon::thermalDetail() const
+{
+    QVariantMap m;
+    const QDir tdir(QStringLiteral("/sys/class/thermal"));
+    const QStringList zoneDirs =
+        tdir.entryList(QStringList() << QStringLiteral("thermal_zone*"), QDir::Dirs, QDir::Name);
+
+    // cooling_deviceN -> the zones that bind it, from the cdevN symlinks the
+    // kernel creates when a zone gets a cooling device attached. A cooling
+    // device nothing binds cannot be driven by the kernel's governor at all.
+    QHash<QString, QStringList> boundBy;
+    QVariantList zones;
+    int bindings = 0;
+
+    for (const QString &z : zoneDirs) {
+        const QString base = tdir.filePath(z) + QLatin1Char('/');
+        QVariantMap zm;
+        zm.insert(QStringLiteral("node"), z);
+        const QString name = readTrim(base + QStringLiteral("type"));
+        zm.insert(QStringLiteral("name"), name);
+        const QString raw = readTrim(base + QStringLiteral("temp"));
+        zm.insert(QStringLiteral("raw"), raw);
+        zm.insert(QStringLiteral("policy"), readTrim(base + QStringLiteral("policy")));
+        zm.insert(QStringLiteral("mode"), readTrim(base + QStringLiteral("mode")));
+
+        // The same rule the live card applies, but here the dropped zones stay
+        // on the page with the reason attached instead of vanishing.
+        const int milli = raw.toInt();
+        QString skip;
+        if (raw.isEmpty())
+            skip = QStringLiteral("empty");
+        else if (name.contains(QStringLiteral("-vbat-lvl")) || name.contains(QStringLiteral("-ibat-lvl"))
+                 || name.contains(QStringLiteral("-vph-lvl")) || name.contains(QStringLiteral("-bcl-lvl"))
+                 || (name == QLatin1String("soc") && milli <= 100))
+            skip = QStringLiteral("watchdog");
+        else if (milli <= 0)
+            skip = QStringLiteral("zero");
+        else if (milli > 150000)
+            skip = QStringLiteral("range");
+        else
+            zm.insert(QStringLiteral("tempC"), milli / 1000.0);
+        if (!skip.isEmpty())
+            zm.insert(QStringLiteral("skipped"), skip);
+
+        QVariantList trips;
+        for (int i = 0; i < 16; ++i) {
+            const QString t = readTrim(base + QStringLiteral("trip_point_%1_temp").arg(i));
+            if (t.isEmpty())
+                continue;
+            QVariantMap tm;
+            tm.insert(QStringLiteral("index"), i);
+            tm.insert(QStringLiteral("kind"), readTrim(base + QStringLiteral("trip_point_%1_type").arg(i)));
+            tm.insert(QStringLiteral("tempC"), t.toDouble() / 1000.0);
+            const QString h = readTrim(base + QStringLiteral("trip_point_%1_hyst").arg(i));
+            if (!h.isEmpty())
+                tm.insert(QStringLiteral("hystC"), h.toDouble() / 1000.0);
+            trips.append(tm);
+        }
+        if (!trips.isEmpty())
+            zm.insert(QStringLiteral("trips"), trips);
+
+        QStringList cdevs;
+        for (const QString &c : QDir(base).entryList(QStringList() << QStringLiteral("cdev*"),
+                                                     QDir::Dirs | QDir::System)) {
+            if (c.endsWith(QStringLiteral("_trip_point")) || c.endsWith(QStringLiteral("_weight")))
+                continue;
+            const QString target = QFileInfo(base + c).symLinkTarget();
+            if (target.isEmpty())
+                continue;
+            const QString cd = QFileInfo(target).fileName();
+            cdevs.append(cd);
+            boundBy[cd].append(name.isEmpty() ? z : name);
+            ++bindings;
+        }
+        if (!cdevs.isEmpty())
+            zm.insert(QStringLiteral("cdevs"), cdevs.join(QStringLiteral(", ")));
+        zones.append(zm);
+    }
+
+    // Same comparison the live card makes, for the same reason: a node that
+    // carries millivolts arrives as a number in the temperature range, and the
+    // only thing that gives it away is sitting far below every other sensor in
+    // the same handset. Marked here rather than removed -- this is the page
+    // that exists to show what the kernel registered.
+    {
+        QVector<double> t;
+        for (const QVariant &v : zones) {
+            const QVariantMap z = v.toMap();
+            if (z.contains(QStringLiteral("tempC")))
+                t.append(z.value(QStringLiteral("tempC")).toDouble());
+        }
+        if (t.size() >= 5) {
+            std::sort(t.begin(), t.end());
+            const double median = t.at(t.size() / 2);
+            // Thresholds as in the sampler, and for the same reason: the
+            // legitimate spread across one board reaches 45 K under load, so
+            // only a near-freezing zone on a warm board counts as suspect.
+            if (median > 25.0)
+                for (int i = 0; i < zones.size(); ++i) {
+                    QVariantMap z = zones[i].toMap();
+                    const double zt = z.value(QStringLiteral("tempC")).toDouble();
+                    if (z.contains(QStringLiteral("tempC")) && zt < 10.0
+                        && median - zt > 25.0) {
+                        z.insert(QStringLiteral("suspect"), true);
+                        zones[i] = z;
+                    }
+                }
+        }
+    }
+
+    QVariantList cooling;
+    for (const QString &c : tdir.entryList(QStringList() << QStringLiteral("cooling_device*"),
+                                           QDir::Dirs, QDir::Name)) {
+        const QString base = tdir.filePath(c) + QLatin1Char('/');
+        QVariantMap cm;
+        cm.insert(QStringLiteral("node"), c);
+        cm.insert(QStringLiteral("type"), readTrim(base + QStringLiteral("type")));
+        cm.insert(QStringLiteral("cur"), readTrim(base + QStringLiteral("cur_state")).toInt());
+        cm.insert(QStringLiteral("max"), readTrim(base + QStringLiteral("max_state")).toInt());
+        const QStringList b = boundBy.value(c);
+        if (!b.isEmpty())
+            cm.insert(QStringLiteral("boundTo"), b.join(QStringLiteral(", ")));
+        cooling.append(cm);
+    }
+
+    // MediaTek's thermal interface answers the one question the zone list
+    // cannot. The zones give temperatures, the trip points give intentions,
+    // and these flags give the state of the limiter itself: whether the SoC is
+    // being held back at this moment, and against which junction target.
+    const QString ki = QStringLiteral("/sys/kernel/thermal/");
+    if (QFileInfo::exists(ki)) {
+        QVariantMap lim;
+        const QString noLimit = QStringLiteral("no limit");
+        const QString noSensor = QStringLiteral("no sensor");
+        for (const char *k : { "is_cpu_limit", "is_gpu_limit", "is_apu_limit" }) {
+            const QString v = readTrim(ki + QLatin1String(k));
+            if (!v.isEmpty())
+                lim.insert(QString::fromLatin1(k) == QLatin1String("is_cpu_limit")
+                               ? QStringLiteral("cpuLimited")
+                           : QString::fromLatin1(k) == QLatin1String("is_gpu_limit")
+                               ? QStringLiteral("gpuLimited")
+                               : QStringLiteral("apuLimited"), v);
+        }
+        // Junction targets and the skin target are millidegrees; the power
+        // budget is milliwatt with the no-limit sentinel; the headroom is
+        // whole kelvin below target, one per core plus the board.
+        // The sentinel words are shown to the reader, so they go through the
+        // translations like every other word in the app.
+        struct Conv { const char *key, *file; double div; const char *unit; const char *word; };
+        static const Conv conv[] = {
+            { "junctionTarget", "ttj",               1000, "°C", QT_TRANSLATE_NOOP("SysMon", "no limit") },
+            { "junctionMax",    "max_ttj",           1000, "°C", QT_TRANSLATE_NOOP("SysMon", "no limit") },
+            { "junctionMin",    "min_ttj",           1000, "°C", QT_TRANSLATE_NOOP("SysMon", "no limit") },
+            { "skinTarget",     "target_tpcb",       1000, "°C", QT_TRANSLATE_NOOP("SysMon", "no sensor") },
+            { "cpuTemps",       "cpu_temp",          1000, "°C", QT_TRANSLATE_NOOP("SysMon", "no sensor") },
+            { "skinTemp",       "vtskin_temp",       1000, "°C", QT_TRANSLATE_NOOP("SysMon", "no sensor") },
+            { "headroom",       "headroom_info",        1, "K",  QT_TRANSLATE_NOOP("SysMon", "no limit") },
+            { "powerBudget",    "power_budget",         1, "mW", QT_TRANSLATE_NOOP("SysMon", "no limit") },
+            { "dsuCeiling",     "dsu_ceiling_freq",  1000, "MHz", QT_TRANSLATE_NOOP("SysMon", "no limit") },
+            { "throttleFloor",  "min_throttle_freq", 1000, "MHz", QT_TRANSLATE_NOOP("SysMon", "no limit") },
+            { nullptr, nullptr, 0, nullptr, nullptr }
+        };
+        for (int i = 0; conv[i].key; ++i) {
+            // fromUtf8, not QLatin1String: the unit column carries "°C", and
+            // the degree sign is two bytes in this file. Read as Latin-1 they
+            // become two characters and the app prints "Â°C".
+            const QString v = fmtThermalList(readTrim(ki + QLatin1String(conv[i].file)),
+                                             conv[i].div, QString::fromUtf8(conv[i].unit),
+                                             SysMon::tr(conv[i].word));
+            if (!v.isEmpty())
+                lim.insert(QString::fromLatin1(conv[i].key), v);
+        }
+        // "temperature, capped clock, current clock" -- millidegrees and two
+        // kilohertz figures in one line.
+        const QStringList gi = readTrim(ki + QStringLiteral("gpu_info"))
+                               .split(QLatin1Char(','), QString::SkipEmptyParts);
+        if (gi.size() >= 3) {
+            lim.insert(QStringLiteral("gpuTemp"),
+                       QStringLiteral("%1 °C").arg(gi.at(0).toDouble() / 1000.0, 0, 'f', 1));
+            lim.insert(QStringLiteral("gpuClock"),
+                       QStringLiteral("%1 / %2 MHz").arg(gi.at(2).toDouble() / 1000.0, 0, 'f', 0)
+                                                    .arg(gi.at(1).toDouble() / 1000.0, 0, 'f', 0));
+        }
+        const QString bt = readTrim(ki + QStringLiteral("bat_type"));
+        if (!bt.isEmpty())
+            lim.insert(QStringLiteral("batteryType"), bt);
+        if (!lim.isEmpty())
+            m.insert(QStringLiteral("limits"), lim);
+    }
+
+    m.insert(QStringLiteral("zones"), zones);
+    m.insert(QStringLiteral("cooling"), cooling);
+    m.insert(QStringLiteral("bindings"), bindings);
+    return m;
+}
+
+// ---------------------------------------------------------------------------
+// Raw nodes: everything a subsystem exports, not only the parts this app has a
+// label for.
+//
+// Every detail page above is curated -- each row is an attribute whose meaning
+// was established before it was shown. That leaves out whatever the vendor
+// added, and on a MediaTek platform that is most of it: a procfs file per
+// camera sensor slot, the Mali driver's own counters, the Wi-Fi firmware's
+// parameter list, a charger stage per silicon block. None of it is privileged,
+// all of it is world-readable, and the only reason it never appeared here is
+// that nobody wrote a name for it.
+//
+// So these dump the directories a subsystem owns, attribute by attribute,
+// exactly as the kernel exports them, with no interpretation at all. Discovery
+// goes through the kernel's own class enumeration wherever there is one, so
+// the same code finds the Qualcomm nodes on one device and the MediaTek ones
+// on the next without carrying a device list.
+// ---------------------------------------------------------------------------
+
+static QString taintWords(const QString &flags);
+
+// Binary multiples with the prefixes that mean binary multiples. Everything
+// here divides by 1024, so the unit has to say KiB and not kB -- the storage
+// page already explains the gap between the two, and it cannot explain it in
+// units that pretend the gap is not there.
+static QString humanBytes(double b)
+{
+    if (b < 0)
+        b = 0;
+    if (b >= 1073741824.0)
+        return QString::number(b / 1073741824.0, 'f', 2) + QStringLiteral(" GiB");
+    if (b >= 1048576.0)
+        return QString::number(b / 1048576.0, 'f', 1) + QStringLiteral(" MiB");
+    if (b >= 1024.0)
+        return QString::number(b / 1024.0, 'f', 0) + QStringLiteral(" KiB");
+    return QString::number(b, 'f', 0) + QStringLiteral(" B");
+}
+
+// A raw figure with no unit says nothing: 12288 is a number, 12 KiB is a
+// statement. A few sysfs attributes carry a unit the kernel itself defines --
+// the same on every device, every driver, documented in the ABI -- and those
+// get read out in words. The rest keeps the driver's own figure untouched,
+// because on a vendor node the same key counts microamps on one chip and
+// milliamps on the next, and a unit guessed from a name would be a claim this
+// app cannot back.
+//
+// Nothing is lost either way: where there is a reading it takes the value
+// column and the kernel's own figure moves to the right of the row.
+static QString rawReading(const QString &dir, const QString &name, const QString &value)
+{
+    const bool isModule  = dir.startsWith(QLatin1String("/sys/module/"));
+    const bool isNet     = dir.startsWith(QLatin1String("/sys/class/net/"));
+    const bool isThermal = dir.startsWith(QLatin1String("/sys/class/thermal/"));
+
+    if (isModule && name == QLatin1String("taint"))
+        return taintWords(value);
+
+    bool ok = false;
+    const double v = value.toDouble(&ok);
+    if (!ok)
+        return QString();
+
+    // Module section sizes: bytes, kernel/module.c.
+    if (isModule && (name == QLatin1String("coresize") || name == QLatin1String("initsize")))
+        return humanBytes(v);
+    // Interface counters and the MTU: bytes, Documentation/ABI/testing/sysfs-class-net.
+    if (isNet && (name == QLatin1String("rx_bytes") || name == QLatin1String("tx_bytes")))
+        return humanBytes(v);
+    // Not humanBytes here: an MTU of 1500 is read as 1500, and "1 KiB" would
+    // be a worse answer than the figure it replaced.
+    if (isNet && name == QLatin1String("mtu"))
+        return QString::number(v, 'f', 0) + QStringLiteral(" B");
+    if (isNet && name == QLatin1String("speed") && v > 0)
+        return QString::number(v, 'f', 0) + QStringLiteral(" Mbit/s");
+    // Thermal zones: millidegrees, sysfs-class-thermal.
+    if (isThermal && name == QLatin1String("temp"))
+        return QString::number(v / 1000.0, 'f', 1) + QStringLiteral(" °C");
+    return QString();
+}
+
+static void addRawDir(QVariantList &out, const QString &title, const QString &dir)
+{
+    if (!QFileInfo::exists(dir))
+        return;
+    QVariantList attrs = sysfsAttributes(dir);
+    if (attrs.isEmpty())
+        return;
+    for (int i = 0; i < attrs.size(); ++i) {
+        QVariantMap a = attrs[i].toMap();
+        const QString r = rawReading(dir, a.value(QStringLiteral("name")).toString(),
+                                     a.value(QStringLiteral("value")).toString());
+        if (r.isEmpty())
+            continue;
+        a.insert(QStringLiteral("reading"), r);
+        attrs[i] = a;
+    }
+    QVariantMap g;
+    g.insert(QStringLiteral("title"), title);
+    g.insert(QStringLiteral("path"), dir);
+    g.insert(QStringLiteral("attrs"), attrs);
+    out.append(g);
+}
+
+// A plain file instead of a directory of attributes: one row per line, so a
+// procfs table stays a table instead of collapsing into one long value.
+static void addRawFile(QVariantList &out, const QString &title, const QString &path)
+{
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly))
+        return;
+    QVariantList attrs;
+    while (!f.atEnd() && attrs.size() < 400) {
+        QString line = QString::fromLatin1(f.readLine()).trimmed();
+        if (line.isEmpty())
+            continue;
+        if (line.size() > 200)
+            line = line.left(200) + QStringLiteral(" …");
+        QString key;
+        int sep = line.indexOf(QLatin1Char(':'));
+        if (sep < 0 || sep > 40)
+            sep = line.indexOf(QLatin1Char('='));
+        if (sep > 0 && sep <= 40) {
+            key = line.left(sep).trimmed();
+            line = line.mid(sep + 1).trimmed();
+        }
+        QVariantMap a;
+        a.insert(QStringLiteral("name"), key);
+        a.insert(QStringLiteral("value"), line);
+        attrs.append(a);
+    }
+    if (attrs.isEmpty())
+        return;
+    QVariantMap g;
+    g.insert(QStringLiteral("title"), title);
+    g.insert(QStringLiteral("path"), path);
+    g.insert(QStringLiteral("attrs"), attrs);
+    out.append(g);
+}
+
+// A file whose content identifies the device rather than describing it. Only
+// the value is dropped -- the key stays, so the reader sees that something was
+// held back rather than that nothing was there.
+static void addRawFileRedacted(QVariantList &out, const QString &title, const QString &path)
+{
+    QVariantList before = out;
+    addRawFile(out, title, path);
+    if (out.size() == before.size())
+        return;
+    QVariantMap g = out.last().toMap();
+    QVariantList attrs = g.value(QStringLiteral("attrs")).toList();
+    for (int i = 0; i < attrs.size(); ++i) {
+        QVariantMap a = attrs[i].toMap();
+        QString v = a.value(QStringLiteral("value")).toString();
+        static const QStringList secret = { QStringLiteral("serialno"),
+                                            QStringLiteral("uuid"),
+                                            QStringLiteral("imei"),
+                                            QStringLiteral("androidboot.un"),
+                                            QStringLiteral("root_hash") };
+        QStringList toks = v.split(QLatin1Char(' '), QString::SkipEmptyParts);
+        bool touched = false;
+        for (QString &t : toks) {
+            for (const QString &k : secret)
+                if (t.contains(k, Qt::CaseInsensitive) && t.contains(QLatin1Char('='))) {
+                    t = t.section(QLatin1Char('='), 0, 0) + QStringLiteral("=…");
+                    touched = true;
+                    break;
+                }
+        }
+        if (!touched)
+            continue;
+        a.insert(QStringLiteral("value"), toks.join(QStringLiteral(" ")));
+        attrs[i] = a;
+    }
+    g.insert(QStringLiteral("attrs"), attrs);
+    out[out.size() - 1] = g;
+}
+
+// Every member of a kernel class, optionally one level deeper (net/eth0/
+// statistics rather than net/eth0). The class is the discovery mechanism:
+// whatever the device registered is what gets dumped.
+static void addRawClass(QVariantList &out, const QString &cls, const QString &sub = QString())
+{
+    const QDir d(QStringLiteral("/sys/class/") + cls);
+    for (const QString &e : d.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+        const QString path = sub.isEmpty() ? d.filePath(e)
+                                           : d.filePath(e) + QLatin1Char('/') + sub;
+        addRawDir(out, cls + QLatin1Char('/') + e + (sub.isEmpty() ? QString()
+                                                                  : QLatin1Char('/') + sub), path);
+    }
+}
+
+// Module parameters. On vendor kernels these carry the tuning the driver was
+// built with -- firmware paths, feature switches, buffer sizes -- and they are
+// the only place some of it is visible at all.
+static void addRawModules(QVariantList &out, const QStringList &patterns)
+{
+    const QDir d(QStringLiteral("/sys/module"));
+    for (const QString &m : d.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+        bool hit = false;
+        for (const QString &p : patterns)
+            if (m.contains(p, Qt::CaseInsensitive)) {
+                hit = true;
+                break;
+            }
+        if (!hit)
+            continue;
+        addRawDir(out, QStringLiteral("module ") + m, d.filePath(m));
+        addRawDir(out, QStringLiteral("module ") + m + QStringLiteral(" — parameters"),
+                  d.filePath(m) + QStringLiteral("/parameters"));
+    }
+}
+
+// A device-tree property. Strings there are NUL-terminated and a property may
+// hold several of them in a row, which is how a node lists its compatible
+// entries from most to least specific.
+static QString dtString(const QString &path)
+{
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly))
+        return QString();
+    QByteArray b = f.read(4096);
+    while (b.endsWith('\0'))
+        b.chop(1);
+    b.replace('\0', ", ");
+    return QString::fromLatin1(b).trimmed();
+}
+
+// The device tree is the phone's parts list. Every chip the kernel binds a
+// driver to appears as a node with a "compatible" string, and that string is
+// the vendor's own name for the part -- which is why this finds hardware no
+// class enumeration knows about: a fingerprint sensor on SPI, an audio
+// amplifier on I2C, the PMICs, the touch controller. It is world-readable,
+// costs nothing, and is the same walk on every device.
+//
+// filter is a space-separated list of substrings; a node matches when its name
+// or its compatible string contains any of them. Empty means everything.
+// ---------------------------------------------------------------------------
+// Catalogue figures for the SoC, keyed on the device-tree compatible string.
+//
+// Nothing in here is measured, and that is the point of keeping it separate.
+// The kernel names the part and stops: a device tree says "mediatek,MT6858"
+// and nothing else, while the figures a reader actually wants -- process node,
+// how many cores of which design, what the memory controller accepts -- exist
+// only in the vendor's own publication. So they are carried here, each with
+// the source that published it, and where the vendor published nothing the row
+// says "not published" rather than borrowing a number from a spec database.
+//
+// Two sources are distinguished, because they are not worth the same:
+// "vendor" is the chip maker's own product page, "third party" is a database
+// or the press. Chip makers do not publish their MT/SM part numbers alongside
+// the marketing name, so the very link between the two is third-party -- which
+// is why the row that makes it says so.
+// ---------------------------------------------------------------------------
+
+static void dramGrade(QVariantMap &m);
+
+// The adaptation's own name for this device, from /etc/hw-release. It is what
+// distinguishes one port from another where the device tree only names the SoC.
+static QString hwDevice()
+{
+    QFile hw(QStringLiteral("/etc/hw-release"));
+    if (hw.open(QIODevice::ReadOnly))
+        for (const QByteArray &l : hw.readAll().split('\n'))
+            if (l.startsWith("MER_HA_DEVICE="))
+                return QString::fromUtf8(l.mid(14).trimmed());
+    return QString();
+}
+
+struct SocSpec { const char *key; const char *value; const char *source; };
+
+// Every loaded kernel module with its size and who holds it. On a vendor
+// kernel the module list is the closest thing to a driver inventory: it names
+// the silicon blocks that got a driver at all, and the dependency column shows
+// which of them lean on which. Ordinary users may read /proc/modules; only the
+// load addresses are withheld from them, and those are not wanted here.
+// ---------------------------------------------------------------------------
+// Firmware. Not one version but a dozen of them, because a phone is a dozen
+// computers: the kernel, a module per silicon block, a blob per radio, and a
+// controller in the storage, the charger, every USB device and the modem, each
+// with a release of its own that nobody ever collects in one place.
+//
+// Everything below is read without privileges. Where a version genuinely does
+// not exist -- and for several of these it does not, because the vendor never
+// exported it -- the row says so instead of leaving a blank that reads like
+// zero.
+// ---------------------------------------------------------------------------
+
+// The driver-info ioctl. It is the only way to ask a network driver what
+// firmware it loaded: no sysfs node carries it, because the string comes back
+// from the device rather than from the kernel. Unprivileged by design -- this
+// is what "ethtool -i" does before it needs any capability.
+// The expansion ROM version is a late addition to struct ethtool_drvinfo: the
+// 5.1 headers carry it, the 5.0 and 4.6 ones do not, and this app is built
+// against all three. Detected rather than pinned to a version macro -- what
+// decides is the header in the build target, not the kernel on the device.
+// The first overload only exists where the field does; where it does not, the
+// second one wins and the row is simply absent.
+template <typename T>
+static auto eromVersion(const T &d, int) -> decltype(QString::fromLatin1(d.erom_version))
+{
+    return QString::fromLatin1(d.erom_version).trimmed();
+}
+template <typename T>
+static QString eromVersion(const T &, long)
+{
+    return QString();
+}
+
+static QVariantMap netDriverInfo(const QString &iface)
+{
+    QVariantMap m;
+    const int fd = ::socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0)
+        return m;
+    struct ethtool_drvinfo di;
+    memset(&di, 0, sizeof(di));
+    di.cmd = ETHTOOL_GDRVINFO;
+    struct ifreq ifr;
+    memset(&ifr, 0, sizeof(ifr));
+    strncpy(ifr.ifr_name, iface.toLatin1().constData(), IFNAMSIZ - 1);
+    ifr.ifr_data = reinterpret_cast<char *>(&di);
+    const bool ok = ::ioctl(fd, SIOCETHTOOL, &ifr) == 0;
+    ::close(fd);
+    if (!ok)
+        return m;
+    auto put = [&m](const char *key, const char *val) {
+        const QString s = QString::fromLatin1(val).trimmed();
+        if (!s.isEmpty())
+            m.insert(QString::fromLatin1(key), s);
+    };
+    put("driver", di.driver);
+    put("driverVersion", di.version);
+    put("firmware", di.fw_version);
+    put("bus", di.bus_info);
+    const QString erom = eromVersion(di, 0);
+    if (!erom.isEmpty())
+        m.insert(QStringLiteral("rom"), erom);
+    return m;
+}
+
+// Module taint letters, as the kernel documents them. A module carrying one of
+// these is not broken -- most drivers on a phone carry O and E, because a
+// vendor kernel is built out of tree and rarely signed -- but it is worth
+// naming, because it says what the kernel knows about where the code came from.
+static QString taintWords(const QString &flags)
+{
+    QStringList out;
+    for (const QChar c : flags) {
+        switch (c.toLatin1()) {
+        case 'P': out << QStringLiteral("proprietary"); break;
+        case 'O': out << QStringLiteral("out of tree"); break;
+        case 'E': out << QStringLiteral("unsigned"); break;
+        case 'F': out << QStringLiteral("force loaded"); break;
+        case 'C': out << QStringLiteral("staging"); break;
+        case 'X': out << QStringLiteral("externally built"); break;
+        default: break;
+        }
+    }
+    return out.join(QStringLiteral(", "));
+}
+
+// part selects one section, because the pages ask separately and the blob
+// inventory walks a few thousand files -- no reason to pay for it when a page
+// only wants the USB release numbers. An empty part returns everything.
+QVariantMap SysMon::firmwareDetail(const QString &part) const
+{
+    QVariantMap m;
+    const bool all = part.isEmpty();
+
+    // ---- one module at a time -------------------------------------------
+    // A module may carry a version string, a source hash, or neither. The
+    // Mali driver's release lives here and nowhere else reachable; most others
+    // answer with a build hash, which still tells two builds apart.
+    if (all || part == QLatin1String("modules")) {
+        QVariantList mods;
+        const QDir d(QStringLiteral("/sys/module"));
+        for (const QString &name : d.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+            const QString base = d.filePath(name) + QLatin1Char('/');
+            const QString ver = readTrim(base + QStringLiteral("version"));
+            const QString src = readTrim(base + QStringLiteral("srcversion"));
+            const QString taint = readTrim(base + QStringLiteral("taint"));
+            if (ver.isEmpty() && src.isEmpty() && taint.isEmpty())
+                continue;   // built in, or nothing to say
+            QVariantMap e;
+            e.insert(QStringLiteral("name"), name);
+            e.insert(QStringLiteral("version"), ver);
+            e.insert(QStringLiteral("srcversion"), src);
+            e.insert(QStringLiteral("taint"), taint);
+            e.insert(QStringLiteral("taintWords"), taintWords(taint));
+            e.insert(QStringLiteral("sizeKb"),
+                     readTrim(base + QStringLiteral("coresize")).toDouble() / 1024.0);
+            mods.append(e);
+        }
+        m.insert(QStringLiteral("modules"), mods);
+    }
+
+    // ---- network interfaces ---------------------------------------------
+    if (all || part == QLatin1String("net")) {
+        QVariantList ifs;
+        const QDir nd(QStringLiteral("/sys/class/net"));
+        for (const QString &n : nd.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+            QVariantMap e = netDriverInfo(n);
+            if (e.isEmpty())
+                continue;
+            e.insert(QStringLiteral("name"), n);
+            ifs.append(e);
+        }
+        m.insert(QStringLiteral("interfaces"), ifs);
+    }
+
+    // ---- USB devices ------------------------------------------------------
+    // bcdDevice is the device release number: the closest thing a USB device
+    // has to a firmware version, and it is right there in sysfs.
+    if (all || part == QLatin1String("usb")) {
+        QVariantList devs;
+        const QDir ud(QStringLiteral("/sys/bus/usb/devices"));
+        for (const QString &n : ud.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+            const QString base = ud.filePath(n) + QLatin1Char('/');
+            const QString vid = readTrim(base + QStringLiteral("idVendor"));
+            if (vid.isEmpty())
+                continue;   // an interface, not a device
+            QVariantMap e;
+            e.insert(QStringLiteral("port"), n);
+            e.insert(QStringLiteral("vendorId"), vid);
+            e.insert(QStringLiteral("productId"), readTrim(base + QStringLiteral("idProduct")));
+            e.insert(QStringLiteral("manufacturer"), readTrim(base + QStringLiteral("manufacturer")));
+            e.insert(QStringLiteral("product"), readTrim(base + QStringLiteral("product")));
+            e.insert(QStringLiteral("release"), readTrim(base + QStringLiteral("bcdDevice")));
+            e.insert(QStringLiteral("usbVersion"), readTrim(base + QStringLiteral("version")));
+            e.insert(QStringLiteral("speed"), readTrim(base + QStringLiteral("speed")));
+            devs.append(e);
+        }
+        m.insert(QStringLiteral("usb"), devs);
+    }
+
+    // ---- storage controllers ---------------------------------------------
+    // UFS and eMMC both keep a firmware revision, under different names.
+    if (all || part == QLatin1String("storage")) {
+        QVariantList st;
+        const QDir bd(QStringLiteral("/sys/class/block"));
+        for (const QString &n : bd.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+            if (n.startsWith(QStringLiteral("loop")) || n.startsWith(QStringLiteral("ram"))
+                || n.startsWith(QStringLiteral("zram")) || n.startsWith(QStringLiteral("dm-"))
+                || n.contains(QLatin1Char('p')) )
+                continue;
+            const QString base = bd.filePath(n) + QStringLiteral("/device/");
+            const QString rev = readTrim(base + QStringLiteral("rev"));
+            const QString fw = readTrim(base + QStringLiteral("fwrev"));
+            if (rev.isEmpty() && fw.isEmpty())
+                continue;
+            QVariantMap e;
+            e.insert(QStringLiteral("name"), n);
+            e.insert(QStringLiteral("vendor"), readTrim(base + QStringLiteral("vendor")));
+            e.insert(QStringLiteral("model"), readTrim(base + QStringLiteral("model"))
+                     + readTrim(base + QStringLiteral("name")));
+            e.insert(QStringLiteral("firmware"), rev.isEmpty() ? fw : rev);
+            e.insert(QStringLiteral("hardware"), readTrim(base + QStringLiteral("hwrev")));
+            e.insert(QStringLiteral("manufacturerId"), readTrim(base + QStringLiteral("manfid")));
+            e.insert(QStringLiteral("oemId"), readTrim(base + QStringLiteral("oemid")));
+            e.insert(QStringLiteral("date"), readTrim(base + QStringLiteral("date")));
+            st.append(e);
+        }
+        m.insert(QStringLiteral("storage"), st);
+    }
+
+    // ---- input devices ----------------------------------------------------
+    // The touch controller, the fingerprint reader and the buttons each report
+    // a bus, a vendor, a product and a version through the input core -- the
+    // only place several of them are versioned at all.
+    if (all || part == QLatin1String("input")) {
+        QVariantList inputs;
+        QFile f(QStringLiteral("/proc/bus/input/devices"));
+        if (f.open(QIODevice::ReadOnly)) {
+            QVariantMap cur;
+            while (!f.atEnd()) {
+                const QString line = QString::fromLatin1(f.readLine()).trimmed();
+                if (line.startsWith(QLatin1String("I:"))) {
+                    cur.clear();
+                    for (const QString &kv : line.mid(2).split(QLatin1Char(' '),
+                                                              QString::SkipEmptyParts)) {
+                        const int eq = kv.indexOf(QLatin1Char('='));
+                        if (eq > 0)
+                            cur.insert(kv.left(eq).toLower(), kv.mid(eq + 1));
+                    }
+                } else if (line.startsWith(QLatin1String("N: Name="))) {
+                    cur.insert(QStringLiteral("name"),
+                               line.mid(8).remove(QLatin1Char('"')));
+                } else if (line.isEmpty() && cur.contains(QStringLiteral("name"))) {
+                    inputs.append(cur);
+                    cur.clear();
+                }
+            }
+            if (cur.contains(QStringLiteral("name")))
+                inputs.append(cur);
+        }
+        m.insert(QStringLiteral("input"), inputs);
+    }
+
+    // ---- the blobs on disk ------------------------------------------------
+    // What the kernel would load into a radio or a DSP. The file names carry
+    // the chip family, and the dates say when the vendor last touched them.
+    if (all || part == QLatin1String("blobs")) {
+        QVariantList blobs;
+        qint64 total = 0;
+        int count = 0;
+        for (const QString &root : { QStringLiteral("/lib/firmware"),
+                                     QStringLiteral("/vendor/firmware"),
+                                     QStringLiteral("/etc/firmware"),
+                                     QStringLiteral("/odm/firmware"),
+                                     QStringLiteral("/vendor/firmware_mnt/image") }) {
+            if (!QFileInfo::exists(root))
+                continue;
+            QDirIterator it(root, QDir::Files, QDirIterator::Subdirectories);
+            while (it.hasNext() && count < 3000) {
+                const QFileInfo fi(it.next());
+                ++count;
+                total += fi.size();
+                if (blobs.size() >= 800)
+                    continue;
+                QVariantMap e;
+                e.insert(QStringLiteral("name"), fi.absoluteFilePath().mid(root.size() + 1));
+                e.insert(QStringLiteral("root"), root);
+                e.insert(QStringLiteral("bytes"), (double)fi.size());
+                e.insert(QStringLiteral("date"), fi.lastModified().toString(Qt::ISODate));
+                blobs.append(e);
+            }
+        }
+        std::sort(blobs.begin(), blobs.end(), [](const QVariant &a, const QVariant &b) {
+            return a.toMap().value(QStringLiteral("name")).toString()
+                 < b.toMap().value(QStringLiteral("name")).toString();
+        });
+        m.insert(QStringLiteral("blobs"), blobs);
+        m.insert(QStringLiteral("blobCount"), count);
+        m.insert(QStringLiteral("blobBytes"), (double)total);
+    }
+
+    // ---- how hard the kernel is to attack from here ----------------------
+    // Switches an ordinary process may read, each of which decides whether
+    // some class of local attack is available at all. They are shown as they
+    // stand, with the safer value named beside them; none of this is a verdict
+    // about the device.
+    if (all || part == QLatin1String("system")) {
+        QVariantList hard;
+        // Each switch carries the direction that makes it stricter, because
+        // "different from the recommendation" is not the same as "weaker".
+        // kptr_restrict=2 hides kernel pointers from everyone and 1 only from
+        // unprivileged readers; perf_event_paranoid=3 forbids what 2 allows.
+        // Reporting either of those as something to improve would be telling
+        // the reader to loosen a setting that is already tighter than asked.
+        // cmp: '>' = at least this, '<' = at most this, 0 = no recommendation.
+        const struct { const char *path, *label, *safe; char cmp; } sw[] = {
+            { "/proc/sys/kernel/kptr_restrict",          "Kernel pointers hidden",      "1", '>' },
+            { "/proc/sys/kernel/dmesg_restrict",         "Kernel log restricted",       "1", '>' },
+            { "/proc/sys/kernel/perf_event_paranoid",    "Performance counters",        "2", '>' },
+            { "/proc/sys/kernel/yama/ptrace_scope",      "Debugging other processes",   "1", '>' },
+            { "/proc/sys/kernel/randomize_va_space",     "Address space randomised",    "2", '>' },
+            { "/proc/sys/kernel/unprivileged_bpf_disabled", "Unprivileged BPF blocked", "1", '>' },
+            { "/proc/sys/user/max_user_namespaces",      "User namespaces",             "",  0 },
+            { "/proc/sys/fs/protected_symlinks",         "Symlink protection",          "1", '>' },
+            { "/proc/sys/fs/protected_hardlinks",        "Hardlink protection",         "1", '>' },
+            { "/proc/sys/fs/suid_dumpable",              "Core dumps of setuid programs", "0", '<' },
+            { nullptr, nullptr, nullptr, 0 }
+        };
+        for (int i = 0; sw[i].path; ++i) {
+            const QString v = readTrim(QLatin1String(sw[i].path));
+            if (v.isEmpty())
+                continue;
+            QVariantMap e;
+            e.insert(QStringLiteral("label"), QString::fromLatin1(sw[i].label));
+            e.insert(QStringLiteral("value"), v);
+            e.insert(QStringLiteral("safe"), QString::fromLatin1(sw[i].safe));
+            // The leaf name, not the whole path: the directory is the same for
+            // nearly all of them and the column is narrow.
+            e.insert(QStringLiteral("path"),
+                     QString::fromLatin1(sw[i].path).section(QLatin1Char('/'), -1));
+            if (sw[i].cmp) {
+                const double val = v.toDouble();
+                const double safe = QString::fromLatin1(sw[i].safe).toDouble();
+                e.insert(QStringLiteral("weaker"),
+                         sw[i].cmp == '>' ? val < safe : val > safe);
+            }
+            hard.append(e);
+        }
+        const QString lock = readTrim(QStringLiteral("/sys/kernel/security/lockdown"));
+        if (!lock.isEmpty())
+            m.insert(QStringLiteral("lockdown"), lock);
+        const QString se = readTrim(QStringLiteral("/sys/fs/selinux/enforce"));
+        if (!se.isEmpty())
+            m.insert(QStringLiteral("selinux"), se == QLatin1String("1")
+                     ? QStringLiteral("enforcing") : QStringLiteral("permissive"));
+        m.insert(QStringLiteral("hardening"), hard);
+        m.insert(QStringLiteral("tainted"), readTrim(QStringLiteral("/proc/sys/kernel/tainted")));
+    }
+
+    // ---- the bootloader's own account ------------------------------------
+    // The kernel command line is where the bootloader records what it was and
+    // what it verified. Only the version-bearing keys are lifted out.
+    if (all || part == QLatin1String("system")) {
+        QVariantList boot;
+        const QString cmd = readTrim(QStringLiteral("/proc/cmdline"));
+        for (const QString &tok : cmd.split(QLatin1Char(' '), QString::SkipEmptyParts)) {
+            if (!tok.startsWith(QLatin1String("androidboot.")))
+                continue;
+            const int eq = tok.indexOf(QLatin1Char('='));
+            if (eq < 0)
+                continue;
+            const QString k = tok.mid(12, eq - 12);
+            if (k != QLatin1String("bootloader") && k != QLatin1String("baseband")
+                && k != QLatin1String("hardware") && k != QLatin1String("verifiedbootstate")
+                && k != QLatin1String("veritymode") && k != QLatin1String("vbmeta.avb_version")
+                && k != QLatin1String("boot_devices") && k != QLatin1String("product.hardware.sku")
+                && k != QLatin1String("dtbo_idx") && k != QLatin1String("serialno"))
+                continue;
+            QVariantMap e;
+            e.insert(QStringLiteral("key"), k);
+            e.insert(QStringLiteral("value"), tok.mid(eq + 1));
+            boot.append(e);
+        }
+        m.insert(QStringLiteral("boot"), boot);
+    }
+
+    return m;
+}
+
+QVariantList SysMon::kernelModules() const
+{
+    QVariantList out;
+    QFile f(QStringLiteral("/proc/modules"));
+    if (!f.open(QIODevice::ReadOnly))
+        return out;
+    while (!f.atEnd()) {
+        const QStringList c =
+            QString::fromLatin1(f.readLine()).trimmed().split(QLatin1Char(' '));
+        if (c.size() < 4)
+            continue;
+        QVariantMap m;
+        m.insert(QStringLiteral("name"), c.at(0));
+        m.insert(QStringLiteral("sizeKb"), c.at(1).toDouble() / 1024.0);
+        m.insert(QStringLiteral("used"), c.at(2).toInt());
+        // "-" where nothing depends on it; otherwise a comma-separated list
+        // with a trailing comma the kernel leaves in.
+        QString by = c.at(3);
+        if (by == QLatin1String("-"))
+            by.clear();
+        while (by.endsWith(QLatin1Char(',')))
+            by.chop(1);
+        m.insert(QStringLiteral("usedBy"), by.replace(QLatin1Char(','), QStringLiteral(", ")));
+        out.append(m);
+    }
+    std::sort(out.begin(), out.end(), [](const QVariant &a, const QVariant &b) {
+        return a.toMap().value(QStringLiteral("name")).toString()
+             < b.toMap().value(QStringLiteral("name")).toString();
+    });
+    return out;
+}
+
+// ---------------------------------------------------------------------------
+// Catalogue figures for the device itself, as opposed to its SoC.
+//
+// A phone carries parts the kernel never names. The camera sensors sit behind
+// a vendor HAL that Sailfish does not run; the panel reports a resolution and
+// not a part; the memory package is a board decision the datasheet of the SoC
+// cannot know. Where the maker of the device has stated such a figure, it is
+// carried here with the maker named -- and it stays beside the hardware it
+// belongs to, so the camera parts are on the camera page and nowhere else.
+//
+// Every row says where it came from. "the maker" is the device vendor's own
+// statement, "observed" is something read off a device of this model, and a
+// figure nobody published is absent rather than guessed.
+// ---------------------------------------------------------------------------
+
+struct DevSpec { const char *part; const char *key; const char *value; const char *source; };
+
+QVariantMap SysMon::deviceCatalogue(const QString &part) const
+{
+    QVariantMap m;
+    const QString model = hwDevice();
+    if (model.isEmpty())
+        return m;
+
+    QVariantList rows;
+    QString name;
+
+    if (model == QLatin1String("jp2601")) {
+        name = QStringLiteral("Jolla Phone (2026)");
+        static const DevSpec jp2601[] = {
+            { "camera", "Rear, main", "Sony IMX766, 50 MP, autofocus", "the maker" },
+            { "camera", "Rear, ultra-wide", "Sony IMX214, 13 MP, autofocus", "the maker" },
+            { "camera", "Front", "Sony IMX616, 32 MP, fixed focus", "the maker" },
+            { "camera", "Flash", "Awinic AW36515, two channels", "observed" },
+            { "display", "Panel", "6.36 inch AMOLED, 1032 × 2272", "observed" },
+            { "memory", "Package", "LPDDR4X, single package shared with the storage, SK hynix", "the maker" },
+            { "storage", "Package", "UFS 2.2, single package shared with the memory, SK hynix", "the maker" },
+            { "battery", "Cell", "5450 mAh, user-replaceable, three-pin (plus, minus, thermistor)", "the maker" },
+            { "battery", "Charging", "45 W over USB Power Delivery with programmable supply", "the maker" },
+            { "audio", "Codec", "MT6369, inside the PMIC rather than a separate part", "observed" },
+            { "radio", "LTE bands", "FDD 1–8, 12, 17–20, 25, 26, 28AB, 66  ·  TDD 34, 38–41", "the maker" },
+            { "radio", "5G bands", "n1, n2, n3, n5, n7, n8, n12, n20, n26, n28, n38, n40, n41, n66, n77, n78 — sub-6 only", "the maker" },
+            { "radio", "Wireless", "Wi-Fi 6, Bluetooth 5.4, NFC; combined radio with an A-die 6631 companion", "the maker" },
+            { "body", "Size and weight", "157 × 74 × 9.7 mm, 208 g", "the maker" },
+            { "body", "Fingerprint reader", "in the power key", "the maker" },
+            { "body", "Assembly", "Salo, Finland", "the maker" },
+            { "expansion", "Accessory connector", "seven pogo pins at 2.90 mm: 5 V in, 5 V out, ground, I3C clock and data, identify, interrupt", "the maker" },
+            { "expansion", "Accessory bus", "I3C in single-data-rate mode, up to 12.5 Mbit/s; the bus runs at 1.8 V in the SoC and is shifted to 3.3 V at the pins", "the maker" },
+            { "expansion", "Accessory identity", "an EEPROM at I2C address 0x50, starting with the four bytes 4A 54 4F 48 and a CRC-32 over a CBOR record", "the maker" },
+            { nullptr, nullptr, nullptr, nullptr }
+        };
+        for (const DevSpec *p = jp2601; p->key; ++p) {
+            if (!part.isEmpty() && part != QLatin1String(p->part))
+                continue;
+            QVariantMap r;
+            r.insert(QStringLiteral("part"), QString::fromUtf8(p->part));
+            r.insert(QStringLiteral("k"), QString::fromUtf8(p->key));
+            r.insert(QStringLiteral("v"), QString::fromUtf8(p->value));
+            r.insert(QStringLiteral("src"), QString::fromUtf8(p->source));
+            rows.append(r);
+        }
+    }
+
+    if (rows.isEmpty())
+        return m;
+
+    // The one figure worth setting against the device in front of us. The cell
+    // is sold as one capacity and the gauge reports another; both are on the
+    // battery page already, and saying so is better than letting a reader
+    // discover the gap and assume one of them is a bug in this app.
+    if (part.isEmpty() || part == QLatin1String("battery")) {
+        const double design =
+            readTrim(QStringLiteral("/sys/class/power_supply/battery/charge_full_design"))
+            .toDouble() / 1000.0;
+        if (design > 0)
+            m.insert(QStringLiteral("batteryDesignMah"), design);
+        if (model == QLatin1String("jp2601"))
+            m.insert(QStringLiteral("batteryRatedMah"), 5450.0);
+    }
+
+    m.insert(QStringLiteral("device"), name);
+    m.insert(QStringLiteral("model"), model);
+    m.insert(QStringLiteral("rows"), rows);
+    return m;
+}
+
+QVariantMap SysMon::socCatalogue() const
+{
+    QVariantMap m;
+    QString compat;
+    {
+        QFile f(QStringLiteral("/proc/device-tree/compatible"));
+        if (f.open(QIODevice::ReadOnly))
+            compat = QString::fromLatin1(f.readAll().replace('\0', ' ')).trimmed();
+    }
+    if (compat.isEmpty())
+        return m;
+
+    QVariantList rows;
+    QString part, name;
+
+    if (compat.contains(QLatin1String("MT6858"), Qt::CaseInsensitive)) {
+        part = QStringLiteral("MT6858");
+        name = QStringLiteral("MediaTek Dimensity 7100");
+        static const SocSpec mt6858[] = {
+            { "Marketing name", "Dimensity 7100", "third party" },
+            { "Process", "6 nm", "vendor" },
+            { "Foundry", "TSMC", "third party" },
+            { "CPU", "4× Cortex-A78 up to 2.4 GHz  +  4× Cortex-A55 up to 2.0 GHz", "vendor" },
+            { "Caches, DSU", "", "not published" },
+            { "GPU", "Arm Mali-G610 MC2 (2 shader cores, Valhall 3rd gen)", "vendor" },
+            { "GPU clock", "1000 MHz", "third party" },
+            { "Memory", "LPDDR5 up to 5500 Mbps, or LPDDR4X up to 4266 Mbps", "vendor" },
+            { "Storage", "UFS 3.1", "vendor" },
+            { "Camera", "up to 200 MP; HDR video (DCG/DAG), multi-frame noise reduction,"
+                        " hardware face detection", "vendor" },
+            { "ISP name, concurrent sensors", "", "not published" },
+            { "NPU / APU", "", "not published" },
+            { "Modem", "5G 3GPP Release 16, sub-6 GHz only (no mmWave), SA and NSA,"
+                       " up to 3.3 Gbit/s down, NR DL 2CC / 140 MHz, 256QAM, VoNR,"
+                       " dual 5G SIM", "vendor" },
+            { "LTE category", "", "not published" },
+            { "Wi-Fi", "Wi-Fi 6 (802.11a/b/g/n/ac/ax), 1T1R", "vendor" },
+            { "Bluetooth", "5.4, including Long Range", "vendor" },
+            { "Satellite navigation", "dual band — GPS L1CA+L5, BeiDou B1I+B2a, GLONASS L1OF,"
+                                      " Galileo E1+E5a, QZSS L1CB, NavIC L5+N1", "vendor" },
+            { "Display controller", "up to 1200 × 2600 at up to 120 Hz, 10 bit,"
+                                    " HDR10 / HDR10+ / HLG / HDR Vivid", "vendor" },
+            { "Video codecs", "", "not published" },
+            { "Charging", "45 W integrated, UFCS", "vendor" },
+            { "Announced", "31 December 2025", "third party" },
+            { nullptr, nullptr, nullptr }
+        };
+        for (const SocSpec *p = mt6858; p->key; ++p) {
+            QVariantMap r;
+            r.insert(QStringLiteral("k"), QString::fromUtf8(p->key));
+            r.insert(QStringLiteral("v"), QString::fromUtf8(p->value));
+            r.insert(QStringLiteral("src"), QString::fromUtf8(p->source));
+            rows.append(r);
+        }
+        m.insert(QStringLiteral("note"),
+                 QStringLiteral("MediaTek does not publish its MT part numbers next to the "
+                                "marketing name, so the step from mediatek,MT6858 to "
+                                "Dimensity 7100 rests on third-party databases — several of "
+                                "them, none contradicting the others, and all consistent with "
+                                "the core layout this device reports."));
+    }
+
+    if (rows.isEmpty())
+        return m;
+
+    // The catalogue lists two memory standards for this part because the SoC
+    // accepts either; which one is soldered to this board is not in any
+    // datasheet. The DRAM governor's own ceiling settles it.
+    QVariantMap dram;
+    dramGrade(dram);
+    const double dramHz =
+        readTrim(QStringLiteral("/sys/class/devfreq/mtk-dvfsrc-devfreq/max_freq")).toDouble();
+    QString fitted;
+    if (dram.contains(QStringLiteral("dramType"))) {
+        // The controller says it outright; no inference needed.
+        fitted = dram.value(QStringLiteral("dramType")).toString();
+        if (dram.contains(QStringLiteral("dramRate")))
+            fitted += QStringLiteral(", %1 MB/s")
+                      .arg(dram.value(QStringLiteral("dramRate")).toDouble(), 0, 'f', 0);
+    } else if (dramHz > 0) {
+        // No controller node: the DRAM governor's ceiling still narrows it to
+        // one of the grades the catalogue lists, which is worth saying as long
+        // as it is called what it is -- a ceiling, not a nameplate.
+        const double mts = dramHz / 1e6;
+        if (mts >= 800 && mts <= 20000)
+            fitted = QStringLiteral("%1 MT/s ceiling").arg(mts, 0, 'f', 0);
+    }
+    if (!fitted.isEmpty()) {
+        QVariantMap r;
+        r.insert(QStringLiteral("k"), QStringLiteral("Memory fitted here"));
+        r.insert(QStringLiteral("v"), fitted);
+        r.insert(QStringLiteral("src"), QStringLiteral("this device"));
+        rows.append(r);
+    }
+
+    m.insert(QStringLiteral("part"), part);
+    m.insert(QStringLiteral("name"), name);
+    m.insert(QStringLiteral("rows"), rows);
+    return m;
+}
+
+QVariantList SysMon::deviceTreeParts(const QString &filter) const
+{
+    QVariantList out;
+    const QString root = QStringLiteral("/sys/firmware/devicetree/base");
+    if (!QFileInfo::exists(root))
+        return out;
+    const QStringList keys = filter.split(QLatin1Char(' '), QString::SkipEmptyParts);
+
+    QDirIterator it(root, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    while (it.hasNext() && out.size() < 4000) {
+        const QString dir = it.next();
+        const QString comp = dtString(dir + QStringLiteral("/compatible"));
+        if (comp.isEmpty())
+            continue;
+        const QString name = QFileInfo(dir).fileName();
+        if (!keys.isEmpty()) {
+            bool hit = false;
+            for (const QString &k : keys)
+                if (name.contains(k, Qt::CaseInsensitive) || comp.contains(k, Qt::CaseInsensitive)) {
+                    hit = true;
+                    break;
+                }
+            if (!hit)
+                continue;
+        }
+        QVariantMap p;
+        p.insert(QStringLiteral("node"), name);
+        p.insert(QStringLiteral("path"), dir.mid(root.size()));
+        p.insert(QStringLiteral("compatible"), comp);
+        // A node the board file switched off: the silicon exists in the SoC,
+        // this device does not wire it up.
+        const QString st = dtString(dir + QStringLiteral("/status"));
+        if (!st.isEmpty())
+            p.insert(QStringLiteral("status"), st);
+        out.append(p);
+    }
+    std::sort(out.begin(), out.end(), [](const QVariant &a, const QVariant &b) {
+        return a.toMap().value(QStringLiteral("path")).toString()
+             < b.toMap().value(QStringLiteral("path")).toString();
+    });
+    return out;
+}
+
+// A bus with one directory per attached device. The device's own name or
+// modalias is the part the driver bound to, so this enumerates the chips on
+// the board rather than the classes they were sorted into.
+static void addRawBus(QVariantList &out, const QString &title, const QString &busDir,
+                      const QString &attr)
+{
+    const QDir d(busDir);
+    QVariantList attrs;
+    for (const QString &e : d.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+        if (attrs.size() >= 500)
+            break;
+        const QString v = readTrim(d.filePath(e) + QLatin1Char('/') + attr);
+        if (v.isEmpty())
+            continue;
+        QVariantMap a;
+        a.insert(QStringLiteral("name"), e);
+        a.insert(QStringLiteral("value"), v);
+        attrs.append(a);
+    }
+    if (attrs.isEmpty())
+        return;
+    QVariantMap g;
+    g.insert(QStringLiteral("title"), title);
+    g.insert(QStringLiteral("path"), busDir);
+    g.insert(QStringLiteral("attrs"), attrs);
+    out.append(g);
+}
+
+QVariantList SysMon::rawNodes(const QString &topic) const
+{
+    QVariantList out;
+
+    if (topic == QLatin1String("cpu")) {
+        const QDir pol(QStringLiteral("/sys/devices/system/cpu/cpufreq"));
+        for (const QString &p : pol.entryList(QStringList() << QStringLiteral("policy*"),
+                                              QDir::Dirs, QDir::Name))
+            addRawDir(out, QStringLiteral("cpufreq/") + p, pol.filePath(p));
+        for (int i = 0; i < 32; ++i) {
+            const QString base = QStringLiteral("/sys/devices/system/cpu/cpu%1/").arg(i);
+            if (!QFileInfo::exists(base))
+                break;
+            addRawDir(out, QStringLiteral("cpu%1/topology").arg(i), base + QStringLiteral("topology"));
+        }
+        addRawDir(out, QStringLiteral("cpu/vulnerabilities"),
+                  QStringLiteral("/sys/devices/system/cpu/vulnerabilities"));
+        addRawFile(out, QStringLiteral("/proc/cpuinfo"), QStringLiteral("/proc/cpuinfo"));
+        addRawFile(out, QStringLiteral("/proc/pressure/cpu"), QStringLiteral("/proc/pressure/cpu"));
+        addRawModules(out, QStringList() << QStringLiteral("cm_mgr") << QStringLiteral("cpufreq")
+                                         << QStringLiteral("task_turbo") << QStringLiteral("scheduler")
+                                         << QStringLiteral("core_ctl"));
+    } else if (topic == QLatin1String("gfx")) {
+        addRawDir(out, QStringLiteral("mali0"), QStringLiteral("/sys/class/misc/mali0/device"));
+        addRawClass(out, QStringLiteral("devfreq"));
+        addRawDir(out, QStringLiteral("kgsl-3d0"), QStringLiteral("/sys/class/kgsl/kgsl-3d0"));
+        addRawDir(out, QStringLiteral("drm/card0"), QStringLiteral("/sys/class/drm/card0/device"));
+        addRawModules(out, QStringList() << QStringLiteral("mali") << QStringLiteral("gpufreq")
+                                         << QStringLiteral("ged") << QStringLiteral("kgsl")
+                                         << QStringLiteral("drm"));
+    } else if (topic == QLatin1String("camera")) {
+        // MediaTek creates one procfs file per sensor slot, and they look like
+        // an inventory without being one: all eight print the same single
+        // global, which stays empty until a privileged debug write fills it.
+        // Listed because they exist and cost nothing, not because they answer.
+        const QDir drv(QStringLiteral("/proc/driver"));
+        for (const QString &f : drv.entryList(QStringList() << QStringLiteral("camsensor*"),
+                                              QDir::Files, QDir::Name))
+            addRawFile(out, QStringLiteral("/proc/driver/") + f, drv.filePath(f));
+        addRawClass(out, QStringLiteral("video4linux"));
+        // The flash and its driver, named without touching a register: the
+        // class directory and the I2C client both carry the part name, while
+        // the attributes beside them do not survive being read.
+        addRawBus(out, QStringLiteral("leds"), QStringLiteral("/sys/class/leds"),
+                  QStringLiteral("device/name"));
+        addRawBus(out, QStringLiteral("leds — device tree"), QStringLiteral("/sys/class/leds"),
+                  QStringLiteral("device/of_node/compatible"));
+        addRawModules(out, QStringList() << QStringLiteral("imgsensor") << QStringLiteral("camera")
+                                         << QStringLiteral("seninf") << QStringLiteral("flashlight"));
+    } else if (topic == QLatin1String("net")) {
+        addRawClass(out, QStringLiteral("net"));
+        addRawClass(out, QStringLiteral("net"), QStringLiteral("statistics"));
+        addRawFile(out, QStringLiteral("/proc/net/wireless"), QStringLiteral("/proc/net/wireless"));
+        addRawModules(out, QStringList() << QStringLiteral("wlan") << QStringLiteral("cfg80211")
+                                         << QStringLiteral("mac80211") << QStringLiteral("conninfra")
+                                         << QStringLiteral("connfem"));
+    } else if (topic == QLatin1String("bt")) {
+        addRawClass(out, QStringLiteral("bluetooth"));
+        addRawModules(out, QStringList() << QStringLiteral("bluetooth") << QStringLiteral("btmtk")
+                                         << QStringLiteral("bt_drv") << QStringLiteral("hci"));
+    } else if (topic == QLatin1String("storage")) {
+        const QDir blk(QStringLiteral("/sys/class/block"));
+        for (const QString &b : blk.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+            if (b.startsWith(QStringLiteral("loop")) || b.startsWith(QStringLiteral("ram"))
+                || b.startsWith(QStringLiteral("zram")) || b.startsWith(QStringLiteral("dm-")))
+                continue;
+            addRawDir(out, QStringLiteral("block/") + b, blk.filePath(b) + QStringLiteral("/device"));
+        }
+        addRawClass(out, QStringLiteral("scsi_device"), QStringLiteral("device"));
+        addRawFile(out, QStringLiteral("/proc/pressure/io"), QStringLiteral("/proc/pressure/io"));
+        addRawModules(out, QStringList() << QStringLiteral("ufs") << QStringLiteral("mmc")
+                                         << QStringLiteral("blocktag"));
+    } else if (topic == QLatin1String("mem")) {
+        addRawFile(out, QStringLiteral("/proc/meminfo"), QStringLiteral("/proc/meminfo"));
+        addRawFile(out, QStringLiteral("/proc/vmstat"), QStringLiteral("/proc/vmstat"));
+        addRawFile(out, QStringLiteral("/proc/pressure/memory"), QStringLiteral("/proc/pressure/memory"));
+        addRawDir(out, QStringLiteral("mm/transparent_hugepage"),
+                  QStringLiteral("/sys/kernel/mm/transparent_hugepage"));
+        addRawDir(out, QStringLiteral("mm/ksm"), QStringLiteral("/sys/kernel/mm/ksm"));
+        // The DRAM controller names the memory grade outright, which no other
+        // node on the device does.
+        addRawDir(out, QStringLiteral("dramc_drv"),
+                  QStringLiteral("/sys/bus/platform/drivers/dramc_drv"));
+        addRawDir(out, QStringLiteral("helio-dvfsrc"),
+                  QStringLiteral("/sys/kernel/helio-dvfsrc"));
+        addRawModules(out, QStringList() << QStringLiteral("dramc") << QStringLiteral("emi")
+                                         << QStringLiteral("zram"));
+    } else if (topic == QLatin1String("audio")) {
+        addRawClass(out, QStringLiteral("sound"));
+        addRawFile(out, QStringLiteral("/proc/asound/cards"), QStringLiteral("/proc/asound/cards"));
+        addRawFile(out, QStringLiteral("/proc/asound/pcm"), QStringLiteral("/proc/asound/pcm"));
+        addRawModules(out, QStringList() << QStringLiteral("snd_soc") << QStringLiteral("spk_amp")
+                                         << QStringLiteral("audiodsp"));
+    } else if (topic == QLatin1String("usb")) {
+        addRawClass(out, QStringLiteral("typec"));
+        addRawClass(out, QStringLiteral("udc"));
+        addRawClass(out, QStringLiteral("usb_role"));
+        addRawClass(out, QStringLiteral("usbpd"));
+        addRawModules(out, QStringList() << QStringLiteral("tcpc") << QStringLiteral("usb")
+                                         << QStringLiteral("extcon"));
+    } else if (topic == QLatin1String("modem")) {
+        addRawClass(out, QStringLiteral("ccci_node"));
+        addRawModules(out, QStringList() << QStringLiteral("ccci") << QStringLiteral("md_power")
+                                         << QStringLiteral("modem"));
+    } else if (topic == QLatin1String("thermal")) {
+        addRawClass(out, QStringLiteral("thermal"));
+        // MediaTek's thermal interface hangs off the kernel object rather than
+        // a class, so no enumeration finds it. It is the only place that says
+        // whether the SoC is being limited right now.
+        addRawDir(out, QStringLiteral("/sys/kernel/thermal"),
+                  QStringLiteral("/sys/kernel/thermal"));
+        addRawDir(out, QStringLiteral("/sys/kernel/thermal_trace"),
+                  QStringLiteral("/sys/kernel/thermal_trace"));
+        addRawDir(out, QStringLiteral("/sys/kernel/charger_cooler"),
+                  QStringLiteral("/sys/kernel/charger_cooler"));
+        addRawModules(out, QStringList() << QStringLiteral("thermal") << QStringLiteral("throttling")
+                                         << QStringLiteral("cooler") << QStringLiteral("cooling"));
+    } else if (topic == QLatin1String("battery")) {
+        addRawDir(out, QStringLiteral("platform/charger"),
+                  QStringLiteral("/sys/devices/platform/charger"));
+        addRawDir(out, QStringLiteral("/proc/mtk_battery_cmd"),
+                  QStringLiteral("/proc/mtk_battery_cmd"));
+        addRawModules(out, QStringList() << QStringLiteral("charg") << QStringLiteral("gauge")
+                                         << QStringLiteral("battery") << QStringLiteral("ufcs")
+                                         << QStringLiteral("adapter"));
+    } else if (topic == QLatin1String("device")) {
+        // The board itself: what the bootloader was told, which chips sit on
+        // which bus, and which of them asked the kernel for an interrupt.
+        addRawFile(out, QStringLiteral("/proc/cmdline"), QStringLiteral("/proc/cmdline"));
+        addRawFile(out, QStringLiteral("/proc/bus/input/devices"),
+                   QStringLiteral("/proc/bus/input/devices"));
+        addRawBus(out, QStringLiteral("i2c devices"), QStringLiteral("/sys/bus/i2c/devices"),
+                  QStringLiteral("name"));
+        addRawBus(out, QStringLiteral("spi devices"), QStringLiteral("/sys/bus/spi/devices"),
+                  QStringLiteral("modalias"));
+        addRawBus(out, QStringLiteral("platform devices"),
+                  QStringLiteral("/sys/bus/platform/devices"), QStringLiteral("modalias"));
+        addRawFile(out, QStringLiteral("/proc/interrupts"), QStringLiteral("/proc/interrupts"));
+        addRawFile(out, QStringLiteral("/proc/devices"), QStringLiteral("/proc/devices"));
+        addRawFile(out, QStringLiteral("/proc/bootprof"), QStringLiteral("/proc/bootprof"));
+        addRawFile(out, QStringLiteral("/proc/misc"), QStringLiteral("/proc/misc"));
+        addRawDir(out, QStringLiteral("soc0"), QStringLiteral("/sys/devices/soc0"));
+    } else if (topic == QLatin1String("sensors")) {
+        addRawClass(out, QStringLiteral("sensors"));
+        addRawClass(out, QStringLiteral("iio:device0"));
+        const QDir iio(QStringLiteral("/sys/bus/iio/devices"));
+        for (const QString &e : iio.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name))
+            addRawDir(out, QStringLiteral("iio/") + e, iio.filePath(e));
+        addRawModules(out, QStringList() << QStringLiteral("sensor") << QStringLiteral("accel")
+                                         << QStringLiteral("gyro") << QStringLiteral("als"));
+    }
+    return out;
+}
+
+// The memory grade, from the DRAM controller rather than from a datasheet.
+// A SoC usually accepts two or three LPDDR generations and the device tree
+// does not say which one the board carries; this driver does, as an enum of
+// its own that it also prints in words nowhere. The mapping is the driver's.
+static void dramGrade(QVariantMap &m)
+{
+    const QString dc = QStringLiteral("/sys/bus/platform/drivers/dramc_drv/");
+    const QString dt = readTrim(dc + QStringLiteral("dram_type"));
+    if (!dt.isEmpty()) {
+        bool ok = false;
+        const int id = dt.section(QLatin1Char('='), 1).trimmed().toInt(&ok);
+        QString name;
+        if (ok) {
+            switch (id) {
+            case 5: name = QStringLiteral("LPDDR4"); break;
+            case 6: name = QStringLiteral("LPDDR4X"); break;
+            case 7: name = QStringLiteral("LPDDR4P"); break;
+            case 8: name = QStringLiteral("LPDDR5"); break;
+            case 9: name = QStringLiteral("LPDDR5X"); break;
+            default: break;
+            }
+        }
+        if (!name.isEmpty())
+            m.insert(QStringLiteral("dramType"), name);
+        m.insert(QStringLiteral("dramTypeRaw"), dt);
+    }
+    const QString dr = readTrim(dc + QStringLiteral("dram_data_rate"));
+    if (!dr.isEmpty()) {
+        const double rate = dr.section(QLatin1Char('='), 1).trimmed().toDouble();
+        // This is what the memory runs at this second -- the governor drops it
+        // to a low step when nothing is asking. The nameplate is the ceiling
+        // below, and showing one without the other invites the reader to take
+        // an idle figure for the rating.
+        if (rate >= 100 && rate <= 20000)
+            m.insert(QStringLiteral("dramRate"), rate);
+        else if (rate > 0)
+            m.insert(QStringLiteral("dramRateRaw"), rate);
+    }
+    const double ceil =
+        readTrim(QStringLiteral("/sys/class/devfreq/mtk-dvfsrc-devfreq/max_freq")).toDouble();
+    if (ceil > 0 && ceil / 1e6 >= 800 && ceil / 1e6 <= 20000)
+        m.insert(QStringLiteral("dramRateMax"), ceil / 1e6);
+    const QString mr = readTrim(dc + QStringLiteral("mr"));
+    if (!mr.isEmpty())
+        m.insert(QStringLiteral("dramModeRegisters"), mr);
+}
+
 QVariantMap SysMon::memoryDetail() const
 {
     QVariantMap m;
+    dramGrade(m);
     QFile f(QStringLiteral("/proc/meminfo"));
     if (!f.open(QIODevice::ReadOnly))
         return m;
@@ -1113,13 +2702,34 @@ QVariantMap SysMon::cpuDetail() const
     m.insert(QStringLiteral("kernelVersion"), readTrim(QStringLiteral("/proc/sys/kernel/version")));
     m.insert(QStringLiteral("os"), osField(QStringLiteral("/etc/os-release"), "PRETTY_NAME"));
     m.insert(QStringLiteral("osVersion"), osField(QStringLiteral("/etc/os-release"), "VERSION_ID"));
-    // Jolla marketing name + hw model from the hardware adaptation release
+    // Marketing name and hardware model from the adaptation's own release file.
     QString hwName = osField(QStringLiteral("/etc/hw-release"), "NAME");
     if (hwName.isEmpty())
+        hwName = osField(QStringLiteral("/etc/hw-release"), "PRETTY_NAME");
+    if (hwName.isEmpty())
         hwName = osField(QStringLiteral("/etc/hw-release"), "MER_HA_DEVICE");
+    // Some adaptations write the vendor into NAME and then repeat it in the
+    // product: the Jolla Phone (2026) ships NAME="Jolla Jolla Phone". Collapse
+    // a word that immediately repeats itself rather than showing the stutter.
+    {
+        QStringList w = hwName.split(QLatin1Char(' '), QString::SkipEmptyParts);
+        for (int i = w.size() - 1; i > 0; --i)
+            if (w.at(i).compare(w.at(i - 1), Qt::CaseInsensitive) == 0)
+                w.removeAt(i);
+        hwName = w.join(QLatin1Char(' '));
+    }
     m.insert(QStringLiteral("deviceName"), hwName);
-    m.insert(QStringLiteral("deviceModel"),
-             osField(QStringLiteral("/etc/hw-release"), "HW_DEVICE_MODEL"));
+    // HW_DEVICE_MODEL is optional and the Jolla Phone (2026) omits it. The
+    // adaptation's own device code identifies the port just as well, and it is
+    // the name every other file on the device uses for it.
+    QString hwModel = osField(QStringLiteral("/etc/hw-release"), "HW_DEVICE_MODEL");
+    if (hwModel.isEmpty())
+        hwModel = osField(QStringLiteral("/etc/hw-release"), "MER_HA_DEVICE");
+    if (hwModel.isEmpty())
+        hwModel = osField(QStringLiteral("/etc/hw-release"), "ID");
+    m.insert(QStringLiteral("deviceModel"), hwModel);
+    m.insert(QStringLiteral("deviceVendor"),
+             osField(QStringLiteral("/etc/hw-release"), "MER_HA_VENDOR"));
     m.insert(QStringLiteral("hwVersion"), osField(QStringLiteral("/etc/hw-release"), "VERSION_ID"));
 
     // Android base under libhybris: version/patch level of the vendor blobs.
@@ -1193,6 +2803,22 @@ QVariantMap SysMon::cpuDetail() const
 QVariantMap SysMon::graphicsDetail() const
 {
     QVariantMap m;
+    // The kernel driver's release name. kbase puts it in the module's version
+    // attribute and nowhere else an ordinary user can reach -- the mali0
+    // device directory has no version node at all, and the ioctl that would
+    // answer needs the GPU opened.
+    {
+        const QDir mods(QStringLiteral("/sys/module"));
+        for (const QString &mod : mods.entryList(QStringList() << QStringLiteral("mali_kbase*"),
+                                                 QDir::Dirs, QDir::Name)) {
+            const QString v = readTrim(mods.filePath(mod) + QStringLiteral("/version"));
+            if (v.isEmpty())
+                continue;
+            m.insert(QStringLiteral("gpuDriverModule"), mod);
+            m.insert(QStringLiteral("gpuDriverRelease"), v);
+            break;
+        }
+    }
     // GPU: Adreno (kgsl) first, then a generic devfreq gpu node
     const QString kgsl = QStringLiteral("/sys/class/kgsl/kgsl-3d0/");
     QString gpuModel = readTrim(kgsl + QStringLiteral("gpu_model"));
@@ -1757,6 +3383,7 @@ QVariantMap SysMon::wirelessDetail() const
     // shipped firmware blobs (names only — they identify the chip family);
     // Qualcomm patterns plus MediaTek (WIFI_RAM_CODE_*, WMT_*, /etc/firmware)
     QStringList fwFiles;
+    QMap<QString, QString> fwWhere;      // name -> directory it was found in
     for (const QString &d : { QStringLiteral("/vendor/firmware"),
                               QStringLiteral("/lib/firmware"),
                               QStringLiteral("/etc/firmware"),
@@ -1767,10 +3394,19 @@ QVariantMap SysMon::wirelessDetail() const
                                << QStringLiteral("WIFI_RAM_CODE*") << QStringLiteral("BT_RAM_CODE*")
                                << QStringLiteral("WMT_*") << QStringLiteral("mt66*"),
                  QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot))
-            if (!fwFiles.contains(f)) fwFiles << f;
+            if (!fwFiles.contains(f)) { fwFiles << f; fwWhere.insert(f, d); }
     }
     fwFiles.sort();
-    m.insert(QStringLiteral("firmwareFiles"), fwFiles.join(QStringLiteral(", ")));
+    // One entry per file rather than one long line: a dozen blob names run
+    // together are unreadable, and the directory is worth naming beside each.
+    QVariantList fwList;
+    for (const QString &f : fwFiles) {
+        QVariantMap e;
+        e.insert(QStringLiteral("name"), f);
+        e.insert(QStringLiteral("dir"), fwWhere.value(f));
+        fwList.append(e);
+    }
+    m.insert(QStringLiteral("firmwareFileList"), fwList);
 
     // --- Bluetooth ----------------------------------------------------
     QStringList adapters;
@@ -1794,28 +3430,103 @@ QVariantMap SysMon::wirelessDetail() const
     return m;
 }
 
-// Registered Android HAL services on /dev/hwbinder — the HAL-level view of
-// the hardware adaptation. Uses binder-list (libgbinder-tools) when present;
-// returns empty on non-hybris devices or without the tool.
-QVariantList SysMon::halServices() const
+// Whether it is worth asking at all. Cheap, so a page can offer the HAL list
+// without paying for it: halServices() below runs a helper per binder domain.
+bool SysMon::halBinderPresent() const
 {
-    QVariantList out;
-    if (!QFileInfo::exists(QStringLiteral("/dev/hwbinder")))
-        return out;
-    QProcess p;
-    p.start(QStringLiteral("binder-list"),
-            QStringList() << QStringLiteral("-d") << QStringLiteral("/dev/hwbinder"));
-    if (!p.waitForFinished(3000))
-        return out;
-    QStringList lines;
-    for (const QByteArray &l : p.readAllStandardOutput().split('\n')) {
-        const QString s = QString::fromUtf8(l).trimmed();
-        if (!s.isEmpty()) lines << s;
+    return QFileInfo::exists(QStringLiteral("/dev/binder"))
+        || QFileInfo::exists(QStringLiteral("/dev/hwbinder"));
+}
+
+// Is a given service manager running? Its absence is the whole reason this
+// code has to look: querying a binder domain whose manager is gone does not
+// fail, it waits for an answer that never comes. Measured on the Jolla phone
+// of 2026 -- /dev/hwbinder exists and two processes hold it open, but
+// hwservicemanager is not started at all, and the query hangs until killed.
+// /proc/<pid>/cmdline is world-readable, so this needs no privilege.
+static bool managerRunning(const QByteArray &exe)
+{
+    const QDir proc(QStringLiteral("/proc"));
+    for (const QString &e : proc.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        bool isPid = false;
+        e.toInt(&isPid);
+        if (!isPid)
+            continue;
+        QFile f(QStringLiteral("/proc/") + e + QStringLiteral("/cmdline"));
+        if (!f.open(QIODevice::ReadOnly))
+            continue;
+        const QByteArray first = f.readAll().split('\0').value(0);
+        if (first == exe || first.endsWith('/' + exe))
+            return true;
     }
-    lines.sort();
-    for (const QString &s : lines)
-        out.append(s);
-    return out;
+    return false;
+}
+
+// The registered Android services of the hardware adaptation, per binder
+// domain. There are three, and which one carries the HALs depends on the age
+// of the Android base underneath: HIDL on /dev/hwbinder is what a port of the
+// Android 9-12 era uses, AIDL on /dev/binder is what replaced it -- Android 13
+// deprecated HIDL and 14 dropped hwservicemanager outright. Asking only one of
+// them therefore answers richly on one device and not at all on the next, so
+// all three are asked and each says for itself who serves it.
+//
+// None of this has anything to do with Android App Support: these are the
+// adaptation's own services and they are registered whether or not any
+// Android container is installed or running.
+QVariantMap SysMon::halServices() const
+{
+    struct Domain { const char *path, *manager, *protocol; };
+    static const Domain domains[] = {
+        { "/dev/binder",    "servicemanager",    "AIDL" },
+        { "/dev/vndbinder", "vndservicemanager", "AIDL (vendor)" },
+        { "/dev/hwbinder",  "hwservicemanager",  "HIDL" },
+        { nullptr, nullptr, nullptr }
+    };
+
+    QVariantMap m;
+    QVariantList domainList, services;
+    for (int i = 0; domains[i].path; ++i) {
+        const QString path = QString::fromLatin1(domains[i].path);
+        if (!QFileInfo::exists(path))
+            continue;
+        QVariantMap d;
+        d.insert(QStringLiteral("path"), path);
+        d.insert(QStringLiteral("protocol"), QString::fromLatin1(domains[i].protocol));
+        d.insert(QStringLiteral("manager"), QString::fromLatin1(domains[i].manager));
+
+        const bool live = managerRunning(QByteArray(domains[i].manager));
+        d.insert(QStringLiteral("running"), live);
+        int found = 0;
+        if (live) {
+            QProcess p;
+            p.start(QStringLiteral("binder-list"), QStringList() << QStringLiteral("-d") << path);
+            if (p.waitForFinished(1500)) {
+                QStringList lines;
+                for (const QByteArray &l : p.readAllStandardOutput().split('\n')) {
+                    const QString t = QString::fromUtf8(l).trimmed();
+                    if (!t.isEmpty())
+                        lines << t;
+                }
+                lines.sort();
+                for (const QString &t : lines) {
+                    QVariantMap sv;
+                    sv.insert(QStringLiteral("name"), t);
+                    sv.insert(QStringLiteral("protocol"), QString::fromLatin1(domains[i].protocol));
+                    services.append(sv);
+                    ++found;
+                }
+            } else {
+                p.kill();
+                p.waitForFinished(500);
+                d.insert(QStringLiteral("timedOut"), true);
+            }
+        }
+        d.insert(QStringLiteral("count"), found);
+        domainList.append(d);
+    }
+    m.insert(QStringLiteral("domains"), domainList);
+    m.insert(QStringLiteral("services"), services);
+    return m;
 }
 
 // Bug-report log info, unprivileged part: installed packages and running
@@ -2108,15 +3819,7 @@ QString SysMon::battQualityBasis() const
 
 QString SysMon::fmtBytes(double b) const
 {
-    if (b < 0)
-        b = 0;
-    if (b >= 1073741824.0)
-        return QString::number(b / 1073741824.0, 'f', 2) + QStringLiteral(" GB");
-    if (b >= 1048576.0)
-        return QString::number(b / 1048576.0, 'f', 1) + QStringLiteral(" MB");
-    if (b >= 1024.0)
-        return QString::number(b / 1024.0, 'f', 0) + QStringLiteral(" kB");
-    return QString::number(b, 'f', 0) + QStringLiteral(" B");
+    return humanBytes(b);
 }
 
 QString SysMon::fmtRate(double bps) const

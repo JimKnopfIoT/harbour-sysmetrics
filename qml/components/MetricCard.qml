@@ -26,11 +26,15 @@ Rectangle {
     border.width: 1
     border.color: Qt.rgba(accent.r, accent.g, accent.b, 0.28)
 
-    // On top of the content so a tap anywhere on the card reliably opens it.
+    // Underneath the content, not on top of it. Everything a card holds —
+    // labels, bars, the graph — is inert and lets a tap fall through to here,
+    // so a tap anywhere still opens the card; but a control that does take
+    // taps, such as the "show all" toggle under a capped list, now gets its
+    // own. On top, this area swallowed those toggles and the card opened
+    // instead of the list.
     MouseArea {
         id: pressArea
         anchors.fill: parent
-        z: 100
         enabled: card.drilldown
         onClicked: card.clicked()
     }

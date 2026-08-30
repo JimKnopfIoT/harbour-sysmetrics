@@ -14,16 +14,255 @@ function row(k, v, opt) {
     return r
 }
 
+// Fold a group of sections away: they keep their place at the end of the page
+// and cost one header line each until the reader opens them. Everything that
+// is a full dump rather than a figure one needs for an overview goes through
+// here — the page has to answer "what is this device" before it answers
+// "what does the kernel export".
+function folded(list) {
+    for (var i = 0; i < list.length; ++i)
+        list[i].collapsed = true
+    return list
+}
+
+// A run of sections of the same kind — one directory per power-supply stage,
+// one per sound card, one per raw node — is a list, not a chapter each. From
+// four of them on they go under a single header and open together; three or
+// fewer are quicker to read than to unpack.
+function group(list, id, title, note) {
+    if (list.length <= 3) return list
+    var out = [{ groupHeader: id, title: title, count: list.length, note: note, rows: [] }]
+    for (var i = 0; i < list.length; ++i) {
+        list[i].collapsed = true
+        list[i].group = id
+        out.push(list[i])
+    }
+    return out
+}
+
+// The page's findings, placed where the builder wants them rather than after
+// everything else.
+function diagnosisHere() {
+    return { diagnosis: true }
+}
+
+// Raw node dumps: whatever a subsystem exports, one section per directory.
+// Deliberately the last thing on a page — the named facts first, the unlabelled
+// remainder after them, for the reader who would rather see the file than our
+// reading of it.
+function rawSections(topic) {
+    var groups = []
+    try { groups = sysmon.rawNodes(topic) } catch (e) { return [] }
+    var out = []
+    for (var i = 0; i < groups.length; ++i) {
+        var g = groups[i]
+        var attrs = g.attrs || []
+        var rows = []
+        for (var j = 0; j < attrs.length; ++j) {
+            var at = attrs[j]
+            // Where the kernel's ABI fixes the unit, the reading takes the
+            // value column and the figure the kernel wrote moves to the right.
+            // Everything else stands exactly as it was written.
+            rows.push(at.reading
+                      ? row(at.name, at.reading, {mono:true, right: at.value})
+                      : row(at.name, at.value, {mono:true}))
+        }
+        if (!rows.length) continue
+        out.push({ title: g.title, rows: rows })
+    }
+    if (!out.length) return []
+    var note = qsTr("Everything this subsystem exports, exactly as the kernel wrote it — the attributes this app has a name for and the ones it does not. Almost nothing below is converted: each value stands in whatever unit its driver chose, and that is not always the same unit from one node to the next. The exception is the handful of attributes whose unit the kernel's own interface fixes for every device — a module's section sizes are bytes, a thermal zone's temperature is millidegrees — and those are read out in words, with the figure the kernel wrote kept on the right. All of it is world-readable; none of it needs the root helper.")
+    folded(out)
+    if (out.length <= 3) {
+        out[0].note = note
+        return out
+    }
+    return group(out, "raw-" + topic, qsTr("Raw kernel nodes"), note)
+}
+
+// The device tree as a parts list. filter is a space-separated set of
+// substrings matched against node name and compatible string; empty lists
+// every node that names a chip at all.
+function dtSections(filter, title) {
+    var parts = []
+    try { parts = sysmon.deviceTreeParts(filter || "") } catch (e) { return [] }
+    if (!parts.length) return []
+    var rows = []
+    for (var i = 0; i < parts.length; ++i) {
+        var p = parts[i]
+        rows.push(row(p.node, p.compatible,
+                      { mono: true, active: p.status === "disabled" ? false : undefined }))
+    }
+    return folded([{ title: title || qsTr("Device tree"),
+        note: qsTr("Every device-tree node that names a chip, with the compatible string the kernel matched a driver against — the vendor's own name for the part. This is the board's parts list, and it names hardware no device class enumerates: the amplifiers on I2C, the fingerprint reader on SPI, the regulators inside each PMIC. Grayed entries are switched off in the board file: the silicon is in the SoC, this device does not wire it up."),
+        rows: rows }])
+}
+
+// ---- firmware, kept on the subsystem's own page ---------------------------
+// There is no single firmware version on a phone. There are dozens: the
+// kernel, a module per silicon block, a blob per radio, and a controller with
+// a release of its own in the storage, the charger, every USB device and the
+// modem. Collecting them on one page would put the Wi-Fi firmware somewhere
+// other than the Wi-Fi, so each lands beside the hardware it belongs to.
+
+// A device release number as the USB specification writes it: two BCD bytes,
+// which sysfs prints as four hex digits.
+function bcd(v) {
+    if (!v) return ""
+    var t = ("" + v).trim()
+    if (t.length === 4 && t.indexOf(".") < 0) return t.slice(0, 2) + "." + t.slice(2)
+    return t
+}
+
+function fwModules(patterns, title) {
+    var mods = []
+    try { mods = sysmon.firmwareDetail("modules").modules || [] } catch (e) { return [] }
+    var rows = []
+    for (var i = 0; i < mods.length; ++i) {
+        var mo = mods[i]
+        var hit = false
+        for (var p = 0; p < patterns.length; ++p)
+            if (mo.name.toLowerCase().indexOf(patterns[p]) >= 0) { hit = true; break }
+        if (!hit) continue
+        var v = mo.version ? mo.version
+              : mo.srcversion ? qsTr("build %1").arg(mo.srcversion)
+              : qsTr("no version string")
+        rows.push(row(mo.name, v, { mono: true, right: mo.taintWords,
+                                    active: (mo.version || mo.srcversion) ? undefined : false }))
+    }
+    if (!rows.length) return []
+    return folded([{ title: title || qsTr("Driver and firmware"),
+        note: qsTr("The modules behind this hardware, with whatever version each one carries. A driver that names a release states it; one that does not is shown by the hash of the source it was built from, which still tells two builds apart. The note on the right is what the kernel knows about where the code came from — out-of-tree and unsigned are the normal case on a vendor kernel, not a fault."),
+        rows: rows }])
+}
+
+function fwUsb() {
+    var devs = []
+    try { devs = sysmon.firmwareDetail("usb").usb || [] } catch (e) { return [] }
+    if (!devs.length) return []
+    var rows = []
+    for (var i = 0; i < devs.length; ++i) {
+        var d = devs[i]
+        var name = ((d.manufacturer || "") + " " + (d.product || "")).trim()
+        if (!name.length) name = d.vendorId + ":" + d.productId
+        var bits = []
+        if (d.release) bits.push(qsTr("firmware %1").arg(bcd(d.release)))
+        if (d.usbVersion) bits.push("USB " + ("" + d.usbVersion).trim())
+        if (d.speed) bits.push(d.speed + " Mbit/s")
+        bits.push(d.vendorId + ":" + d.productId)
+        rows.push(row(name, bits.join("  ·  "), { right: d.port }))
+    }
+    return folded([{ title: qsTr("Attached devices — firmware"),
+        note: qsTr("Every USB device reports a release number of its own, and it is the closest thing such a device has to a firmware version. It is the manufacturer's number, not a date, so it only compares against another unit of the same product. The identifier at the end is the vendor and product pair the kernel matched a driver against."),
+        rows: rows }])
+}
+
+function fwNet() {
+    var ifs = []
+    try { ifs = sysmon.firmwareDetail("net").interfaces || [] } catch (e) { return [] }
+    if (!ifs.length) return []
+    var rows = []
+    for (var i = 0; i < ifs.length; ++i) {
+        var n = ifs[i]
+        rows.push(row(n.name, (n.driver || "?")
+                  + (n.driverVersion ? "  " + n.driverVersion : "")
+                  + (n.firmware ? "  ·  " + qsTr("firmware") + " " + n.firmware : "")
+                  + (n.rom ? "  ·  ROM " + n.rom : ""),
+                  { mono: true, right: n.bus }))
+    }
+    return folded([{ title: qsTr("Interface firmware"),
+        note: qsTr("Asked of the driver directly, because no file carries it: the firmware string comes back from the device rather than from the kernel. An interface that answers with a driver name and nothing else has a driver that never implemented the question — the radio still runs firmware, it just does not say which."),
+        rows: rows }])
+}
+
+function fwStorage() {
+    var st = []
+    try { st = sysmon.firmwareDetail("storage").storage || [] } catch (e) { return [] }
+    if (!st.length) return []
+    var rows = []
+    for (var i = 0; i < st.length; ++i) {
+        var d = st[i]
+        rows.push(row(((d.vendor || "") + " " + (d.model || "")).trim() || d.name,
+                      qsTr("firmware %1").arg(d.firmware)
+                      + (d.hardware ? "  ·  " + qsTr("hardware %1").arg(d.hardware) : "")
+                      + (d.date ? "  ·  " + d.date : ""),
+                      { mono: true, right: d.name }))
+    }
+    return folded([{ title: qsTr("Controller firmware"),
+        note: qsTr("The revision the storage controller reports for itself. It is the firmware running inside the chip, not the flash memory's condition — that is on the health card. A UFS or eMMC part is a small computer with its own release, and this is its version."),
+        rows: rows }])
+}
+
+// Catalogue figures for the device itself, kept beside the hardware they
+// describe rather than gathered on a page of their own.
+function catSections(part) {
+    var c = {}
+    try { c = sysmon.deviceCatalogue(part) } catch (e) { return [] }
+    var rs = c.rows || []
+    if (!rs.length) return []
+    var rows = []
+    for (var i = 0; i < rs.length; ++i) {
+        // Short on purpose: this column is narrow, and a long phrase runs
+        // over the value beside it.
+        var src = rs[i].src === "the maker" ? qsTr("maker")
+                : rs[i].src === "observed" ? qsTr("observed")
+                : rs[i].src
+        rows.push(row(rs[i].k, rs[i].v, { right: src }))
+    }
+    var out = folded([{ title: qsTr("%1 — catalogue").arg(c.device),
+        note: qsTr("Not measured. Parts of a phone that the kernel never names — the camera sensors sit behind a vendor layer this system does not run, the panel reports a resolution and not a part number, the memory package is a board decision no SoC datasheet knows. Where the maker of the device has stated such a figure it is carried here, with the source on the right, and where nobody published one the row is absent rather than guessed."),
+        rows: rows }])
+    // Two numbers for the same cell, and they disagree. Better to say so than
+    // to let a reader find the gap and assume this app got one of them wrong.
+    if (c.batteryRatedMah && c.batteryDesignMah
+            && Math.abs(c.batteryRatedMah - c.batteryDesignMah) > 100)
+        out[0].note += "\n\n" + qsTr("The cell is sold as %1 mAh and the gauge reports %2 mAh as its design capacity. Both figures are on this page and they cannot both describe the same cell. Nothing here resolves it: the gauge is reading its own battery profile, which is written by the vendor and can be wrong, and the marketed figure is not a measurement either. Treat the health percentage above with that in mind — it divides one of these numbers by the other kind.")
+                    .arg(c.batteryRatedMah.toFixed(0)).arg(c.batteryDesignMah.toFixed(0))
+    return out
+}
+
 function cpu() {
     var d = sysmon.cpuDetail()
     var s = []
+    // Everything that answers a question one does not ask while getting an
+    // overview is collected separately and folded away at the end of the page,
+    // in the order at the bottom of this function.
+    var socCat = [], halSec = [], bootSec = [], inputSec = [], blobSec = []
+    // The catalogue knows the name the device is sold under, which the
+    // adaptation file does not always carry.
+    var devcat = {}
+    try { devcat = sysmon.deviceCatalogue("body") } catch (eDc) { devcat = {} }
     s.push({ title: qsTr("Device"), rows: [
-        row(qsTr("Product"), d.deviceName),
-        row(qsTr("Model"), d.deviceModel),
+        row(qsTr("Product"), devcat.device
+            ? devcat.device + (d.deviceName && d.deviceName !== devcat.device
+                               ? "   (" + d.deviceName + ")" : "")
+            : d.deviceName),
+        row(qsTr("Model"), d.deviceModel
+            + (d.deviceVendor ? "  ·  " + d.deviceVendor : ""), {mono:true}),
         row(qsTr("Board"), d.machine),
         row("SoC", d.socModel || d.socName, {mono:true}),
         row(qsTr("SoC (device tree)"), d.socCompatible, {mono:true})
     ]})
+    var soc = {}
+    try { soc = sysmon.socCatalogue() } catch (eSoc) { soc = {} }
+    if (soc.rows && soc.rows.length) {
+        var socRows = []
+        for (var sq = 0; sq < soc.rows.length; ++sq) {
+            var sp = soc.rows[sq]
+            var src = sp.src === "vendor" ? qsTr("published by the chip vendor")
+                    : sp.src === "third party" ? qsTr("third party")
+                    : sp.src === "this device" ? qsTr("read from this device")
+                    : qsTr("not published")
+            socRows.push(row(sp.k, sp.v && sp.v.length ? sp.v : qsTr("not published"),
+                             { right: src,
+                               active: sp.v && sp.v.length ? undefined : false,
+                               color: sp.src === "this device" ? "#8ef94a" : undefined }))
+        }
+        socCat.push({ title: qsTr("%1 — catalogue").arg(soc.name), collapsed: true,
+                 note: qsTr("Not measured. These are the figures the chip vendor published for this part, carried in the app because the kernel does not hold them: the device tree names the SoC and stops. The right-hand column says who published each one — the vendor's own product page, a third party, or, for the last row, this device itself. Where the vendor published nothing, the row says so rather than borrowing a number from a spec database.")
+                     + (soc.note ? "\n\n" + soc.note : ""),
+                 rows: socRows })
+    }
     s.push({ title: qsTr("Operating system"), rows: [
         row("Sailfish OS", d.os),
         row(qsTr("Release"), d.osVersion),
@@ -67,8 +306,15 @@ function cpu() {
                  rows: gr })
     }
     var fr = d.availFreqsMhz || []
-    if (fr.length)
-        s.push({ title: qsTr("Frequency steps"), rows: [ row(qsTr("Available"), fr.join(", ") + " MHz") ] })
+    if (fr.length) {
+        var frRows = []
+        for (var fq = 0; fq < fr.length; ++fq)
+            frRows.push(row(qsTr("Step %1").arg(fq + 1), fr[fq] + " MHz",
+                            { right: sysmon.coreFreqsMhz[0] === fr[fq] ? qsTr("now") : "" }))
+        s.push({ title: qsTr("Frequency steps"), collapsed: true,
+                 note: qsTr("Every frequency the scaling driver offers for the policy the first core belongs to. Other clusters keep lists of their own, which this node does not carry, and the step marked on the right is the one that core happens to sit on right now."),
+                 rows: frRows })
+    }
 
     var caches = d.caches || []
     if (caches.length) {
@@ -85,18 +331,48 @@ function cpu() {
         s.push({ title: qsTr("CPU features"),
                  note: qsTr("Instruction-set capabilities the CPU reports."), rows: frows })
     }
-    // Ultimate: registered Android HAL services on /dev/hwbinder
-    var hal = sysmon.halServices()
-    if (hal.length) {
-        var hr = []
-        for (var h = 0; h < hal.length; ++h) {
-            var parts = ("" + hal[h]).split("::")
-            hr.push(row(parts[0], parts.length > 1 ? parts[1] : "", {mono:true}))
-        }
-        s.push({ title: qsTr("Android HAL services"),
-                 note: qsTr("HIDL services registered on /dev/hwbinder — the HAL layer the hardware adaptation actually runs."),
-                 rows: hr })
+    // The adaptation's registered Android services. Asked for only when the
+    // reader opens the section: the listing runs an external tool once per
+    // binder domain. Which domain carries the HALs depends on the age of the
+    // Android base, so the section names all of them and says who serves each.
+    if (sysmon.halBinderPresent()) {
+        halSec.push({ title: qsTr("Android HAL services"), collapsed: true,
+                 note: qsTr("The services the hardware adaptation registers on the Android binder — camera, sensors, graphics, audio. Which door they sit behind depends on the age of the Android base: an older port registers them as HIDL on /dev/hwbinder, a newer one as AIDL on /dev/binder, because Android 13 deprecated HIDL and 14 dropped its service manager. The first rows say which doors this device has and who is answering behind them. None of it depends on Android App Support — these belong to the adaptation and are there whether a container is installed or not."),
+                 rowsFn: function () {
+                     var hal = sysmon.halServices()
+                     var doms = hal.domains || [], svcs = hal.services || []
+                     var hr = []
+                     for (var i = 0; i < doms.length; ++i) {
+                         var dm = doms[i]
+                         var state = !dm.running
+                                 ? qsTr("no service manager — %1 is not running").arg(dm.manager)
+                                 : dm.timedOut
+                                 ? qsTr("service manager runs, but the listing did not answer")
+                                 : qsTr("%n service(s)", "", dm.count)
+                         // Not grayed: a grayed row is tagged "unused", and a
+                         // domain nobody serves is not an unused capability of
+                         // this device — it is a door the platform no longer
+                         // has. The text says which it is.
+                         hr.push(row(dm.path, state, { right: dm.protocol }))
+                     }
+                     for (var j = 0; j < svcs.length; ++j) {
+                         // HIDL writes interface::name, AIDL writes
+                         // interface/instance; both split into a name and the
+                         // instance behind it.
+                         var t = "" + svcs[j].name, k = t, v = ""
+                         if (t.indexOf("::") >= 0) {
+                             k = t.split("::")[0]
+                             v = t.split("::")[1]
+                         } else if (t.lastIndexOf("/") > 0) {
+                             k = t.slice(0, t.lastIndexOf("/"))
+                             v = t.slice(t.lastIndexOf("/") + 1)
+                         }
+                         hr.push(row(k, v, { mono: true, right: svcs[j].protocol }))
+                     }
+                     return hr
+                 } })
     }
+
     // Copy-ready device block for bug reports. Deliberately English literals:
     // reports go to international trackers.
     var rep = "Date: " + Qt.formatDateTime(new Date(), "yyyy-MM-dd hh:mm") + "\n"
@@ -142,7 +418,92 @@ function cpu() {
         }
     }
 
-    return { title: qsTr("System & CPU"), helpTopics: ["cpu","diagnosis","monitoring"], sections: s, diagTopic: "cpu", report: rep }
+    // ---- what the system was booted as, and how hard it is to attack ----
+
+    var sysfw = {}
+    try { sysfw = sysmon.firmwareDetail("system") } catch (eF) { sysfw = {} }
+
+    var bootRows = []
+    var bl = sysfw.boot || []
+    for (var bi = 0; bi < bl.length; ++bi)
+        bootRows.push(row(bl[bi].key, bl[bi].value, {mono:true}))
+    if (bootRows.length)
+        bootSec.push({ title: qsTr("Boot"), collapsed: true,
+                 note: qsTr("What the bootloader recorded on the kernel command line about itself and about what it verified. The verified-boot state says whether the chain of signatures held from the boot ROM up to this system; a device with an unlocked bootloader reports so here, which is a fact about the device, not a fault."),
+                 rows: bootRows })
+
+    var hard = sysfw.hardening || []
+    if (hard.length || sysfw.lockdown || sysfw.selinux) {
+        var hr = []
+        for (var hi = 0; hi < hard.length; ++hi) {
+            var sw = hard[hi]
+            // Three states, not two: weaker than recommended, at least as
+            // strict, or a figure with no recommendation attached at all —
+            // and that last one must not be painted as though it were good.
+            var rated = sw.weaker !== undefined
+            hr.push(row(sw.label,
+                        sw.value + (rated && sw.weaker ? "  ·  " + qsTr("safer would be %1").arg(sw.safe) : ""),
+                        { mono: true, right: sw.path,
+                          color: !rated ? undefined : sw.weaker ? "#ffb44a" : "#8ef94a" }))
+        }
+        if (sysfw.lockdown) hr.push(row(qsTr("Kernel lockdown"), sysfw.lockdown, {mono:true}))
+        if (sysfw.selinux) hr.push(row("SELinux", sysfw.selinux,
+                                       {color: sysfw.selinux === "enforcing" ? "#8ef94a" : "#ffb44a"}))
+        if (sysfw.tainted && sysfw.tainted !== "0")
+            hr.push(row(qsTr("Kernel taint"), sysfw.tainted, {mono:true}))
+        s.push({ title: qsTr("How exposed this kernel is"),
+                 note: qsTr("Switches an ordinary process may read, each deciding whether a whole class of local attack is available at all. They are shown as they stand, with the safer setting named where there is one. This is not a verdict: a phone distribution turns several of them down on purpose so that ordinary tools keep working, and a value in amber means worth knowing, not broken."),
+                 rows: hr })
+    }
+
+    var inp = []
+    try { inp = sysmon.firmwareDetail("input").input || [] } catch (eI) { inp = [] }
+    if (inp.length) {
+        var ir = []
+        for (var ii = 0; ii < inp.length; ++ii) {
+            var d3 = inp[ii]
+            ir.push(row(d3.name, qsTr("bus %1  ·  vendor %2  ·  product %3  ·  version %4")
+                        .arg(d3.bus).arg(d3.vendor).arg(d3.product).arg(d3.version), {mono:true}))
+        }
+        inputSec.push({ title: qsTr("Input hardware"), collapsed: true,
+                 note: qsTr("The touch controller, the buttons, the fingerprint reader and anything else that reports events. For several of them this is the only place the device is versioned at all — the vendor, product and version numbers come from the hardware itself, through the input core."),
+                 rows: ir })
+    }
+
+    var blobs = {}
+    try { blobs = sysmon.firmwareDetail("blobs") } catch (eB) { blobs = {} }
+    var bfiles = blobs.blobs || []
+    if (bfiles.length) {
+        var br = []
+        for (var fi2 = 0; fi2 < bfiles.length; ++fi2)
+            br.push(row(bfiles[fi2].name,
+                        sysmon.fmtBytes(bfiles[fi2].bytes) + "  ·  " + bfiles[fi2].date.slice(0, 10),
+                        {mono:true, right: bfiles[fi2].root.replace("/lib/", "").replace("/vendor/", "v/")}))
+        blobSec.push({ title: qsTr("Firmware files on disk"), collapsed: true,
+                 note: qsTr("%1 files, %2 in total — the images the kernel loads into a radio, a DSP or a sensor when it starts them. The names carry the chip family, and the dates say when the vendor last touched them. This is what is available to load, not proof that any of it was loaded.")
+                        .arg(blobs.blobCount).arg(sysmon.fmtBytes(blobs.blobBytes)),
+                 rows: br })
+    }
+
+    // The kernel's exposure reads directly against the findings below it —
+    // the diagnosis names the consequence of what this list states, so the two
+    // belong together rather than at opposite ends of the page.
+    s.push(diagnosisHere())
+
+    // The detail, in the order a reader would go looking for it: what the
+    // adaptation runs, what the parts are on paper, what is on the disk, what
+    // the boot chain and the peripherals say, and the unlabelled remainder.
+    var tail = halSec.concat(socCat)
+        .concat(catSections("body"))
+        .concat(blobSec)
+        .concat(fwModules([""], qsTr("Every module and its version")))
+        .concat(bootSec)
+        .concat(inputSec)
+        .concat(dtSections("", qsTr("Device tree — every part")))
+        .concat(rawSections("device"))
+        .concat(rawSections("cpu"))
+
+    return { title: qsTr("System & CPU"), helpTopics: ["cpu","diagnosis","monitoring","raw","firmware"], sections: s.concat(tail), diagTopic: "cpu", report: rep }
 }
 
 function gfx() {
@@ -151,6 +512,10 @@ function gfx() {
     s.push({ title: qsTr("GPU"), rows: [
         row(qsTr("Model"), d.gpuModel),
         row(qsTr("Driver"), d.gpuDriver || d.driver),
+        row(qsTr("Driver release"), d.gpuDriverRelease
+            ? d.gpuDriverRelease + (d.gpuDriverModule ? "  ·  " + d.gpuDriverModule : "")
+            : qsTr("not exposed by this driver"),
+            { mono: true, active: d.gpuDriverRelease ? undefined : false }),
         row(qsTr("Clock"), (d.gpuCurMhz ? d.gpuCurMhz + " MHz" : "—") + (d.gpuMaxMhz ? " / " + d.gpuMaxMhz + " MHz" : "")),
         row(qsTr("Busy"), d.gpuBusy !== undefined ? d.gpuBusy + " %" : "—")
     ]})
@@ -166,7 +531,8 @@ function gfx() {
     } else {
         s.push({ title: qsTr("Display"), note: qsTr("No connected DRM connector exposed by the kernel."), rows: [] })
     }
-    return { title: qsTr("Graphics"), helpTopics: [], sections: s, diagTopic: "gpu" }
+    s.push(diagnosisHere())
+    return { title: qsTr("Graphics"), helpTopics: ["raw","firmware"], sections: s.concat(catSections("display")).concat(fwModules(["mali","gpufreq","ged","drm","kgsl","disp"])).concat(dtSections("gpu mali display dsi panel drm", qsTr("Device tree — graphics"))).concat(rawSections("gfx")), diagTopic: "gpu" }
 }
 
 function mem() {
@@ -195,6 +561,20 @@ function mem() {
         devRows.push(row(qsTr("Type"), d.ddrType + (d.ddrTypeCode !== undefined ? "  (code " + d.ddrTypeCode + ")" : ""), {mono:true}))
     else if (d.ddrTypeCode !== undefined)
         devRows.push(row(qsTr("Type"), qsTr("DDR code %1 (unmapped)").arg(d.ddrTypeCode), {mono:true}))
+    // The DRAM controller, where there is one, names the grade outright — no
+    // datasheet, no inference from a governor ceiling.
+    if (d.dramType)
+        devRows.push(row(qsTr("Grade (memory controller)"), d.dramType, {mono:true, color:"#8ef94a"}))
+    // The live rate and the ceiling belong together: the governor drops the
+    // memory to a low step when nothing is asking, and an idle figure on its
+    // own reads like the rating.
+    if (d.dramRate)
+        devRows.push(row(qsTr("Data rate now"), d.dramRate.toFixed(0) + " MT/s"
+                         + (d.dramRateMax ? "   " + qsTr("of %1 MT/s").arg(d.dramRateMax.toFixed(0)) : "")))
+    else if (d.dramRateMax)
+        devRows.push(row(qsTr("Data rate ceiling"), d.dramRateMax.toFixed(0) + " MT/s"))
+    if (d.dramModeRegisters)
+        devRows.push(row(qsTr("Mode registers"), d.dramModeRegisters, {mono:true}))
     devRows.push(row(qsTr("Manufacturer"), qsTr("not exposed — JEDEC MR5, read by the bootloader into SMEM, not surfaced here"), {active:false}))
     devRows.push(row(qsTr("Organisation (ranks / channels / dies)"), qsTr("not exposed — a JEDEC/datasheet property of the die (MR5–MR8), not a runtime register here"), {active:false}))
     sections.push({ title: qsTr("Memory device"),
@@ -202,17 +582,20 @@ function mem() {
         rows: devRows })
 
     // physical memory map (address regions the kernel sees — not the die layout)
+    // and the unabridged meminfo: both are lists to look something up in, so
+    // they wait at the end of the page rather than in front of the figures.
+    var memDumps = []
     var regs = d.regions || []
     if (regs.length) {
         var rrows = []
         for (var r = 0; r < regs.length; ++r)
             rrows.push(row("0x" + regs[r].base.toString(16), sysmon.fmtBytes(regs[r].size), {mono:true}))
-        sections.push({ title: qsTr("Physical memory map"),
+        memDumps.push({ title: qsTr("Physical memory map"), collapsed: true,
             note: qsTr("The address regions the kernel maps, carved around reserved firmware areas — this is the address layout, not the chip's rank/channel structure."),
             rows: rrows })
     }
 
-    sections.push({ title: qsTr("meminfo (full)"), rows: rows })
+    memDumps.push({ title: qsTr("meminfo (full)"), collapsed: true, rows: rows })
     // --- memory pressure since boot --------------------------------------
     // The running cost of a full RAM, so it sits with the RAM figures rather
     // than in a balance of its own.
@@ -232,7 +615,7 @@ function mem() {
         }
     }
 
-    return { title: qsTr("RAM"), helpTopics: ["mem"], sections: sections }
+    return { title: qsTr("RAM"), helpTopics: ["mem","raw","firmware"], sections: sections.concat(memDumps).concat(catSections("memory")).concat(fwModules(["dram","emi","dvfsrc","zram"])).concat(dtSections("dram emi memory", qsTr("Device tree — memory"))).concat(rawSections("mem")) }
 }
 
 // Wear rows, shared by the UFS and the eMMC/card block. JEDEC step 0x0B is an
@@ -309,12 +692,12 @@ function storage() {
         }
         var extra = []
         if (main.numWluns) extra.push(qsTr("%1 well-known LUNs (boot, RPMB, device)").arg(main.numWluns))
-        s.push({ title: qsTr("Capacity composition"),
+        s.push({ title: qsTr("Capacity composition"), collapsed: true,
             note: qsTr("A single UFS package, not multiple cards. The controller presents it as %1 data LUN(s): one large user area plus tiny boot LUNs, plus %2. There is no software-visible “2×64” die split — the flash dies sit behind the controller.")
                     .arg(main.numLuns || ufs.length).arg(main.numWluns ? qsTr("well-known LUNs (RPMB etc.)") : qsTr("well-known LUNs")),
             rows: crows })
 
-        s.push({ title: qsTr("Raw vs usable"),
+        s.push({ title: qsTr("Raw vs usable"), collapsed: true,
             note: qsTr("The size shown is the usable user LUN in GiB (powers of two). The advertised capacity counts raw NAND in GB (powers of ten) and includes over-provisioning kept hidden by the controller — which is why e.g. 128 GB shows as ~119 GiB."),
             rows: [] })
     }
@@ -366,7 +749,7 @@ function storage() {
                     color: mn.pct > 90 ? "#ff5a52" : mn.pct > 75 ? "#ffb44a" : "#31e0a0" })
     }
     s.push({ title: qsTr("Partitions"), bars: bars, rows: [] })
-    return { title: qsTr("Storage"), helpTopics: ["storage"], sections: s }
+    return { title: qsTr("Storage"), helpTopics: ["storage","raw","firmware"], sections: s.concat(catSections("storage")).concat(fwStorage()).concat(fwModules(["ufs","mmc","blocktag","scsi"])).concat(dtSections("ufs mmc sdhci storage", qsTr("Device tree — storage"))).concat(rawSections("storage")) }
 }
 
 // The counters below start with the interface, not with the phone. Name the
@@ -445,12 +828,13 @@ function net() {
             var dis = bd.channelsDisabled || []
             if (dis.length)
                 brows.push(row(qsTr("Channels (blocked here)"), dis.join(", "), {active:false}))
-            s.push({ title: qsTr("Band: %1").arg(bd.name),
+            s.push({ title: qsTr("Band: %1").arg(bd.name), collapsed: true,
                      note: qsTr("Capabilities of the Wi-Fi chip on this band; blocked channels are grayed."),
                      rows: brows })
         }
     }
 
+    var ifaceSecs = []
     for (var i = 0; i < nics.length; ++i) {
         var n = nics[i]
         var rows = [
@@ -468,8 +852,10 @@ function net() {
                       sysmon.fmtBytes(n.rxBytes) + "  /  " + sysmon.fmtBytes(n.txBytes)))
         if (countedSince(n)) rows.push(row(qsTr("Counted since"), countedSince(n)))
         if (n.rxErrors || n.txErrors) rows.push(row(qsTr("Errors"), "rx " + n.rxErrors + " · tx " + n.txErrors))
-        s.push({ title: n.iface, rows: rows })
+        ifaceSecs.push({ title: n.iface, rows: rows })
     }
+    s = s.concat(group(ifaceSecs, "iface", qsTr("Every network interface"),
+        qsTr("Every interface the kernel has registered, whether or not anything is using it: the loopback, the ones a modem brings up per data context, and the virtual ones a container or a tether creates. Each keeps counters of its own, which start when the interface does — not when the phone did.")))
     // Ultimate: WLAN chipset identity
     var w = sysmon.wirelessDetail()
     if (w.wlanDriver || w.wlanDtNode || w.wlanFwBuild) {
@@ -488,19 +874,37 @@ function net() {
                             qsTr("root mode shows version and build of the running WLAN firmware here"),
                             {active:false}))
         }
-        if (w.firmwareFiles) wr.push(row(qsTr("Firmware files"), w.firmwareFiles, {mono:true}))
         if (w.rfkill) wr.push(row("rfkill", w.rfkill))
+        // The blob names are a list, not a sentence: one per line, with the
+        // directory each was found in, and folded away because nobody needs
+        // them to see which chip this is.
+        var fwf = w.firmwareFileList || []
+        if (fwf.length) {
+            var fwr = []
+            for (var fx = 0; fx < fwf.length; ++fx)
+                fwr.push(row(fwf[fx].name, fwf[fx].dir, {mono:true}))
+            s.unshift({ title: qsTr("Firmware files for this radio"), collapsed: true,
+                note: qsTr("The firmware images shipped for this radio, by name and by the directory each sits in. The names carry the chip family, which is what makes them worth listing at all. That a file is present says it is available to load — not that this system loaded it."),
+                rows: fwr })
+        }
         s.unshift({ title: qsTr("WLAN chipset"),
                     note: qsTr("Chip identity from driver, device tree and firmware."),
                     rows: wr })
     }
-    return { title: qsTr("Network"), helpTopics: ["conn"], sections: s, diagTopic: "network" }
+    s.push(diagnosisHere())
+    return { title: qsTr("Network"), helpTopics: ["conn","raw","firmware"], sections: s.concat(catSections("radio")).concat(fwNet()).concat(fwModules(["wlan","cfg80211","mac80211","conninfra","connfem","connadp"])).concat(dtSections("wifi wlan consys conninfra ethernet", qsTr("Device tree — network"))).concat(rawSections("net")), diagTopic: "network" }
 }
 
 function batt() {
     var h = sysmon.batteryHardware()
     var c = sysmon.chargerDetail()
+    var cp = sysmon.chargingPath()
+    var supplies = []
+    try { supplies = sysmon.powerSupplyDump() } catch (eD) { supplies = [] }
     var sections = []
+    // The driver's own view of the charging path: worth having, not worth
+    // standing between the reader and the state of the cell.
+    var chargeDetail = []
 
     if (c.online) {
         var crows = [
@@ -510,7 +914,8 @@ function batt() {
             row(qsTr("Charging power"), c.chargePower !== undefined ? c.chargePower.toFixed(1) + " W" : "—", {color:"#8ef94a"}),
             row(qsTr("Into battery"), (c.chargeCurrent !== undefined ? (c.chargeCurrent*1000).toFixed(0) + " mA" : "—")
                 + (c.batteryVoltage ? "  @ " + c.batteryVoltage.toFixed(2) + " V" : "")),
-            row(qsTr("Input"), (c.inputVoltage ? c.inputVoltage.toFixed(2) + " V" : "—")
+            row(qsTr("Input"), (c.inputVoltage ? c.inputVoltage.toFixed(2) + " V"
+                    : (cp.vbus ? cp.vbus.toFixed(2) + " V  " + qsTr("(charger ADC)") : "—"))
                 + (c.inputCurrentMax ? "  ·  max " + c.inputCurrentMax.toFixed(2) + " A" : ""))
         ]
         if (c.pdActive !== undefined)
@@ -610,12 +1015,101 @@ function batt() {
             var hrows = []
             for (var j = 0; j < log.length; ++j) hrows.push(row("", log[j], {mono:true}))
             if (hrows.length)
-                sections.push({ title: qsTr("Kernel log (raw excerpt)"), rows: hrows })
+                chargeDetail.push({ title: qsTr("Kernel log (raw excerpt)"), collapsed: true, rows: hrows })
         } else {
             sections.push({ title: qsTr("Charger handshake"),
                 rows: [ row(qsTr("Log"), qsTr("Root mode required — start the helper to read the kernel charger log.")) ] })
         }
     }
+
+    // ---- what the charger driver itself exports -------------------------
+    // The power-supply class is the common denominator between chipsets; the
+    // vendor driver keeps a directory of its own beside it, and on MediaTek
+    // that is where the bus voltage, the negotiated adapter and the throttling
+    // flag actually live.
+    if (cp.vendor) {
+        var vr = []
+        if (cp.vbus !== undefined)
+            vr.push(row(qsTr("Bus voltage"), cp.vbus.toFixed(3) + " V", {color:"#8ef94a"}))
+        if (cp.adcCurrent !== undefined)
+            vr.push(row(qsTr("Charging current"), (cp.adcCurrent * 1000).toFixed(0) + " mA", {color:"#8ef94a"}))
+        vr.push(row(qsTr("Adapter"), cp.adapterType))
+        vr.push(row(qsTr("Charging mode"), cp.chargingMode, {mono:true}))
+        vr.push(row(qsTr("Charger type (driver)"), cp.chargerType, {mono:true}))
+        vr.push(row(qsTr("Pump Express"), cp.pumpExpress))
+        vr.push(row(qsTr("High-voltage charging"), cp.highVoltage))
+        vr.push(row(qsTr("Software JEITA"), cp.swJeita))
+        vr.push(row(qsTr("Smart charging"), cp.smartCharging))
+        vr.push(row(qsTr("Power path"), cp.powerPath))
+        vr.push(row(qsTr("Over-voltage threshold"),
+                    cp.ovpVolt ? cp.ovpVolt.toFixed(1) + " V" : "—"))
+        vr.push(row(qsTr("Fast-charge indicator"), cp.fastChargeIndicator, {mono:true}))
+        if (cp.scTargetSoc || cp.scCurrentLimit)
+            vr.push(row(qsTr("Smart-charge schedule"),
+                        (cp.scTargetSoc ? qsTr("hold at %1 %").arg(cp.scTargetSoc) : "")
+                        + (cp.scCurrentLimit ? "  ·  " + qsTr("limit %1 mA").arg(cp.scCurrentLimit) : "")
+                        + (cp.scStart || cp.scEnd ? "  ·  " + (cp.scStart || "0") + "–" + (cp.scEnd || "0") + " s" : "")))
+        if (cp.safetyTimer !== undefined && cp.safetyTimer !== "")
+            vr.push(row(qsTr("Safety timer"), cp.safetyTimer))
+        if (cp.setCv !== undefined && cp.setCv !== "")
+            vr.push(row(qsTr("Charge-voltage override"), cp.setCv, {mono:true}))
+        vr.push(row(qsTr("Corrosion detection"), cp.rustDetect))
+        vr.push(row(qsTr("Throttle flag"),
+                    cp.throttleFlag === "1" ? qsTr("1 — has tripped at least once") : cp.throttleFlag,
+                    {color: cp.throttleFlag === "1" ? "#ffb44a" : undefined}))
+        chargeDetail.push({ title: qsTr("Charging path (%1)").arg(cp.vendor), collapsed: true,
+            note: qsTr("From the charger driver's own directory, which sits below the power-supply class. The two figures at the top are its ADC readings — bus voltage in millivolt, charging current in milliamp — and they are the only ones here converted into units, because that scale was checked against the battery node at the same operating point. The throttle flag latches: it says the driver's thermal limit has tripped at some point, not that it is limiting now. It has been observed standing at 1 while full current flowed again, so it answers whether, never how much."),
+            rows: vr })
+    }
+
+    // ---- the charging chain, stage by stage -----------------------------
+    if (supplies.length) {
+        var sr = []
+        for (var si = 0; si < supplies.length; ++si) {
+            var su = supplies[si]
+            var st = []
+            if (su.type && su.type !== "Unknown") st.push(su.type)
+            if (su.status) st.push(su.status)
+            if (su.usbTypeActive && su.usbTypeActive !== "Unknown") st.push(su.usbTypeActive)
+            var up = su.online !== "" && su.online !== "0"
+            if (su.online !== "") st.push(up ? qsTr("online") : qsTr("offline"))
+            if (su.model) st.push(su.model)
+            var live = up || su.status === "Charging"
+            sr.push(row(su.name + (su.driver ? "  ·  " + su.driver : ""), st.join("  ·  "),
+                        { active: live ? undefined : false,
+                          right: (su.attrs ? su.attrs.length : 0) + "" }))
+        }
+        chargeDetail.push({ title: qsTr("Charging chain"), collapsed: true,
+            note: qsTr("Every node the kernel registered under the power-supply class, the driver behind it and — on the right — how many attributes it exports. A single-path charger registers one input and the battery; a divider topology registers each silicon stage separately, and only the ones actually carrying current come up online. The grayed ones are present but idle."),
+            rows: sr })
+    }
+
+    // ---- what is able to throttle the charge ----------------------------
+    var th = {}
+    try { th = sysmon.thermalDetail() } catch (eT) { th = {} }
+    var cool = th.cooling || []
+    var chgCool = []
+    for (var ci = 0; ci < cool.length; ++ci)
+        if (/charg|batt|bcl/i.test(cool[ci].type || ""))
+            chgCool.push(cool[ci])
+    if (chgCool.length) {
+        var kr = []
+        for (var ki = 0; ki < chgCool.length; ++ki) {
+            var cd = chgCool[ki]
+            kr.push(row(cd.type, cd.cur + " / " + cd.max + "  ·  "
+                        + (cd.boundTo ? qsTr("bound to %1").arg(cd.boundTo)
+                                      : qsTr("not bound to any zone")),
+                        {color: cd.cur > 0 ? "#ffb44a" : undefined}))
+        }
+        chargeDetail.push({ title: qsTr("Charge throttling"), collapsed: true,
+            note: qsTr("Cooling devices the kernel offers for the charging path, as current step out of maximum step. A cooling device that no thermal zone binds cannot be driven by the kernel's governor at all — it exists, and nothing reaches for it. That does not mean nothing throttles: a vendor charger driver can limit the current entirely inside itself, where the thermal framework never sees it."),
+            rows: kr })
+    }
+
+    if (cp.modules && cp.modules.length)
+        chargeDetail.push({ title: qsTr("Charging drivers loaded"), collapsed: true,
+            note: qsTr("Kernel modules with a part in charging. Each negotiation protocol ships as its own module, so this says what the hardware is able to negotiate at all — independently of what happens to be plugged in. Names are the drivers' own."),
+            rows: [ row(qsTr("Modules"), cp.modules.join("   "), {mono:true}) ] })
 
     sections.push({ title: qsTr("Identity"), rows: [
         row(qsTr("Supply"), h.supply, {mono:true}),
@@ -695,7 +1189,151 @@ function batt() {
         note: qsTr("CPU time is the dominant battery drain — this ranks current CPU use. An estimate, not a per-app power meter."),
         rows: trows })
 
-    return { title: qsTr("Battery"), helpTopics: ["battery","usb"], sections: sections }
+    // Every register of every supply, unabridged. On a divider topology this
+    // is where the gauge's own hundred-odd registers live, and none of them
+    // reach the curated sections above because no one has named them.
+    var dumps = []
+    for (var di = 0; di < supplies.length; ++di) {
+        var sd = supplies[di]
+        var at = sd.attrs || []
+        if (!at.length) continue
+        var ar = []
+        for (var ai = 0; ai < at.length; ++ai)
+            ar.push(row(at[ai].name, at[ai].value, {mono:true}))
+        dumps.push({ title: sd.name + (sd.driver ? "  ·  " + sd.driver : ""), rows: ar })
+    }
+    var dumpNote = qsTr("Every attribute of every power-supply node, exactly as the kernel wrote it. Units are the drivers' own and are not uniform: the same key can count microamps on one node and milliamps on the next, so nothing here is converted. An empty value is a node that answered with nothing.")
+    if (dumps.length && dumps.length <= 3)
+        dumps[0].note = dumpNote
+    sections.push(diagnosisHere())
+    sections = sections.concat(chargeDetail).concat(catSections("battery"))
+        .concat(group(folded(dumps), "psy", qsTr("Every power-supply node"), dumpNote))
+        .concat(fwModules(["charg","chg","gauge","battery","ufcs","adapter","pmic","tcpc"]))
+        .concat(dtSections("charg batt gauge fuel pmic", qsTr("Device tree — power")))
+        .concat(rawSections("battery"))
+
+    return { title: qsTr("Battery"), helpTopics: ["battery","usb","raw","firmware"], sections: sections, diagTopic: "battery" }
+}
+
+// The thermal framework as a page of its own: the live card on the overview
+// shows the zones that carry a temperature, this shows the register behind it
+// — every zone including the ones the card drops, every trip point, and every
+// cooling device with the zone that binds it.
+function thermal() {
+    var t = sysmon.thermalDetail()
+    var zones = t.zones || []
+    var s = []
+
+    var reason = {
+        empty:    qsTr("no reading"),
+        watchdog: qsTr("not a temperature — a battery watchdog wired into the thermal framework"),
+        zero:     qsTr("reads zero — stage not powered"),
+        range:    qsTr("out of range")
+    }
+
+    var lim = t.limits || {}
+    var limRows = []
+    function limitRow(label, v) {
+        if (v === undefined) return
+        limRows.push(row(label, v === "1" ? qsTr("being limited now") : qsTr("not limited"),
+                         { color: v === "1" ? "#ffb44a" : "#8ef94a" }))
+    }
+    limitRow(qsTr("Processor"), lim.cpuLimited)
+    limitRow(qsTr("Graphics"), lim.gpuLimited)
+    limitRow(qsTr("AI accelerator"), lim.apuLimited)
+    if (lim.junctionTarget)
+        limRows.push(row(qsTr("Junction target (CPU, GPU, AI)"), lim.junctionTarget))
+    if (lim.junctionMin)
+        limRows.push(row(qsTr("Lowest junction target it will fall to"), lim.junctionMin))
+    if (lim.powerBudget)
+        limRows.push(row(qsTr("Power budget (CPU, GPU, AI)"), lim.powerBudget))
+    if (lim.headroom)
+        limRows.push(row(qsTr("Headroom to target (per core, then board)"), lim.headroom))
+    if (lim.cpuTemps)
+        limRows.push(row(qsTr("Per-core temperature"), lim.cpuTemps))
+    if (lim.gpuTemp)
+        limRows.push(row(qsTr("Graphics temperature"), lim.gpuTemp))
+    if (lim.gpuClock)
+        limRows.push(row(qsTr("Graphics clock (now / cap)"), lim.gpuClock))
+    if (lim.skinTarget)
+        limRows.push(row(qsTr("Skin target"), lim.skinTarget))
+    if (lim.skinTemp)
+        limRows.push(row(qsTr("Skin temperature"), lim.skinTemp))
+    if (lim.throttleFloor)
+        limRows.push(row(qsTr("Clock floor while throttling"), lim.throttleFloor))
+    if (lim.dsuCeiling)
+        limRows.push(row(qsTr("Cluster interconnect ceiling"), lim.dsuCeiling))
+    if (limRows.length)
+        s.push({ title: qsTr("Is anything being limited right now?"),
+                 note: qsTr("From the vendor's thermal interface, which is the only place that answers this. The zone list gives temperatures and the trip points give intentions; these flags give the state of the limiter itself. Where they are absent, the platform does not publish the answer and it can only be inferred from clocks that fail to reach their ceiling.")
+                     + "\n\n" + qsTr("The junction target is the die temperature the limiter steers towards — not a measurement and not a shutdown threshold: as the silicon approaches it, clock is taken away to keep it there. It is listed once per domain the limiter governs, in the order processor, graphics, AI accelerator, which is why the same figure can appear three times. The lowest target below it is how far the limiter may push that goal down when the outside of the phone gets warm.")
+                     + "\n\n" + qsTr("Two of these fields carry a stand-in rather than a value: this driver writes 666666666 when no limit is set, and a temperature below absolute zero when no sensor is fitted. Both are shown as words here, because printed as numbers they would read as a 666 kW budget and a temperature of −274 °C."),
+                 rows: limRows })
+
+    var live = [], quiet = []
+    for (var i = 0; i < zones.length; ++i) {
+        var z = zones[i]
+        if (z.tempC !== undefined)
+            // The raw figure stays beside the reading: a zone that is really a
+            // voltage shows it there, in millivolts, next to neighbours in
+            // millidegrees.
+            live.push(row((z.name || z.node) + (z.suspect ? "  ⚠" : ""),
+                          z.tempC.toFixed(1) + " °C"
+                          + (z.suspect ? "   " + qsTr("does not fit the other zones") : ""),
+                          { right: z.raw,
+                            color: z.suspect ? "#ffb44a"
+                                 : z.tempC > 70 ? "#ff5a52"
+                                 : z.tempC > 55 ? "#ffb44a" : undefined }))
+        else
+            quiet.push(row(z.name || z.node, reason[z.skipped] || z.skipped || "—", { right: z.node }))
+    }
+    if (live.length) {
+        var anySuspect = false
+        for (var q = 0; q < zones.length; ++q) if (zones[q].suspect) anySuspect = true
+        s.push({ title: qsTr("Zones with a reading"),
+                 note: qsTr("Every thermal zone the kernel registers, with the raw figure it exported on the right — millidegrees, for a zone that is really a temperature. Names are the kernel's; where a vendor names a zone after a component, the sensor usually sits near it rather than on it.")
+                     + (anySuspect ? "\n\n" + qsTr("A zone marked ⚠ is sitting far below every other sensor in this phone. That cannot happen to a real one: the board has a single ambient and the parts on it only ever sit above it. The usual explanation is a node that carries millivolts or milliamps and was registered in the thermal framework anyway, where the framework then labels it °C. Compare the raw figure on the right with its neighbours — a reading of 4400 among readings of 33000 is a voltage.") : ""),
+                 rows: live })
+    }
+    if (quiet.length)
+        s.push({ title: qsTr("Zones without a usable reading"), collapsed: true,
+                 note: qsTr("Registered zones the live card leaves out, each with the reason. A zone reading zero is generally a stage that is not powered; one carrying milliamps or millivolts is a battery watchdog that the vendor hung into the thermal framework because throttling runs through it. They stay listed here because the kernel does register them."),
+                 rows: quiet })
+
+    var tr = []
+    for (var j = 0; j < zones.length; ++j) {
+        var zz = zones[j]
+        var tp = zz.trips || []
+        for (var k = 0; k < tp.length; ++k)
+            tr.push(row((zz.name || zz.node) + "  ·  " + tp[k].kind,
+                        tp[k].tempC.toFixed(0) + " °C"
+                        + (tp[k].hystC ? "  ·  " + qsTr("hysteresis %1 K").arg(tp[k].hystC.toFixed(0)) : "")))
+    }
+    s.push({ title: qsTr("Trip points"), collapsed: true,
+             note: tr.length
+                 ? qsTr("The temperatures at which the kernel is meant to act. A passive trip asks for throttling, a critical trip shuts the device down. Trip points in the region of 115 °C are silicon emergency stops, not operating limits — a device whose only trips sit up there does its everyday regulation somewhere else, or not at all.")
+                 : qsTr("This kernel registers no trip points at all. Whatever regulates temperature here does so outside the thermal framework, where it cannot be read."),
+             rows: tr.length ? tr : [ row(qsTr("Trip points"), qsTr("none registered")) ] })
+
+    var cool = t.cooling || []
+    var cr = []
+    for (var m = 0; m < cool.length; ++m) {
+        var cd = cool[m]
+        cr.push(row(cd.type || cd.node,
+                    cd.cur + " / " + cd.max + "  ·  "
+                    + (cd.boundTo ? qsTr("bound to %1").arg(cd.boundTo) : qsTr("not bound to any zone")),
+                    { right: cd.node, color: cd.cur > 0 ? "#ffb44a" : undefined }))
+    }
+    if (cr.length)
+        s.push({ title: qsTr("Cooling devices"), collapsed: true,
+                 note: t.bindings === 0
+                     ? qsTr("Current step out of maximum step. Not one of these is bound to a thermal zone on this device: the kernel's governor has nothing to reach for, and every one of them stands where its driver left it. Throttling that does happen therefore happens inside a vendor driver, not here — so a cooling device resting at zero is no evidence that nothing is being limited.")
+                     : qsTr("Current step out of maximum step, and the zone that drives each one. A cooling device no zone binds cannot be driven by the kernel's governor at all — it exists, and nothing reaches for it."),
+                 rows: cr })
+
+    return { title: qsTr("Thermal"), helpTopics: ["thermal","raw"],
+             sections: s.concat(dtSections("thermal therm ntc lvts cooler", qsTr("Device tree — thermal")))
+                        .concat(rawSections("thermal")) }
 }
 
 function bluetooth() {
@@ -746,7 +1384,8 @@ function bluetooth() {
                     note: qsTr("On most ports BT shares the WLAN combo chip; the device-tree node names it."),
                     rows: br })
     }
-    return { title: qsTr("Bluetooth"), helpTopics: [], sections: s, diagTopic: "bluetooth" }
+    s.push(diagnosisHere())
+    return { title: qsTr("Bluetooth"), helpTopics: ["raw","firmware"], sections: s.concat(fwModules(["bluetooth","btmtk","bt_drv","hci","rfkill"])).concat(dtSections("bluetooth btif consys connfem", qsTr("Device tree — Bluetooth"))).concat(rawSections("bt")), diagTopic: "bluetooth" }
 }
 
 function audio() {
@@ -802,7 +1441,8 @@ function audio() {
         s.push({ title: qsTr("Inputs (sources)"),
             note: qsTr("PulseAudio capture devices. The microphone gain is the primary input's volume — reflects the harbour-mic-gain fix."), rows: qrows })
 
-    return { title: qsTr("Audio"), helpTopics: [], sections: s, diagTopic: "audio" }
+    s.push(diagnosisHere())
+    return { title: qsTr("Audio"), helpTopics: ["raw","firmware"], sections: s.concat(catSections("audio")).concat(fwModules(["snd","spk","amp","audio","accdet"])).concat(dtSections("audio codec amp speaker snd accdet", qsTr("Device tree — audio"))).concat(rawSections("audio")), diagTopic: "audio" }
 }
 
 function camera() {
@@ -853,7 +1493,7 @@ function camera() {
     for (var j = 0; j < nodes.length; ++j)
         nrows.push(row(nodes[j].node, nodes[j].label || qsTr("(unnamed)"), {mono:true}))
     if (nrows.length)
-        s.push({ title: qsTr("Kernel video nodes"),
+        s.push({ title: qsTr("Kernel video nodes"), collapsed: true,
             note: qsTr("Kernel V4L2 interfaces — control, JPEG and video-codec blocks, not user-facing cameras."), rows: nrows })
 
     // MediaTek: sensors sit behind imgsensor/mtkcam, not in V4L2 like Qualcomm CAMSS
@@ -862,7 +1502,8 @@ function camera() {
             note: qsTr("This is a MediaTek imgsensor/mtkcam stack. The image sensors are driven through the camera HAL, not exposed as V4L2 sensor sub-devices — so their models are not enumerable from sysfs. The video nodes above are the JPEG and video codecs."),
             rows: [ row(qsTr("Sensor models"), qsTr("not exposed by the MediaTek kernel")) ] })
 
-    return { title: qsTr("Camera"), helpTopics: ["camera"], sections: s, diagTopic: "camera" }
+    s.push(diagnosisHere())
+    return { title: qsTr("Camera"), helpTopics: ["camera","raw","firmware"], sections: s.concat(catSections("camera")).concat(fwModules(["imgsensor","camera","seninf","flashlight","vcodec","jpeg"])).concat(dtSections("cam sensor seninf imgsensor flash lens", qsTr("Device tree — camera"))).concat(rawSections("camera")), diagTopic: "camera" }
 }
 
 function roleName(r) {
@@ -915,6 +1556,7 @@ function usb() {
     if (!devs.length) {
         s.push({ title: qsTr("Connected devices"), rows: [ row(qsTr("Devices"), qsTr("none connected")) ] })
     } else {
+        var devSecs = []
         for (var j = 0; j < devs.length; ++j) {
             var v = devs[j]
             var title = v.product || v.productName || (v.vid + ":" + v.pid)
@@ -950,10 +1592,12 @@ function usb() {
             }
             if (!nodes.length)
                 drows.push(row(qsTr("Device nodes"), qsTr("none exposed")))
-            s.push({ title: title, rows: drows })
+            devSecs.push({ title: title, rows: drows })
         }
+        s = s.concat(group(devSecs, "usbdev", qsTr("Connected devices"),
+            qsTr("What the bus enumerated, one entry per device — a hub counts as one of them, and so does every function a composite device registers.")))
     }
-    return { title: qsTr("USB"), helpTopics: ["usb"], sections: s }
+    return { title: qsTr("USB"), helpTopics: ["usb","raw","firmware"], sections: s.concat(catSections("expansion")).concat(fwUsb()).concat(fwModules(["usb","tcpc","typec","extcon","xhci","dwc3","musb"])).concat(dtSections("usb typec tcpc", qsTr("Device tree — USB"))).concat(rawSections("usb")) }
 }
 
 // Turn raw charger kernel-log lines into a plain-language timeline.
@@ -1017,7 +1661,7 @@ function modem() {
         s.push({ title: qsTr("Modem"),
             note: qsTr("No ofono modem is registered. Flight mode, or ofono is not running."),
             rows: [ row(qsTr("Status"), qsTr("unavailable")) ] })
-        return { title: qsTr("Modem / SIM"), helpTopics: ["modem"], sections: s }
+        return { title: qsTr("Modem / SIM"), helpTopics: ["modem","raw","firmware"], sections: s.concat(fwModules(["ccci","md_","modem","mddp","dpmaif"])).concat(dtSections("modem ccci mddp md1", qsTr("Device tree — modem"))).concat(rawSections("modem")) }
     }
     var ms = d.modems
     for (var i = 0; i < ms.length; ++i) {
@@ -1078,7 +1722,7 @@ function modem() {
                 ]})
         }
     }
-    return { title: qsTr("Modem / SIM"), helpTopics: ["modem"], sections: s }
+    return { title: qsTr("Modem / SIM"), helpTopics: ["modem","raw","firmware"], sections: s.concat(fwModules(["ccci","md_","modem","mddp","dpmaif"])).concat(dtSections("modem ccci mddp md1", qsTr("Device tree — modem"))).concat(rawSections("modem")) }
 }
 
 // ---- accumulated: what the kernel has been tallying all along --------------
