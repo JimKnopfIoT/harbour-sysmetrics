@@ -28,4 +28,7 @@ private:
     void checkMtkHotplug(QVariantList &out) const;
     void checkBtAdapters(QVariantList &out) const;
     void checkWlanRadio(QVariantList &out) const;
+    void checkGpuDriverRelease(QVariantList &out) const;
+    void checkChargerNodePermissions(QVariantList &out) const;
+    void checkSecurityPatchAge(QVariantList &out) const;
 };

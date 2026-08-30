@@ -147,6 +147,15 @@ public:
     Q_INVOKABLE QVariantMap wifiDetail() const;
     Q_INVOKABLE QVariantMap batteryHardware() const;
     Q_INVOKABLE QVariantMap chargerDetail() const;
+    Q_INVOKABLE QVariantMap chargingPath() const;
+    Q_INVOKABLE QVariantList powerSupplyDump() const;
+    Q_INVOKABLE QVariantMap thermalDetail() const;
+    Q_INVOKABLE QVariantList rawNodes(const QString &topic) const;
+    Q_INVOKABLE QVariantList deviceTreeParts(const QString &filter = QString()) const;
+    Q_INVOKABLE QVariantMap socCatalogue() const;
+    Q_INVOKABLE QVariantMap deviceCatalogue(const QString &part = QString()) const;
+    Q_INVOKABLE QVariantList kernelModules() const;
+    Q_INVOKABLE QVariantMap firmwareDetail(const QString &part = QString()) const;
     Q_INVOKABLE QVariantMap memoryDetail() const;
     Q_INVOKABLE QVariantMap sinceBootDetail() const;
     Q_INVOKABLE QVariantMap cpuDetail() const;
@@ -157,7 +166,8 @@ public:
     Q_INVOKABLE QVariantMap modemDetail() const;
     Q_INVOKABLE QVariantMap usbDetail() const;
     Q_INVOKABLE QVariantMap wirelessDetail() const;
-    Q_INVOKABLE QVariantList halServices() const;
+    Q_INVOKABLE bool halBinderPresent() const;
+    Q_INVOKABLE QVariantMap halServices() const;
     Q_INVOKABLE QString bugReportInfo(const QString &term) const;
     Q_INVOKABLE QString fmtBytes(double b) const;
     Q_INVOKABLE QString fmtRate(double bps) const;

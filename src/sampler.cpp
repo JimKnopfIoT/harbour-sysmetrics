@@ -1,5 +1,7 @@
 #include "sampler.h"
 
+#include <algorithm>
+
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
@@ -32,6 +34,33 @@ int readRaw(const char *path, char *buf, int cap)
     ::close(fd);
     buf[total] = '\0';
     return total;
+}
+
+// /etc/hw-release names the adaptation's device model
+QString deviceModel()
+{
+    QFile hw(QStringLiteral("/etc/hw-release"));
+    if (hw.open(QIODevice::ReadOnly))
+        for (const QByteArray &l : hw.readAll().split('\n'))
+            if (l.startsWith("MER_HA_DEVICE="))
+                return QString::fromUtf8(l.mid(14).trimmed());
+    return QString();
+}
+
+// The Xperia 10 III routes rear_cam_flash_therm — the zone the kernel exports as
+// camera-therm-usr — through a 400 kOhm pull-up, while the PMIC ADC driver
+// applies its 100 kOhm lookup table. The divider reference being four times too
+// small, the NTC resistance comes out four times too low, which on the table's
+// B=4250 curve is a pure shift in 1/T: no ADC code needed, one term.
+//
+// Verified radiometrically against an InfiRay P2 Pro on 2026-08-27, with the
+// flash LED as the heat source: measured 41 and 42 degC on the glass above the
+// LED against 40.2 and 42.7 degC computed here, while the zone as exported read
+// 75.9 and 79.0 degC. Off by 0.8 K instead of 37 K.
+float fixFlashTherm(float degC)
+{
+    const double kelvin = degC + 273.15;
+    return float(1.0 / (1.0 / kelvin + 1.3862944 / 4250.0) - 273.15);   // ln(4)/B
 }
 
 QByteArray readAll(const QString &path)
@@ -354,7 +383,53 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
         if (milli <= 0 || milli > 150000)
             continue;
         const QString type = QString::fromLatin1(readAll(base + QStringLiteral("/type")).trimmed());
-        s.thermal.append(qMakePair(type, milli / 1000.f));
+        // Qualcomm hangs its battery watchdogs into the same framework, because
+        // throttling runs through it — their "temp" carries mA, mV or percent.
+        // Checked against power_supply on the Xperia 10 III: vbat-lvl* equals
+        // voltage_now, ibat-lvl* current_now, soc capacity. The battery card
+        // shows all three anyway, in their own units.
+        if (type.contains(QStringLiteral("-vbat-lvl")) || type.contains(QStringLiteral("-ibat-lvl"))
+            || type.contains(QStringLiteral("-vph-lvl")) || type.contains(QStringLiteral("-bcl-lvl")))
+            continue;
+        // Elsewhere a zone named "soc" is the die sensor, so drop it only on the
+        // reading that cannot be a temperature.
+        if (type == QLatin1String("soc") && milli <= 100)
+            continue;
+        static const QString model = deviceModel();
+        const bool fix = type == QLatin1String("camera-therm-usr")
+                         && model == QLatin1String("xqbt52");   // Xperia 10 III
+        const float degC = milli / 1000.f;
+        s.thermal.append({type, fix ? fixFlashTherm(degC) : degC, fix, false});
+    }
+
+    // A zone that is not a temperature at all is the hard case: a node
+    // carrying millivolts arrives here as a number in the right range, and no
+    // bounds check can reject 4.4 when a phone in winter could read that.
+    //
+    // The comparison therefore runs against the other zones -- but carefully,
+    // because the legitimate spread across one board is far wider than it
+    // looks. Measured under charge on this project's own devices: 21.6 K
+    // between the battery gauge and the charger zone on the Xperia, and 45 K
+    // between the hottest SoC zone and the radio on the Jolla Phone. A rule
+    // tuned to 20 K would call half of those false.
+    //
+    // So all three conditions have to hold at once: the rest of the board is
+    // clearly warm, this zone is near freezing, and the gap is wider than any
+    // measured spread. That combination is not something a working sensor on a
+    // warm board produces; a millivolt reading of 4400 among millidegree
+    // readings of 33000 is. Flagged, never dropped -- the threshold is a
+    // heuristic, and a heuristic does not get to delete a measurement.
+    if (s.thermal.size() >= 5) {
+        QVector<float> t;
+        t.reserve(s.thermal.size());
+        for (const auto &z : s.thermal)
+            t.append(z.degC);
+        std::sort(t.begin(), t.end());
+        const float median = t.at(t.size() / 2);
+        if (median > 25.f)
+            for (auto &z : s.thermal)
+                if (z.degC < 10.f && median - z.degC > 25.f)
+                    z.suspect = true;
     }
 
     // battery: prefer "battery", else first type=Battery supply

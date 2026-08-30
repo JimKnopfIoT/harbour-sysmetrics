@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QProcess>
 #include <QRegularExpression>
+#include <QDate>
 
 namespace {
 
@@ -95,6 +96,12 @@ static QString topicFor(const QString &id)
     if (id == QLatin1String("mic-gain"))         return QStringLiteral("audio");
     if (id.startsWith(QLatin1String("bt-")))     return QStringLiteral("bluetooth");
     if (id.startsWith(QLatin1String("wlan-")))   return QStringLiteral("network");
+    if (id.startsWith(QLatin1String("charger-")) || id.startsWith(QLatin1String("batt-")))
+        return QStringLiteral("battery");
+    // The System & CPU page is where system-wide findings belong; it is the
+    // page that carries the kernel, the boot chain and the module list.
+    if (id.startsWith(QLatin1String("system-")))
+        return QStringLiteral("cpu");
     return QStringLiteral("system");
 }
 
@@ -112,12 +119,164 @@ QVariantList Diagnostics::run(double cpuPct, double load1) const
     checkMicGain(out);
     checkBtAdapters(out);
     checkWlanRadio(out);
+    checkGpuDriverRelease(out);
+    checkChargerNodePermissions(out);
+    checkSecurityPatchAge(out);
     for (int i = 0; i < out.size(); ++i) {
         QVariantMap m = out[i].toMap();
         m.insert(QStringLiteral("topic"), topicFor(m.value(QStringLiteral("id")).toString()));
         out[i] = m;
     }
     return out;
+}
+
+// The vendor security patch level. On a port like this one the kernel and the
+// hardware blobs come from an Android base, and that base carries a date
+// stating which month's fixes are in it. It is the only figure on the device
+// that speaks to the chipset advisories at all -- those are baseband and
+// driver fixes that no sysfs node describes.
+//
+// The check is the age of that date, because a date alone means nothing to a
+// reader and "current" cannot be defined without a list this app would have to
+// carry and keep. Age can be computed here and stays true.
+void Diagnostics::checkSecurityPatchAge(QVariantList &out) const
+{
+    QString patch;
+    for (const QString &f : { QStringLiteral("/vendor/build.prop"),
+                              QStringLiteral("/odm/etc/build.prop"),
+                              QStringLiteral("/vendor/odm/etc/build.prop"),
+                              QStringLiteral("/system/build.prop") }) {
+        QFile bp(f);
+        if (!bp.open(QIODevice::ReadOnly | QIODevice::Text))
+            continue;
+        while (!bp.atEnd()) {
+            const QString l = QString::fromUtf8(bp.readLine()).trimmed();
+            if (l.startsWith(QLatin1String("ro.vendor.build.security_patch="))
+                || l.startsWith(QLatin1String("ro.build.version.security_patch="))) {
+                const QString v = l.section(QLatin1Char('='), 1).trimmed();
+                if (!v.isEmpty() && patch.isEmpty())
+                    patch = v;
+            }
+        }
+        if (!patch.isEmpty())
+            break;
+    }
+    if (patch.isEmpty())
+        return;
+
+    const QDate d = QDate::fromString(patch, QStringLiteral("yyyy-MM-dd"));
+    if (!d.isValid())
+        return;
+    const QDate now = QDate::currentDate();
+    const int months = (now.year() - d.year()) * 12 + (now.month() - d.month());
+
+    QVariantList det;
+    det.append(detail(tr("Patch level"), patch,
+                      months >= 12 ? QStringLiteral("bad")
+                                   : months <= 3 ? QStringLiteral("ok") : QString()));
+    det.append(detail(tr("Age"), tr("%n month(s)", "", months)));
+    det.append(detail(tr("Source"), tr("the Android base this port is built on")));
+
+    if (months < 6)
+        return;   // nothing worth saying
+
+    out.append(finding(QStringLiteral("system-patch-age"),
+        tr("The hardware layer's security patch level is %n month(s) old", "", months),
+        months >= 12 ? 2 : 1,
+        tr("The drivers and firmware under this system come from an Android base with a stated patch month. Chipset advisories — the baseband and driver fixes a phone gets — land in that base, not in the system on top of it, and nothing on the device reports them individually."),
+        det,
+        tr("Age is not a verdict. A port is frozen at the base its maker built against, and a fix can be backported without moving this date. What the figure does say is how long ago the vendor last stated a month, which is the only handle an unprivileged reader has on the question at all.")));
+}
+
+// The Mali kernel driver carries its release name in the module's version
+// attribute -- MODULE_VERSION(MALI_RELEASE_NAME " (UK version …)") -- and that
+// string is what Arm's advisories are written against. Two use-after-free
+// issues, CVE-2025-6349 and CVE-2025-8045, list r53p0 through r54p1 as
+// affected and were fixed in r54p2; both are reachable by an ordinary local
+// process with no permissions at all.
+//
+// What this can establish is exactly one thing: whether the release name falls
+// inside the advisory's range. It cannot establish that the device is
+// vulnerable. Vendors fork this driver -- the module here is named after the
+// SoC -- and a backported fix does not change the release name. So the check
+// states the range, states the name, and stops there.
+void Diagnostics::checkGpuDriverRelease(QVariantList &out) const
+{
+    const QDir mods(QStringLiteral("/sys/module"));
+    QString module, version;
+    for (const QString &m : mods.entryList(QStringList() << QStringLiteral("mali_kbase*"),
+                                           QDir::Dirs, QDir::Name)) {
+        const QString v = readTrim(mods.filePath(m) + QStringLiteral("/version"));
+        if (v.isEmpty())
+            continue;
+        module = m;
+        version = v;
+        break;
+    }
+    if (version.isEmpty())
+        return;
+
+    const QRegularExpressionMatch mm =
+        QRegularExpression(QStringLiteral("r(\\d+)p(\\d+)")).match(version);
+    QVariantList det;
+    det.append(detail(tr("Module"), module));
+    det.append(detail(tr("Driver release"), version));
+    if (!mm.hasMatch()) {
+        det.append(detail(tr("Advisory range"), QStringLiteral("r53p0 – r54p1")));
+        out.append(finding(QStringLiteral("gpu-kbase-release"),
+            tr("GPU driver release not parsable"), 1,
+            tr("The Mali kernel driver reports a version this app cannot place against Arm's advisory range."),
+            det));
+        return;
+    }
+    const int major = mm.captured(1).toInt();
+    const int minor = mm.captured(2).toInt();
+    // r53p0 … r54p1 inclusive
+    const bool inRange = (major == 53) || (major == 54 && minor <= 1);
+    det.append(detail(tr("Affected range"), QStringLiteral("r53p0 – r54p1"),
+                      inRange ? QStringLiteral("bad") : QStringLiteral("ok")));
+    det.append(detail(tr("Fixed in"), QStringLiteral("r54p2 / r55p0")));
+    det.append(detail(QStringLiteral("CVE-2025-6349"), tr("use after free, local, no privileges needed")));
+    det.append(detail(QStringLiteral("CVE-2025-8045"), tr("use after free, local, no privileges needed")));
+    out.append(finding(QStringLiteral("gpu-kbase-release"),
+        inRange ? tr("GPU driver release is inside a published advisory range")
+                : tr("GPU driver release is past the published advisory range"),
+        inRange ? 2 : 0,
+        inRange
+            ? tr("Arm lists r53p0 through r54p1 as affected by two use-after-free issues in the Mali kernel driver, both reachable from an ordinary process without privileges, and names r54p2 as the release that fixed them. This driver reports a release inside that range.")
+            : tr("Arm's two use-after-free advisories for the Mali kernel driver cover r53p0 through r54p1. This driver reports a later release."),
+        det,
+        tr("A release name is not a verdict. Vendors fork this driver and backport fixes without renaming the release, and this module is a vendor fork — its name says so. The name places it in the range; only the vendor's own changelog can say whether the fix is in. Nothing here was tested against the running driver."),
+        inRange ? tr("Arm advisory") : QString(),
+        inRange ? QStringLiteral("https://developer.arm.com/documentation/110697/latest/") : QString()));
+}
+
+// A charge-control node that anyone may write. The MediaTek charger driver
+// exports two of them at mode 0777, where every other attribute in the same
+// directory is root-owned: any process on the device can set the input current
+// limit. This is a platform observation, not a fault in this app -- it reads,
+// it never writes -- but a diagnostics tool that walks past a world-writable
+// power-control node is not doing its job.
+void Diagnostics::checkChargerNodePermissions(QVariantList &out) const
+{
+    const QDir d(QStringLiteral("/sys/devices/platform/charger"));
+    if (!d.exists())
+        return;
+    QVariantList det;
+    for (const QFileInfo &fi : d.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Name)) {
+        if (!(fi.permissions() & QFile::WriteOther))
+            continue;
+        det.append(detail(fi.fileName(),
+                          tr("writable by any process  ·  %1").arg(readTrim(fi.absoluteFilePath())),
+                          QStringLiteral("bad")));
+    }
+    if (det.isEmpty())
+        return;
+    out.append(finding(QStringLiteral("charger-world-writable"),
+        tr("Charge control is world-writable"), 2,
+        tr("The charger driver exports control nodes that every process on this device may write, while the rest of the same directory is root-owned. Anything running here can raise or lower the charging current."),
+        det,
+        tr("Read from the file permissions, not from behaviour: nothing was written and nothing was observed doing so. The value beside each name is what the node reads right now; -1 means the driver holds no override. This app only ever reads these files.")));
 }
 
 // Hardware CVE class (Spectre, Meltdown, …): the kernel self-reports each
