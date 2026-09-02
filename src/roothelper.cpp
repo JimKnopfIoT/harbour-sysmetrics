@@ -31,13 +31,12 @@ namespace {
 const char *SOCK_PATH = "/tmp/sysmetrics-root.sock";
 const uid_t DEFAULTUSER_UID = 100000;   // Sailfish's defaultuser, owner of the session
 
-// The app's only privileged file reads are these two debugfs files (WLAN
-// firmware identity and crash counters, sysmon.cpp / diagnostics.cpp, both
-// after an unprivileged attempt). Compared for equality — a prefix test would
-// have to canonicalise, an exact match has nothing left to traverse.
+// The app's only privileged reads, each after an unprivileged attempt. Exact
+// match — a prefix test would have to canonicalise. All three are 0444 anyway.
 const char *const ALLOWED_READS[] = {
     "/sys/kernel/debug/icnss/stats",
     "/sys/kernel/debug/cnss/stats",
+    "/sys/kernel/debug/wakeup_sources",
 };
 
 bool pathAllowed(const QString &p)

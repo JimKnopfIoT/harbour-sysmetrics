@@ -1178,16 +1178,60 @@ function batt() {
         row(qsTr("Temperature"), sysmon.battTempC.toFixed(1) + " °C")
     ]})
 
+    // Where the current goes. The gauge measures the sum; the kernel's energy
+    // model splits the CPU's share of it. The page states both and their rest.
     var top = []
-    try { if (typeof procs !== "undefined" && procs.topByCpu) top = procs.topByCpu(10) } catch (eP) { top = [] }
-    var trows = []
-    for (var i = 0; i < top.length; ++i)
-        trows.push(row((i + 1) + ". " + top[i].name + "  (" + top[i].pid + ")",
-                       top[i].cpu.toFixed(1) + " %  ·  " + sysmon.fmtBytes(top[i].mem)))
-    if (!trows.length) trows.push(row(qsTr("Processes"), qsTr("none")))
-    sections.push({ title: qsTr("Top consumers (CPU)"),
-        note: qsTr("CPU time is the dominant battery drain — this ranks current CPU use. An estimate, not a per-app power meter."),
-        rows: trows })
+    try { if (typeof procs !== "undefined" && procs.topByPower) top = procs.topByPower(8) } catch (eP) { top = [] }
+    var pw = (typeof power !== "undefined") ? power : null
+    var haveMa = pw && pw.available
+    var prows = []
+
+    if (pw && pw.totalMilliAmp > 0) {
+        prows.push(row(qsTr("From the battery"), pw.totalMilliAmp.toFixed(0) + " mA"))
+        if (haveMa && pw.cpuMilliAmp >= 0) {
+            var rest = pw.totalMilliAmp - pw.cpuMilliAmp
+            prows.push(row(qsTr("Of that, the CPU"), pw.cpuMilliAmp.toFixed(0) + " mA"))
+            prows.push(row(qsTr("Everything else"), (rest > 0 ? rest.toFixed(0) : "0") + " mA"))
+        }
+    }
+
+    for (var i = 0; i < top.length; ++i) {
+        var t = top[i]
+        var val = (haveMa && t.mA >= 0) ? (t.mA < 10 ? t.mA.toFixed(1) : t.mA.toFixed(0)) + " mA"
+                                        : t.share.toFixed(0) + " %"
+        prows.push(row((i + 1) + ". " + t.name + "  (" + t.pid + ")", val,
+                       { right: t.cpu.toFixed(0) + " % CPU" }))
+    }
+    if (!top.length) prows.push(row(qsTr("Processes"), qsTr("none")))
+
+    // One line on the page; the reasoning lives in the glossary.
+    var pnote
+    if (haveMa && pw.scaleFromGauge)
+        pnote = qsTr("Approximations. The CPU's share of the drain, split by the kernel's energy model and scaled against the gauge (±%1 %). The rest is display, radios and idle — no process caused it.")
+                .arg((pw.spread * 100).toFixed(0))
+    else if (haveMa)
+        pnote = qsTr("Approximations, and a floor: the CPU's share of the drain from the kernel's energy model, which counts core power only. The true figures are higher.")
+    else
+        pnote = qsTr("Shares of the CPU work. This kernel publishes no energy model, so there is nothing to convert into milliamps.")
+    sections.push({ title: qsTr("Where the current goes"), note: pnote, rows: prows })
+
+    // What keeps the device awake. Not an estimate at all: the kernel counts
+    // this itself, and on a phone that will not suspend it answers the battery
+    // question that CPU time cannot.
+    var wk = sysmon.wakeupSources()
+    if (wk && wk.length) {
+        var wrows = []
+        var upS = sysmon.uptimeSec
+        for (var wi = 0; wi < wk.length && wi < 8; ++wi) {
+            var held = sysmon.fmtDuration(Math.round(wk[wi].heldSec))
+            if (upS > 0) held += "  ·  " + (100 * wk[wi].heldSec / upS).toFixed(0) + " %"
+            wrows.push(row(wk[wi].name, held,
+                           { right: wk[wi].count > 0 ? wk[wi].count.toFixed(0) + " ×" : "" }))
+        }
+        sections.push({ title: qsTr("What keeps the device awake"),
+            note: qsTr("How long each source held the system out of suspend since boot, and how often. Counted by the kernel, not estimated here."),
+            rows: wrows })
+    }
 
     // Every register of every supply, unabridged. On a divider topology this
     // is where the gauge's own hundred-odd registers live, and none of them

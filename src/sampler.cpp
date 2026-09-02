@@ -530,10 +530,12 @@ void Sampler::sampleProcesses(QVector<ProcSample> &out, qint64 dtMs)
             continue;
 
         // fields after comm: 0=state 1=ppid ... 11=utime 12=stime 16=nice
-        //                    17=threads 19=starttime 21=rss
-        const char *fld[22];
+        //                    17=threads 19=starttime 21=rss 36=processor
+        // 36 is a sample, not a history -- but its cluster decides whether a
+        // second of CPU cost 23 mA or 236, so it is worth reading.
+        const char *fld[37];
         int nf = 0;
-        for (char *c = rparen + 2; *c && nf < 22; ) {
+        for (char *c = rparen + 2; *c && nf < 37; ) {
             fld[nf++] = c;
             while (*c && *c != ' ')
                 ++c;
@@ -552,6 +554,8 @@ void Sampler::sampleProcesses(QVector<ProcSample> &out, qint64 dtMs)
         p.threads = (int)strtol(fld[17], nullptr, 10);
         p.startJiffies = strtoull(fld[19], nullptr, 10);
         p.rssBytes = strtoull(fld[21], nullptr, 10) * pageSize;
+        if (nf > 36)
+            p.lastCpu = (int)strtol(fld[36], nullptr, 10);
 
         const auto prev = m_prevProc.constFind(pid);
         if (prev != m_prevProc.constEnd() && prev->start == p.startJiffies) {

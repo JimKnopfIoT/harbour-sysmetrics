@@ -21,6 +21,7 @@
 #include "graphitem.h"
 #include "sysmetrics_version.h"
 #include "netmon.h"
+#include "powermodel.h"
 #include "procmodel.h"
 #include "recorder.h"
 #include "rootclient.h"
@@ -68,6 +69,7 @@ int main(int argc, char *argv[])
     QObject::connect(&workerThread, &QThread::finished, sampler, &QObject::deleteLater);
 
     SysMon sysmon;
+    PowerModel power;
     ProcModel model;
     ProcProxy proxy;
     proxy.setSourceModel(&model);
@@ -76,6 +78,10 @@ int main(int argc, char *argv[])
     NetMonitor netmon;
     Diagnostics diagnostics;
 
+    // First: rows are attributed against the frequencies of their own sample,
+    // and the sampler emits the system snapshot before the process list.
+    model.setPowerModel(&power);
+    QObject::connect(sampler, &Sampler::systemSampled, &power, &PowerModel::onSystem);
     QObject::connect(sampler, &Sampler::systemSampled, &sysmon, &SysMon::onSystem);
     QObject::connect(sampler, &Sampler::systemSampled, &model, &ProcModel::onSystem);
     QObject::connect(sampler, &Sampler::processesSampled, &model, &ProcModel::onProcesses);
@@ -119,6 +125,7 @@ int main(int argc, char *argv[])
 
     view->rootContext()->setContextProperty(QStringLiteral("sysmon"), &sysmon);
     view->rootContext()->setContextProperty(QStringLiteral("procs"), &proxy);
+    view->rootContext()->setContextProperty(QStringLiteral("power"), &power);
     view->rootContext()->setContextProperty(QStringLiteral("recorder"), &recorder);
     view->rootContext()->setContextProperty(QStringLiteral("bt"), &bt);
     view->rootContext()->setContextProperty(QStringLiteral("netmon"), &netmon);
