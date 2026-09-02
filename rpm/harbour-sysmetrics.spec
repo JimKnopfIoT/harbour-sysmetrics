@@ -7,7 +7,7 @@
 %bcond_with ultimate
 Name:       harbour-sysmetrics
 Summary:    System diagnostics for Sailfish OS
-Version:    0.3.0
+Version:    0.3.1
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/JimKnopfIoT/harbour-sysmetrics
@@ -71,6 +71,29 @@ systemctl daemon-reload >/dev/null 2>&1 || :
 %{_datadir}/polkit-1/rules.d/50-harbour-sysmetrics.rules
 
 %changelog
+* Wed Sep 02 2026 harbour-sysmetrics contributors 0.3.1-1
+- The battery page ranked processes by CPU percent, which is a figure for the
+  processor page. It now shows where the current goes: what the gauge measures,
+  what of that the CPU accounts for, and the remainder that no process caused.
+- Per-process milliamps come from the kernel's energy model, which states the
+  power a core draws at each frequency, divided by the cell voltage. Weighting
+  by cluster is not optional -- on the Jolla Phone (2026) a big core costs 8.2
+  times a little one by the model and 7.2 by measurement. The figures are a
+  floor: the model counts core power only, leaving out leakage, L3, memory
+  controller and regulator loss, together about half the true cost.
+- Where the gauge yields a scale of its own precisely enough, that is used
+  instead. It is rejected above 35 % spread, because on the same device with
+  the display off current_now returned 67 mA and 644 mA seconds apart under
+  identical full load.
+- New section: what keeps the device awake, from the kernel's own wakelock
+  tally. It answers for the processes CPU time cannot see. The path joins the
+  root helper's read allowlist -- the file is world-readable but debugfs is not.
+- Collecting runs only off the charger, decided by the current's sign rather
+  than the status string, because older MediaTek gauges report "Not charging"
+  while discharging.
+- tools/power-probe.sh: measures whether a device's gauge reacts to load, how
+  fast and by how much.
+
 * Sun Aug 30 2026 harbour-sysmetrics contributors 0.3.0-1
 - Detail pages reorganised: the figures needed for an overview stay open at the
   top; catalogues, firmware, module list, device tree and raw nodes are folded

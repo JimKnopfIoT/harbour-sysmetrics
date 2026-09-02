@@ -857,6 +857,70 @@ static void pdSourceCaps(QVariantMap &m)
     }
 }
 
+// One reading of wakeup_sources, unranked: two pages ask it different
+// questions. The header decides the columns -- their order has changed.
+QVariantList SysMon::readWakeupSources()
+{
+    QVariantList out;
+    // debugfs is 0700 though the file is not, so: unprivileged read, then the
+    // root helper, and where neither answers the section does not appear.
+    QByteArray raw;
+    QFile ws(QStringLiteral("/sys/kernel/debug/wakeup_sources"));
+    if (ws.open(QIODevice::ReadOnly))
+        raw = ws.readAll();
+    if (raw.isEmpty() && RootClient::instance()->active())
+        raw = RootClient::instance()->readFile(QStringLiteral("/sys/kernel/debug/wakeup_sources"));
+    if (raw.isEmpty())
+        return out;
+
+    const QList<QByteArray> lines = raw.split('\n');
+    const QList<QByteArray> head = lines.value(0).simplified().split(' ');
+    if (head.isEmpty())
+        return out;
+    const int cActive = head.indexOf(QByteArray("active_count"));
+    const int cWakeup = head.indexOf(QByteArray("wakeup_count"));
+    const int cTotal  = head.indexOf(QByteArray("total_time"));
+    const int cMax    = head.indexOf(QByteArray("max_time"));
+
+    for (int i = 1; i < lines.size(); ++i) {
+        const QList<QByteArray> f = lines.at(i).simplified().split(' ');
+        if (f.size() < head.size())
+            continue;
+        // A source name may contain spaces; the numeric columns are anchored
+        // at the end, so any surplus fields belong to the name.
+        const int extra = f.size() - head.size();
+        QByteArray nameBytes = f.value(0);
+        for (int e = 1; e <= extra; ++e)
+            nameBytes += ' ' + f.value(e);
+        const auto col = [&](int c) -> qulonglong {
+            return c < 0 ? 0 : f.value(c + extra).toULongLong();
+        };
+        QVariantMap w;
+        w.insert(QStringLiteral("name"), QString::fromLatin1(nameBytes));
+        w.insert(QStringLiteral("count"), (double)col(cWakeup));
+        w.insert(QStringLiteral("activeCount"), (double)col(cActive));
+        w.insert(QStringLiteral("heldSec"), col(cTotal) / 1000.0);
+        w.insert(QStringLiteral("longestSec"), col(cMax) / 1000.0);
+        out.append(w);
+    }
+    return out;
+}
+
+// Ranked by how long each source held the system awake. Unlike the attributed
+// milliamps this models nothing: the kernel counts it itself.
+QVariantList SysMon::wakeupSources() const
+{
+    QVariantList out;
+    for (const QVariant &v : readWakeupSources())
+        if (v.toMap().value(QStringLiteral("heldSec")).toDouble() > 0)
+            out.append(v);
+    std::sort(out.begin(), out.end(), [](const QVariant &a, const QVariant &b) {
+        return a.toMap().value(QStringLiteral("heldSec")).toDouble()
+             > b.toMap().value(QStringLiteral("heldSec")).toDouble();
+    });
+    return out;
+}
+
 QVariantMap SysMon::chargerDetail() const
 {
     QVariantMap m;
@@ -3870,56 +3934,26 @@ QVariantMap SysMon::sinceBootDetail() const
         m.insert(QStringLiteral("awakeSec"), awakeSec);
 
     // --- wakeup sources: screen-on time, and who keeps waking the phone -----
-    QFile ws(QStringLiteral("/sys/kernel/debug/wakeup_sources"));
-    if (ws.open(QIODevice::ReadOnly)) {
-        const QList<QByteArray> lines = ws.readAll().split('\n');
-        // Column count and order have changed across kernel versions, so the
-        // header decides where each figure sits instead of a fixed index.
-        const QList<QByteArray> head = lines.value(0).simplified().split(' ');
-        const int cActive = head.indexOf(QByteArray("active_count"));
-        const int cWakeup = head.indexOf(QByteArray("wakeup_count"));
-        const int cTotal  = head.indexOf(QByteArray("total_time"));
-        const int cMax    = head.indexOf(QByteArray("max_time"));
-
-        QVariantList wakers;
-        for (int i = 1; i < lines.size(); ++i) {
-            const QList<QByteArray> f = lines.at(i).simplified().split(' ');
-            if (f.size() < head.size() || head.isEmpty())
-                continue;
-            // A source name may contain spaces; the numeric columns are anchored
-            // at the end, so any surplus fields belong to the name.
-            const int extra = f.size() - head.size();
-            QByteArray nameBytes = f.value(0);
-            for (int e = 1; e <= extra; ++e)
-                nameBytes += ' ' + f.value(e);
-            const QString name = QString::fromLatin1(nameBytes);
-            const auto col = [&](int c) -> qulonglong {
-                return c < 0 ? 0 : f.value(c + extra).toULongLong();
-            };
-
-            if (name == QLatin1String("mce_display_on")) {
-                m.insert(QStringLiteral("screenSec"), col(cTotal) / 1000.0);
-                m.insert(QStringLiteral("screenCycles"), (int)col(cActive));
-                m.insert(QStringLiteral("screenLongestSec"), col(cMax) / 1000.0);
-            }
-            const qulonglong wc = col(cWakeup);
-            if (wc > 0) {
-                QVariantMap w;
-                w.insert(QStringLiteral("name"), name);
-                w.insert(QStringLiteral("count"), (double)wc);
-                w.insert(QStringLiteral("heldSec"), col(cTotal) / 1000.0);
-                wakers.append(w);
-            }
+    const QVariantList sources = readWakeupSources();
+    QVariantList wakers;
+    for (const QVariant &v : sources) {
+        const QVariantMap w = v.toMap();
+        if (w.value(QStringLiteral("name")).toString() == QLatin1String("mce_display_on")) {
+            m.insert(QStringLiteral("screenSec"), w.value(QStringLiteral("heldSec")));
+            m.insert(QStringLiteral("screenCycles"), w.value(QStringLiteral("activeCount")).toInt());
+            m.insert(QStringLiteral("screenLongestSec"), w.value(QStringLiteral("longestSec")));
         }
-        // Rank by wake count: the question this answers is who interrupts sleep,
-        // not who holds the CPU longest once awake.
-        std::sort(wakers.begin(), wakers.end(), [](const QVariant &a, const QVariant &b) {
-            return a.toMap().value(QStringLiteral("count")).toDouble()
-                 > b.toMap().value(QStringLiteral("count")).toDouble();
-        });
-        if (!wakers.isEmpty())
-            m.insert(QStringLiteral("wakers"), wakers);
+        if (w.value(QStringLiteral("count")).toDouble() > 0)
+            wakers.append(w);
     }
+    // Rank by wake count: the question this answers is who interrupts sleep,
+    // not who holds the CPU longest once awake.
+    std::sort(wakers.begin(), wakers.end(), [](const QVariant &a, const QVariant &b) {
+        return a.toMap().value(QStringLiteral("count")).toDouble()
+             > b.toMap().value(QStringLiteral("count")).toDouble();
+    });
+    if (!wakers.isEmpty())
+        m.insert(QStringLiteral("wakers"), wakers);
 
     // --- suspend attempts ---------------------------------------------------
     // Moved out of debugfs into /sys/power in newer kernels; try both.

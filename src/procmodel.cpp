@@ -1,4 +1,5 @@
 #include "procmodel.h"
+#include "powermodel.h"
 
 #include <pwd.h>
 
@@ -29,6 +30,7 @@ QHash<int, QByteArray> ProcModel::roleNames() const
     r[NiceRole] = "nice";
     r[KernelRole] = "isKernel";
     r[AppRole] = "isApp";
+    r[PowerRole] = "powerMilliAmp";
     return r;
 }
 
@@ -52,6 +54,7 @@ QVariant ProcModel::data(const QModelIndex &index, int role) const
     case NiceRole: return p.nice;
     case KernelRole: return p.kernelThread;
     case AppRole: return p.uid >= 100000;
+    case PowerRole: return (double)p.powerMilliAmp;
     }
     return QVariant();
 }
@@ -71,10 +74,30 @@ QString ProcModel::userName(uint uid) const
 void ProcModel::onSystem(const SysSnap &snap)
 {
     m_memTotal = snap.memTotal;
+    m_coreFreqKhz = snap.coreFreqKhz;
+    m_volts = snap.battVoltageV;
 }
 
-void ProcModel::onProcesses(const QVector<ProcSample> &procs, qulonglong)
+void ProcModel::onProcesses(const QVector<ProcSample> &in, qulonglong)
 {
+    // Weighted by what the core it last ran on costs: the same second is worth
+    // several times as much on a big core, and ignoring that misranks the list.
+    QVector<ProcSample> procs = in;
+    if (m_power) {
+        for (ProcSample &p : procs) {
+            const int cpu = p.lastCpu;
+            if (cpu < 0 || cpu >= m_coreFreqKhz.size() || p.cpuPct <= 0.f)
+                continue;
+            const int khz = m_coreFreqKhz.at(cpu);
+            if (khz <= 0)
+                continue;
+            const double units = (p.cpuPct / 100.0) * m_power->coreWeight(cpu, khz);
+            const double mA = m_power->toMilliAmp(units, m_volts);
+            if (mA >= 0)
+                p.powerMilliAmp = (float)mA;
+        }
+    }
+
     QHash<int, int> incoming;
     incoming.reserve(procs.size());
     for (int i = 0; i < procs.size(); ++i)
@@ -173,6 +196,47 @@ void ProcProxy::setAppsOnly(bool v)
     invalidateFilter();
     emit filterChanged();
     emit countChanged();
+}
+
+QVariantList ProcProxy::topByPower(int n) const
+{
+    QAbstractItemModel *m = sourceModel();
+    if (!m)
+        return QVariantList();
+    struct Row { QString name; int pid; double cpu; double mA; bool app; };
+    QVector<Row> rows;
+    const int rc = m->rowCount();
+    rows.reserve(rc);
+    double totalCpu = 0;
+    for (int i = 0; i < rc; ++i) {
+        const QModelIndex idx = m->index(i, 0);
+        const Row r = { idx.data(ProcModel::NameRole).toString(),
+                        idx.data(ProcModel::PidRole).toInt(),
+                        idx.data(ProcModel::CpuRole).toDouble(),
+                        idx.data(ProcModel::PowerRole).toDouble(),
+                        idx.data(ProcModel::AppRole).toBool() };
+        totalCpu += r.cpu;
+        rows.append(r);
+    }
+    // By the attributed figure where there is one, else by CPU time -- the same
+    // order either way, only the unit on the page differs.
+    std::sort(rows.begin(), rows.end(), [](const Row &a, const Row &b) {
+        if (a.mA != b.mA && (a.mA > 0 || b.mA > 0))
+            return a.mA > b.mA;
+        return a.cpu != b.cpu ? a.cpu > b.cpu : a.pid < b.pid;
+    });
+    QVariantList out;
+    for (int i = 0; i < rows.size() && i < n; ++i) {
+        QVariantMap r;
+        r.insert(QStringLiteral("name"), rows[i].name);
+        r.insert(QStringLiteral("pid"), rows[i].pid);
+        r.insert(QStringLiteral("cpu"), rows[i].cpu);
+        r.insert(QStringLiteral("mA"), rows[i].mA);
+        r.insert(QStringLiteral("share"), totalCpu > 0 ? 100.0 * rows[i].cpu / totalCpu : 0.0);
+        r.insert(QStringLiteral("isApp"), rows[i].app);
+        out.append(r);
+    }
+    return out;
 }
 
 QVariantList ProcProxy::topByCpu(int n) const

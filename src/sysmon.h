@@ -71,6 +71,10 @@ class SysMon : public QObject
 public:
     explicit SysMon(QObject *parent = nullptr);
 
+    // Wakelocks, ranked by how long they held the device awake.
+    Q_INVOKABLE QVariantList wakeupSources() const;
+    static QVariantList readWakeupSources();
+
     qreal cpuPercent() const { return m_s.cpuPct; }
     // coreCount is every CPU the SoC has; on hotplug SoCs some of them are parked
     // at any moment and report SysSnap::CoreOffline instead of a load.

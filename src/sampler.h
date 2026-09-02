@@ -19,6 +19,8 @@ struct ProcSample {
     qulonglong rssBytes = 0;
     qulonglong jiffies = 0;      // utime+stime
     qulonglong startJiffies = 0; // starttime, pid-reuse guard
+    int lastCpu = -1;            // core it last ran on: which cluster it costs on
+    float powerMilliAmp = -1.f;  // attributed drain, <0 while unattributable
     QString name;
     QString cmdline;
     bool kernelThread = false;
