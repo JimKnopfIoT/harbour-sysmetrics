@@ -40,6 +40,9 @@ class SysMon : public QObject
     Q_PROPERTY(QVariantList interfaces READ interfaces NOTIFY updated)
     Q_PROPERTY(int battCapacity READ battCapacity NOTIFY updated)
     Q_PROPERTY(double battCurrentA READ battCurrentA NOTIFY updated)
+    // False where the gauge has no ammeter: the page then omits the rows
+    // instead of printing a zero that reads like a measurement.
+    Q_PROPERTY(bool battCurrentValid READ battCurrentValid NOTIFY updated)
     Q_PROPERTY(double battVoltageV READ battVoltageV NOTIFY updated)
     Q_PROPERTY(double battTempC READ battTempC NOTIFY updated)
     Q_PROPERTY(double battPowerW READ battPowerW NOTIFY updated)
@@ -66,6 +69,9 @@ class SysMon : public QObject
     // Bound to ApplicationWindow.applicationActive: false means the app is
     // covered, so nobody is looking at the process list.
     Q_PROPERTY(bool foreground READ foreground WRITE setForeground NOTIFY foregroundChanged)
+    // Set by the one page that shows the zones live. A thermal pass is
+    // expensive enough that it is not worth doing for nobody.
+    Q_PROPERTY(bool thermalWanted READ thermalWanted WRITE setThermalWanted NOTIFY thermalWantedChanged)
     Q_PROPERTY(int intervalMs READ intervalMs WRITE setIntervalMs NOTIFY intervalChanged)
 
 public:
@@ -114,6 +120,7 @@ public:
     QVariantList interfaces() const;
     int battCapacity() const { return m_s.battCapacity; }
     double battCurrentA() const { return m_s.battCurrentA; }
+    bool battCurrentValid() const { return m_s.battCurrentValid; }
     double battVoltageV() const { return m_s.battVoltageV; }
     double battTempC() const { return m_s.battTempC; }
     double battPowerW() const { return m_s.battPowerW; }
@@ -140,6 +147,8 @@ public:
     void setPaused(bool p);
     bool foreground() const { return m_foreground; }
     void setForeground(bool f);
+    bool thermalWanted() const { return m_thermalWanted; }
+    void setThermalWanted(bool w);
     int intervalMs() const { return m_intervalMs; }
     void setIntervalMs(int ms);
 
@@ -184,6 +193,7 @@ signals:
     void updated();
     void pausedChanged();
     void foregroundChanged();
+    void thermalWantedChanged();
     void intervalChanged();
     void pauseRequested(bool paused);
     void intervalRequested(int ms);
@@ -196,5 +206,6 @@ private:
     QVector<double> m_cpuHist, m_memHist, m_rxHist, m_txHist, m_battHist;
     bool m_paused = false;
     bool m_foreground = true;
+    bool m_thermalWanted = true;
     int m_intervalMs = 3000;
 };

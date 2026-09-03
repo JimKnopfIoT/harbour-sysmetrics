@@ -143,6 +143,12 @@ Page {
                         if (open && lazyRows === null && sec.rowsFn)
                             lazyRows = sec.rowsFn()
                     }
+                    // A section may set its own cap where the page-wide one
+                    // would cut a list in the wrong place -- a ranking whose
+                    // section also carries summary rows, for one: those three
+                    // are not candidates for "show all" and must not eat the
+                    // budget the ranking needs.
+                    property int secCap: sec.cap !== undefined ? sec.cap : page.cap
                     property var sectionRows: sec.rows ? sec.rows
                                               : (lazyRows ? lazyRows : [])
 
@@ -204,7 +210,7 @@ Page {
                             model: {
                                 if (!open) return []
                                 var r = sectionRows
-                                return exp ? r : r.slice(0, page.cap)
+                                return exp ? r : r.slice(0, secCap)
                             }
                             Row {
                                 x: Theme.horizontalPageMargin
@@ -258,7 +264,7 @@ Page {
 
                         MoreToggle {
                             total: open ? sectionRows.length : 0
-                            shown: page.cap; expanded: exp
+                            shown: secCap; expanded: exp
                             onToggle: {
                                 var a = page.expandedSections.slice()
                                 while (a.length <= si) a.push(false)

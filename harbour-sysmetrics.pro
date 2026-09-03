@@ -39,7 +39,6 @@ HEADERS += \
     src/sampler.h \
     src/sysmon.h \
     src/procmodel.h \
-    src/powermodel.h \
     src/netinfo.h \
     src/deviceinfo.h \
     src/detailmon.h \
@@ -56,7 +55,6 @@ SOURCES += \
     src/sampler.cpp \
     src/sysmon.cpp \
     src/procmodel.cpp \
-    src/powermodel.cpp \
     src/netinfo.cpp \
     src/deviceinfo.cpp \
     src/detailmon.cpp \

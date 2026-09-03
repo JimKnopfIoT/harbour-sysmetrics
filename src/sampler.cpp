@@ -158,6 +158,11 @@ void Sampler::setProcessesEnabled(bool on)
         sample();     // the list is visible again: refresh it now, not in 3s
 }
 
+void Sampler::setThermalEnabled(bool on)
+{
+    m_thermalEnabled = on;
+}
+
 void Sampler::sampleNow()
 {
     sample();
@@ -376,60 +381,76 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
     m_prevDiskRd = rd;
     m_prevDiskWr = wr;
 
-    const QDir tdir(QStringLiteral("/sys/class/thermal"));
-    for (const QString &zone : tdir.entryList(QStringList() << QStringLiteral("thermal_zone*"), QDir::Dirs)) {
-        const QString base = tdir.filePath(zone);
-        const int milli = readAll(base + QStringLiteral("/temp")).trimmed().toInt();
-        if (milli <= 0 || milli > 150000)
-            continue;
-        const QString type = QString::fromLatin1(readAll(base + QStringLiteral("/type")).trimmed());
-        // Qualcomm hangs its battery watchdogs into the same framework, because
-        // throttling runs through it — their "temp" carries mA, mV or percent.
-        // Checked against power_supply on the Xperia 10 III: vbat-lvl* equals
-        // voltage_now, ibat-lvl* current_now, soc capacity. The battery card
-        // shows all three anyway, in their own units.
-        if (type.contains(QStringLiteral("-vbat-lvl")) || type.contains(QStringLiteral("-ibat-lvl"))
-            || type.contains(QStringLiteral("-vph-lvl")) || type.contains(QStringLiteral("-bcl-lvl")))
-            continue;
-        // Elsewhere a zone named "soc" is the die sensor, so drop it only on the
-        // reading that cannot be a temperature.
-        if (type == QLatin1String("soc") && milli <= 100)
-            continue;
-        static const QString model = deviceModel();
-        const bool fix = type == QLatin1String("camera-therm-usr")
-                         && model == QLatin1String("xqbt52");   // Xperia 10 III
-        const float degC = milli / 1000.f;
-        s.thermal.append({type, fix ? fixFlashTherm(degC) : degC, fix, false});
-    }
+    // Reading a zone is work, not a lookup: on the Jolla Phone (2026) a pass
+    // over all 56 costs 134 ms, primary_dvchg 11 ms of it and consys 6, because
+    // each read goes out to the part over I2C. Nothing but the overview shows
+    // them live, so off that page the pass is skipped and the last one stands.
+    if (!m_thermalEnabled) {
+        s.thermal = m_lastThermal;
+    } else {
+        const QDir tdir(QStringLiteral("/sys/class/thermal"));
+        for (const QString &zone : tdir.entryList(QStringList() << QStringLiteral("thermal_zone*"), QDir::Dirs)) {
+            const QString base = tdir.filePath(zone);
+            const int milli = readAll(base + QStringLiteral("/temp")).trimmed().toInt();
+            if (milli <= 0 || milli > 150000)
+                continue;
+            // Cached: a zone keeps its type for the life of the system.
+            auto typeIt = m_zoneType.constFind(zone);
+            if (typeIt == m_zoneType.constEnd())
+                typeIt = m_zoneType.insert(zone,
+                            QString::fromLatin1(readAll(base + QStringLiteral("/type")).trimmed()));
+            const QString type = typeIt.value();
+            // Qualcomm hangs its battery watchdogs into the same framework, because
+            // throttling runs through it — their "temp" carries mA, mV or percent.
+            // Checked against power_supply on the Xperia 10 III: vbat-lvl* equals
+            // voltage_now, ibat-lvl* current_now, soc capacity. The battery card
+            // shows all three anyway, in their own units.
+            if (type.contains(QStringLiteral("-vbat-lvl")) || type.contains(QStringLiteral("-ibat-lvl"))
+                || type.contains(QStringLiteral("-vph-lvl")) || type.contains(QStringLiteral("-bcl-lvl")))
+                continue;
+            // Elsewhere a zone named "soc" is the die sensor, so drop it only on the
+            // reading that cannot be a temperature.
+            if (type == QLatin1String("soc") && milli <= 100)
+                continue;
+            static const QString model = deviceModel();
+            const bool fix = type == QLatin1String("camera-therm-usr")
+                             && model == QLatin1String("xqbt52");   // Xperia 10 III
+            const float degC = milli / 1000.f;
+            s.thermal.append({type, fix ? fixFlashTherm(degC) : degC, fix, false});
+        }
 
-    // A zone that is not a temperature at all is the hard case: a node
-    // carrying millivolts arrives here as a number in the right range, and no
-    // bounds check can reject 4.4 when a phone in winter could read that.
-    //
-    // The comparison therefore runs against the other zones -- but carefully,
-    // because the legitimate spread across one board is far wider than it
-    // looks. Measured under charge on this project's own devices: 21.6 K
-    // between the battery gauge and the charger zone on the Xperia, and 45 K
-    // between the hottest SoC zone and the radio on the Jolla Phone. A rule
-    // tuned to 20 K would call half of those false.
-    //
-    // So all three conditions have to hold at once: the rest of the board is
-    // clearly warm, this zone is near freezing, and the gap is wider than any
-    // measured spread. That combination is not something a working sensor on a
-    // warm board produces; a millivolt reading of 4400 among millidegree
-    // readings of 33000 is. Flagged, never dropped -- the threshold is a
-    // heuristic, and a heuristic does not get to delete a measurement.
-    if (s.thermal.size() >= 5) {
-        QVector<float> t;
-        t.reserve(s.thermal.size());
-        for (const auto &z : s.thermal)
-            t.append(z.degC);
-        std::sort(t.begin(), t.end());
-        const float median = t.at(t.size() / 2);
-        if (median > 25.f)
-            for (auto &z : s.thermal)
-                if (z.degC < 10.f && median - z.degC > 25.f)
-                    z.suspect = true;
+        // A zone that is not a temperature at all is the hard case: a node
+        // carrying millivolts arrives here as a number in the right range, and no
+        // bounds check can reject 4.4 when a phone in winter could read that.
+        //
+        // The comparison therefore runs against the other zones -- but carefully,
+        // because the legitimate spread across one board is far wider than it
+        // looks. Measured under charge on this project's own devices: 21.6 K
+        // between the battery gauge and the charger zone on the Xperia, and 45 K
+        // between the hottest SoC zone and the radio on the Jolla Phone. A rule
+        // tuned to 20 K would call half of those false.
+        //
+        // So all three conditions have to hold at once: the rest of the board is
+        // clearly warm, this zone is near freezing, and the gap is wider than any
+        // measured spread. That combination is not something a working sensor on a
+        // warm board produces; a millivolt reading of 4400 among millidegree
+        // readings of 33000 is. Flagged, never dropped -- the threshold is a
+        // heuristic, and a heuristic does not get to delete a measurement.
+        if (s.thermal.size() >= 5) {
+            QVector<float> t;
+            t.reserve(s.thermal.size());
+            for (const auto &z : s.thermal)
+                t.append(z.degC);
+            std::sort(t.begin(), t.end());
+            const float median = t.at(t.size() / 2);
+            if (median > 25.f)
+                for (auto &z : s.thermal)
+                    if (z.degC < 10.f && median - z.degC > 25.f)
+                        z.suspect = true;
+        }
+        // Kept whole, suspect flags included, so the card does not empty out the
+        // moment the overview loses focus.
+        m_lastThermal = s.thermal;
     }
 
     // battery: prefer "battery", else first type=Battery supply
@@ -448,9 +469,21 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
         // Standard sysfs first; older MediaTek exposes only CamelCase legacy
         // names in different units (mA/mV instead of µA/µV).
         const QByteArray cur = readAll(bat + QStringLiteral("/current_now")).trimmed();
-        s.battCurrentA = cur.isEmpty()
-            ? readAll(bat + QStringLiteral("/BatteryAverageCurrent")).trimmed().toLongLong() / 1e3
-            : cur.toLongLong() / 1e6;
+        const QByteArray curLegacy = cur.isEmpty()
+            ? readAll(bat + QStringLiteral("/BatteryAverageCurrent")).trimmed()
+            : QByteArray();
+        s.battCurrentA = cur.isEmpty() ? curLegacy.toLongLong() / 1e3
+                                       : cur.toLongLong() / 1e6;
+        // A node that answers is not yet a figure that means anything. The
+        // Gemini PDA keeps BatteryAverageCurrent at 0 even under full load,
+        // while the ADC behind it moves by 389 mV -- the driver never converts
+        // it. Neither name present means no current at all; present but stuck
+        // at zero while the cell discharges means the same for this app,
+        // because a discharging phone always draws something. One non-zero
+        // reading settles it for good.
+        const bool haveNode = !cur.isEmpty() || !curLegacy.isEmpty();
+        if (s.battCurrentA != 0)
+            m_battCurrentSeen = true;
         const QByteArray vol = readAll(bat + QStringLiteral("/voltage_now")).trimmed();
         s.battVoltageV = vol.isEmpty()
             ? readAll(bat + QStringLiteral("/batt_vol")).trimmed().toLongLong() / 1e3
@@ -459,7 +492,16 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
         if (t.isEmpty()) t = readAll(bat + QStringLiteral("/batt_temp")).trimmed();
         s.battTempC = t.toInt() / 10.0;
         s.battStatus = QString::fromLatin1(readAll(bat + QStringLiteral("/status")).trimmed());
-        s.battPowerW = qAbs(s.battCurrentA) * s.battVoltageV;
+        // MediaTek writes "Cmd discharging" where mainline writes "Discharging",
+        // so the word decides and not the whole string.
+        if (!m_battCurrentSeen && s.battCurrentA == 0
+                && s.battStatus.contains(QLatin1String("discharging"), Qt::CaseInsensitive))
+            ++m_battZeroWhileDischarging;
+        else if (s.battCurrentA != 0)
+            m_battZeroWhileDischarging = 0;
+        s.battCurrentValid = m_battCurrentSeen
+                || (haveNode && m_battZeroWhileDischarging < 3);
+        s.battPowerW = s.battCurrentValid ? qAbs(s.battCurrentA) * s.battVoltageV : 0;
         qulonglong full = readAll(bat + QStringLiteral("/charge_full")).trimmed().toULongLong();
         qulonglong design = readAll(bat + QStringLiteral("/charge_full_design")).trimmed().toULongLong();
         // some drivers only expose energy_* (µWh) instead of charge_* (µAh)

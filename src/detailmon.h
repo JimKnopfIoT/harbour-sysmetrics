@@ -18,7 +18,6 @@ class DetailMon : public QObject
     Q_PROPERTY(QVariantMap cpu READ cpu NOTIFY updated)
     Q_PROPERTY(QVariantMap mem READ mem NOTIFY updated)
     Q_PROPERTY(QVariantMap io READ io NOTIFY updated)
-    Q_PROPERTY(QVariantMap energy READ energy NOTIFY updated)
     Q_PROPERTY(QVariantMap watch READ watch NOTIFY updated)
     Q_PROPERTY(QVariantList files READ files NOTIFY updated)
     Q_PROPERTY(QVariantList devices READ devices NOTIFY updated)
@@ -38,7 +37,6 @@ public:
     QVariantMap cpu() const { return m_cpu; }
     QVariantMap mem() const { return m_mem; }
     QVariantMap io() const { return m_io; }
-    QVariantMap energy() const { return m_energy; }
     QVariantMap watch() const { return m_watch; }
     QVariantList files() const { return m_files; }
     QVariantList devices() const { return m_devices; }
@@ -80,6 +78,6 @@ private:
     QHash<quint64, QPair<qulonglong, qulonglong>> m_prevQueues; // sock inode -> tx,rx
     double m_emaCpu = -1, m_emaWake = -1, m_emaWrite = -1;
 
-    QVariantMap m_info, m_cpu, m_mem, m_io, m_energy, m_watch;
+    QVariantMap m_info, m_cpu, m_mem, m_io, m_watch;
     QVariantList m_files, m_devices, m_sockets, m_threads, m_notes, m_cpuHist;
 };

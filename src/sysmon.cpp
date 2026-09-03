@@ -54,8 +54,11 @@ void SysMon::onSystem(const SysSnap &snap)
     push(m_memHist, snap.memTotal ? 100.0 * (snap.memTotal - snap.memAvailable) / snap.memTotal : 0);
     push(m_rxHist, snap.netRxRate);
     push(m_txHist, snap.netTxRate);
-    // discharge positive, charge negative: drain graph reads upward
-    const double drain = snap.battStatus == QLatin1String("Discharging") ? snap.battPowerW : -snap.battPowerW;
+    // discharge positive, charge negative: drain graph reads upward. Matching
+    // the whole string missed MediaTek's "Cmd discharging" and plotted a
+    // discharging phone as if it were charging.
+    const double drain = snap.battStatus.contains(QLatin1String("discharging"), Qt::CaseInsensitive)
+                         ? snap.battPowerW : -snap.battPowerW;
     push(m_battHist, drain);
     emit updated();
 }
@@ -135,6 +138,14 @@ void SysMon::setForeground(bool f)
         return;
     m_foreground = f;
     emit foregroundChanged();
+}
+
+void SysMon::setThermalWanted(bool w)
+{
+    if (m_thermalWanted == w)
+        return;
+    m_thermalWanted = w;
+    emit thermalWantedChanged();
 }
 
 void SysMon::setIntervalMs(int ms)

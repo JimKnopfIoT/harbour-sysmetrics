@@ -7,7 +7,6 @@
 
 #include "sampler.h"
 
-class PowerModel;
 
 class ProcModel : public QAbstractListModel
 {
@@ -28,11 +27,9 @@ public:
         NiceRole,
         KernelRole,
         AppRole,
-        PowerRole        // attributed milliamps, -1 when not attributable
     };
 
     explicit ProcModel(QObject *parent = nullptr);
-    void setPowerModel(PowerModel *p) { m_power = p; }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -51,9 +48,6 @@ private:
     QVector<ProcSample> m_rows;
     mutable QHash<uint, QString> m_users;
     qulonglong m_memTotal = 0;
-    PowerModel *m_power = nullptr;
-    QVector<int> m_coreFreqKhz;
-    double m_volts = 0;
 };
 
 class ProcProxy : public QSortFilterProxyModel
@@ -87,7 +81,6 @@ public:
     // top-N processes by current CPU% — a battery-drain proxy
     Q_INVOKABLE QVariantList topByCpu(int n) const;
     // top-N by attributed drain, with the share of CPU work each caused
-    Q_INVOKABLE QVariantList topByPower(int n) const;
 
 signals:
     void filterChanged();

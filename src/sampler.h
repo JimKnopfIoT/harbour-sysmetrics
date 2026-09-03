@@ -20,7 +20,6 @@ struct ProcSample {
     qulonglong jiffies = 0;      // utime+stime
     qulonglong startJiffies = 0; // starttime, pid-reuse guard
     int lastCpu = -1;            // core it last ran on: which cluster it costs on
-    float powerMilliAmp = -1.f;  // attributed drain, <0 while unattributable
     QString name;
     QString cmdline;
     bool kernelThread = false;
@@ -55,6 +54,11 @@ struct SysSnap {
     QVector<ThermalZone> thermal;
     int battCapacity = -1;
     double battCurrentA = 0, battVoltageV = 0, battTempC = 0, battPowerW = 0;
+    // Whether that current is a reading at all. The Gemini PDA answers its
+    // legacy BatteryAverageCurrent with a hard 0 while discharging: the driver
+    // publishes no current, and a 0 mA printed on the page would be a claim
+    // the device cannot support.
+    bool battCurrentValid = true;
     int battHealthPct = -1;
     double battHealthExact = -1;   // same figure, undivided by rounding
     int battSohRegister = -1;      // what the gauge's soh register claims
@@ -82,6 +86,7 @@ public slots:
     void setIntervalMs(int ms);
     void setPaused(bool paused);
     void setProcessesEnabled(bool on);
+    void setThermalEnabled(bool on);
     void sampleNow();
 
 signals:
@@ -100,6 +105,16 @@ private:
     // process list needs it. While the app is covered nobody can see that list,
     // so it is skipped and the cover keeps its cheap system figures.
     bool m_procsEnabled = true;
+    // A pass over the thermal framework costs 134 ms on the Jolla Phone
+    // (2026): 56 zones, and reading one is an I2C transaction to the part
+    // it sits on -- primary_dvchg alone takes 11 ms, consys 6. Only the
+    // overview shows these live, so off that page they are not read at all
+    // and the last pass stands until it is.
+    bool m_thermalEnabled = true;
+    QVector<SysSnap::ThermalZone> m_lastThermal;
+    // A zone's type cannot change while the system runs; re-reading it 56
+    // times a tick bought nothing.
+    QHash<QString, QString> m_zoneType;
     qint64 m_prevProcMs = 0;     // last tick that actually walked /proc
     int m_lastProcCount = 0, m_lastThreadCount = 0;
 
@@ -114,6 +129,10 @@ private:
     QString m_prevIface;
     qulonglong m_prevDiskRd = 0, m_prevDiskWr = 0;
     qint64 m_prevMs = 0;
+    // Latched once a non-zero current has ever been seen; until then a run of
+    // zeroes while the cell is discharging is what proves the sensor absent.
+    bool m_battCurrentSeen = false;
+    int m_battZeroWhileDischarging = 0;
     // Everything here is either needed for the next delta or is immutable for the
     // lifetime of the process and therefore worth not re-reading every tick.
     struct PrevProc {          // aggregate: always brace-initialised in full
