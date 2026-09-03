@@ -7,7 +7,7 @@
 %bcond_with ultimate
 Name:       harbour-sysmetrics
 Summary:    System diagnostics for Sailfish OS
-Version:    0.3.1
+Version:    0.3.2
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/JimKnopfIoT/harbour-sysmetrics
@@ -71,6 +71,32 @@ systemctl daemon-reload >/dev/null 2>&1 || :
 %{_datadir}/polkit-1/rules.d/50-harbour-sysmetrics.rules
 
 %changelog
+* Thu Sep 03 2026 harbour-sysmetrics contributors 0.3.2-1
+- The per-process milliamp figures are gone, and with them the section that
+  carried them. Nothing in a phone meters a process. What 0.3.1 showed was a
+  share of CPU time weighted by cluster and scaled against the gauge -- a model
+  dressed as a measurement, and it read like one. It suggested where it should
+  have informed, which is not what this app is for. The processor page still
+  ranks processes by CPU time, which is counted rather than modelled.
+- The same estimate stood a second time on the process detail page as
+  "estimated power share": the device's whole draw multiplied by the process's
+  share of busy CPU, display and radios included. Also gone.
+- Current and power are no longer printed where the driver publishes no
+  current. The Gemini PDA answers its legacy BatteryAverageCurrent with a hard
+  zero while discharging, and a printed 0 mA reads as a measurement rather than
+  an absent sensor. The rows are omitted instead; voltage and temperature,
+  which that gauge does measure, stay.
+- The discharge graph plotted MediaTek devices with the wrong sign: the status
+  there reads "Cmd discharging", and the check compared the whole string.
+- A pass over the thermal zones costs 134 ms on the Jolla Phone (2026), because
+  reading a zone is a transaction to the part it measures -- the charge pump
+  alone takes 11 ms. It ran every tick whether or not anything showed a
+  temperature; it now runs while the overview is in front, and a zone's type is
+  read once instead of 56 times a tick.
+- The Bluetooth refresh blocked the interface thread on a system-bus round trip
+  every five seconds, on every page and in the background. It follows its page
+  now.
+- The settings file is created 0600, and an existing one is tightened on start.
 * Wed Sep 02 2026 harbour-sysmetrics contributors 0.3.1-1
 - The battery page ranked processes by CPU percent, which is a figure for the
   processor page. It now shows where the current goes: what the gauge measures,

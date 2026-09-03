@@ -16,7 +16,13 @@ Page {
         var p = pageStack.pushAttached(Qt.resolvedUrl("HelpPage.qml"), { topics: helpTopics })
         if (p) _helpAttached = true
     }
-    onStatusChanged: if (status === PageStatus.Active) _attachHelp()
+    onStatusChanged: {
+        if (status === PageStatus.Active) _attachHelp()
+        // Reading the thermal zones costs 134 ms a pass on the Jolla Phone
+        // (2026). This is the only page that shows them live, so it asks
+        // for them and stops asking the moment it is not in front.
+        sysmon.thermalWanted = (status === PageStatus.Active)
+    }
 
     property bool thermalExpanded: false
     property bool thermalSuspect: {
@@ -50,7 +56,12 @@ Page {
             if (all[i].level > (lv[all[i].topic] || 0)) lv[all[i].topic] = all[i].level
         diagLevels = lv
     }
-    Timer { interval: 5000; running: true; repeat: true; onTriggered: bt.refresh() }
+    Component.onDestruction: sysmon.thermalWanted = false
+
+    // bt.refresh() blocks the GUI thread on a system-bus round trip; off this
+    // page nothing shows the result, so the timer stops with it.
+    Timer { interval: 5000; running: page.status === PageStatus.Active
+            repeat: true; onTriggered: bt.refresh() }
 
     DiagBackground {}
 

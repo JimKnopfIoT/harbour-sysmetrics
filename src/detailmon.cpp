@@ -245,18 +245,6 @@ void DetailMon::sample()
         m_prevWr = wr;
     }
 
-    // ---- energy ------------------------------------------------------------
-    const QString bat = QStringLiteral("/sys/class/power_supply/battery");
-    const double curA = readAll(bat + QStringLiteral("/current_now")).trimmed().toLongLong() / 1e6;
-    const double voltV = readAll(bat + QStringLiteral("/voltage_now")).trimmed().toLongLong() / 1e6;
-    const QByteArray bstat = readAll(bat + QStringLiteral("/status")).trimmed();
-    const double sysW = qAbs(curA) * voltV;
-    m_energy.insert(QStringLiteral("systemW"), sysW);
-    m_energy.insert(QStringLiteral("discharging"), bstat == "Discharging");
-    // crude attribution: CPU-share fraction of measured system power
-    m_energy.insert(QStringLiteral("estimateW"), sysW * sharePct / 100.0);
-    m_energy.insert(QStringLiteral("sharePct"), sharePct);
-
     // ---- fds, sockets, devices (each tick), watchers (every 4th) -----------
     sampleFds();
     if (m_tick % 4 == 0)
@@ -598,11 +586,6 @@ void DetailMon::assess()
     const double swap = m_mem.value(QStringLiteral("swap")).toDouble();
     if (swap > 52428800)
         notes.append(note(1, tr("%1 MB swapped out").arg((int)(swap / 1048576))));
-
-    if (m_energy.value(QStringLiteral("discharging")).toBool()
-        && m_energy.value(QStringLiteral("estimateW")).toDouble() > 0.3)
-        notes.append(note(2, tr("Estimated power share %1 mW — above the 300 mW this app treats as noticeable")
-                             .arg((int)(m_energy.value(QStringLiteral("estimateW")).toDouble() * 1000))));
 
     m_notes = notes;
 }

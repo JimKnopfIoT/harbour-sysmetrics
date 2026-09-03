@@ -21,7 +21,6 @@
 #include "graphitem.h"
 #include "sysmetrics_version.h"
 #include "netmon.h"
-#include "powermodel.h"
 #include "procmodel.h"
 #include "recorder.h"
 #include "rootclient.h"
@@ -29,7 +28,11 @@
 #include "sampler.h"
 #include "sysmon.h"
 
+#include <QFile>
+#include <QSettings>
+
 #include <cstring>
+#include <sys/stat.h>
 
 // English mode: an identity translator that answers every lookup with the
 // source string. Installed last, it is consulted first and thus overrides any
@@ -52,7 +55,22 @@ int main(int argc, char *argv[])
         if (std::strcmp(argv[i], "--root-helper") == 0)
             return rootHelperMain(argc, argv);
 
+    // The launcher hands the app a umask of 0, so QSettings created its file
+    // world-writable -- and that file carries the gauge calibration the
+    // milliamp figures rest on. Nothing this app writes concerns anyone but
+    // its own user.
+    ::umask(0077);
+
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
+
+    // A file from an earlier version keeps the mode it was created with, so
+    // tighten it once rather than leaving old installs open.
+    {
+        QSettings s;
+        const QString conf = s.fileName();
+        if (QFile::exists(conf))
+            QFile::setPermissions(conf, QFile::ReadOwner | QFile::WriteOwner);
+    }
 
     static AppLang applang;
 
@@ -69,7 +87,6 @@ int main(int argc, char *argv[])
     QObject::connect(&workerThread, &QThread::finished, sampler, &QObject::deleteLater);
 
     SysMon sysmon;
-    PowerModel power;
     ProcModel model;
     ProcProxy proxy;
     proxy.setSourceModel(&model);
@@ -80,8 +97,6 @@ int main(int argc, char *argv[])
 
     // First: rows are attributed against the frequencies of their own sample,
     // and the sampler emits the system snapshot before the process list.
-    model.setPowerModel(&power);
-    QObject::connect(sampler, &Sampler::systemSampled, &power, &PowerModel::onSystem);
     QObject::connect(sampler, &Sampler::systemSampled, &sysmon, &SysMon::onSystem);
     QObject::connect(sampler, &Sampler::systemSampled, &model, &ProcModel::onSystem);
     QObject::connect(sampler, &Sampler::processesSampled, &model, &ProcModel::onProcesses);
@@ -98,6 +113,16 @@ int main(int argc, char *argv[])
     };
     QObject::connect(&sysmon, &SysMon::foregroundChanged, &sysmon, updateProcSampling);
     QObject::connect(&recorder, &Recorder::stateChanged, &recorder, updateProcSampling);
+
+    // A pass over the thermal framework is 134 ms on the Jolla Phone (2026),
+    // because each zone read goes out to the part it measures. Only the
+    // overview shows them live, so it says when they are worth having.
+    auto updateThermalSampling = [&sysmon, sampler]() {
+        QMetaObject::invokeMethod(sampler, "setThermalEnabled", Qt::QueuedConnection,
+                                  Q_ARG(bool, sysmon.thermalWanted() && sysmon.foreground()));
+    };
+    QObject::connect(&sysmon, &SysMon::thermalWantedChanged, &sysmon, updateThermalSampling);
+    QObject::connect(&sysmon, &SysMon::foregroundChanged, &sysmon, updateThermalSampling);
 
     workerThread.start();
 
@@ -125,7 +150,6 @@ int main(int argc, char *argv[])
 
     view->rootContext()->setContextProperty(QStringLiteral("sysmon"), &sysmon);
     view->rootContext()->setContextProperty(QStringLiteral("procs"), &proxy);
-    view->rootContext()->setContextProperty(QStringLiteral("power"), &power);
     view->rootContext()->setContextProperty(QStringLiteral("recorder"), &recorder);
     view->rootContext()->setContextProperty(QStringLiteral("bt"), &bt);
     view->rootContext()->setContextProperty(QStringLiteral("netmon"), &netmon);
