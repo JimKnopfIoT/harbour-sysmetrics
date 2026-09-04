@@ -36,6 +36,7 @@ INCLUDEPATH += src/generated
 
 HEADERS += \
     src/applang.h \
+    src/source.h \
     src/sampler.h \
     src/sysmon.h \
     src/procmodel.h \
@@ -52,6 +53,7 @@ HEADERS += \
 
 SOURCES += \
     src/harbour-sysmetrics.cpp \
+    src/source.cpp \
     src/sampler.cpp \
     src/sysmon.cpp \
     src/procmodel.cpp \

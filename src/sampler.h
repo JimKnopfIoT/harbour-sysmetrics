@@ -8,6 +8,8 @@
 #include <QString>
 #include <QVector>
 
+#include "source.h"
+
 struct ProcSample {
     int pid = 0;
     int ppid = 0;
@@ -65,7 +67,7 @@ struct SysSnap {
     bool battHealthFromGauge = false;
     bool battHealthCatalogue = false;  // full == design: one profile figure, not a measurement
     int battCycles = -1;
-    double battChargeFull = 0, battChargeDesign = 0;  // µAh
+    double battChargeFull = 0, battChargeDesign = 0;  // mAh, 0 = unknown
     QString battStatus, battTech;
     QString battHealthReport;   // driver's own health string, if any
     QString battModel;
@@ -134,6 +136,12 @@ private:
     // zeroes while the cell is discharging is what proves the sensor absent.
     bool m_battCurrentSeen = false;
     int m_battZeroWhileDischarging = 0;
+
+    // Where this phone keeps each battery figure. Resolved on the first sample
+    // and remembered: the fallbacks cost one probe, not one per tick.
+    QString m_batDir;
+    Source m_srcCapacity, m_srcCurrent, m_srcVoltage, m_srcTemp;
+    Source m_srcFull, m_srcDesign, m_srcSoh, m_srcCycles;
     // Everything here is either needed for the next delta or is immutable for the
     // lifetime of the process and therefore worth not re-reading every tick.
     struct PrevProc {          // aggregate: always brace-initialised in full
