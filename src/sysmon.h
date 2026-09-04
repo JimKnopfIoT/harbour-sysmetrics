@@ -50,6 +50,13 @@ class SysMon : public QObject
     Q_PROPERTY(double battHealthExact READ battHealthExact NOTIFY updated)
     Q_PROPERTY(int battSohRegister READ battSohRegister NOTIFY updated)
     Q_PROPERTY(bool battHealthFromGauge READ battHealthFromGauge NOTIFY updated)
+    Q_PROPERTY(bool battHealthCatalogue READ battHealthCatalogue NOTIFY updated)
+    Q_PROPERTY(bool battCapacityDisputed READ battCapacityDisputed NOTIFY updated)
+    Q_PROPERTY(double battGaugeFullMah READ battGaugeFullMah NOTIFY updated)
+    Q_PROPERTY(double battFullMah READ battFullMah NOTIFY updated)
+    Q_PROPERTY(double battDesignMah READ battDesignMah NOTIFY updated)
+    Q_PROPERTY(bool battDesignFromMaker READ battDesignFromMaker NOTIFY updated)
+    Q_PROPERTY(double battChargeNowMah READ battChargeNowMah NOTIFY updated)
     Q_PROPERTY(int battCycles READ battCycles NOTIFY updated)
     Q_PROPERTY(double battChargeFull READ battChargeFull NOTIFY updated)
     Q_PROPERTY(double battChargeDesign READ battChargeDesign NOTIFY updated)
@@ -59,6 +66,7 @@ class SysMon : public QObject
     Q_PROPERTY(QString battQuality READ battQuality NOTIFY updated)
     Q_PROPERTY(QString battQualityBasis READ battQualityBasis NOTIFY updated)
     Q_PROPERTY(QString battStatus READ battStatus NOTIFY updated)
+    Q_PROPERTY(bool battCharging READ battCharging NOTIFY updated)
     Q_PROPERTY(QString kernel READ kernel NOTIFY updated)
     Q_PROPERTY(QVariantList cpuHistory READ cpuHistory NOTIFY updated)
     Q_PROPERTY(QVariantList memHistory READ memHistory NOTIFY updated)
@@ -128,6 +136,13 @@ public:
     double battHealthExact() const { return m_s.battHealthExact; }
     int battSohRegister() const { return m_s.battSohRegister; }
     bool battHealthFromGauge() const { return m_s.battHealthFromGauge; }
+    bool battHealthCatalogue() const { return m_s.battHealthCatalogue; }
+    bool battCapacityDisputed() const;
+    double battGaugeFullMah() const;
+    double battFullMah() const;
+    double battDesignMah() const;
+    bool battDesignFromMaker() const;
+    double battChargeNowMah() const;
     int battCycles() const { return m_s.battCycles; }
     double battChargeFull() const { return m_s.battChargeFull; }
     double battChargeDesign() const { return m_s.battChargeDesign; }
@@ -137,6 +152,11 @@ public:
     QString battQuality() const;
     QString battQualityBasis() const;
     QString battStatus() const { return m_s.battStatus; }
+    // "Cmd discharging" contains "charging": discharge decides first.
+    bool battCharging() const {
+        return !m_s.battStatus.contains(QLatin1String("discharg"), Qt::CaseInsensitive)
+                && m_s.battStatus.contains(QLatin1String("charg"), Qt::CaseInsensitive);
+    }
     QString kernel() const { return m_s.kernel; }
     QVariantList cpuHistory() const { return toList(m_cpuHist); }
     QVariantList memHistory() const { return toList(m_memHist); }
@@ -167,6 +187,8 @@ public:
     Q_INVOKABLE QVariantList deviceTreeParts(const QString &filter = QString()) const;
     Q_INVOKABLE QVariantMap socCatalogue() const;
     Q_INVOKABLE QVariantMap deviceCatalogue(const QString &part = QString()) const;
+    // Kernel enums are English words; these are shown to the reader.
+    Q_INVOKABLE QString psyWord(const QString &raw) const;
     Q_INVOKABLE QVariantList kernelModules() const;
     Q_INVOKABLE QVariantMap firmwareDetail(const QString &part = QString()) const;
     Q_INVOKABLE QVariantMap memoryDetail() const;
@@ -199,6 +221,7 @@ signals:
     void intervalRequested(int ms);
 
 private:
+    mutable double m_gaugeFullMah = -1;
     static QVariantList toList(const QVector<double> &v);
     static void push(QVector<double> &v, double value);
 

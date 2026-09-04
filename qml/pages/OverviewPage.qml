@@ -385,7 +385,7 @@ Page {
                 title: qsTr("Battery")
                 value: sysmon.battCapacity
                 unit: "%"
-                note: "·  " + sysmon.battStatus
+                note: "·  " + sysmon.psyWord(sysmon.battStatus)
                 accent: sysmon.battCapacity < 20 ? Diag.red : Diag.green
                 drilldown: true
                 onClicked: page.openDetail(HwInfo.batt())
@@ -398,7 +398,8 @@ Page {
                         fillColor: Qt.rgba(Diag.amber.r, Diag.amber.g, Diag.amber.b, 0.14)
                         gridColor: Diag.grid
                     }
-                    KeyValue { label: qsTr("Power draw"); value: sysmon.battPowerW.toFixed(2) + " W"
+                    KeyValue { label: sysmon.battCharging ? qsTr("Charging power") : qsTr("Power draw")
+                        value: sysmon.battPowerW.toFixed(2) + " W"
                         valueColor: Diag.amber }
                     KeyValue { label: qsTr("Current"); value: (sysmon.battCurrentA * 1000).toFixed(0) + " mA" }
                     KeyValue { label: qsTr("Voltage"); value: sysmon.battVoltageV.toFixed(3) + " V" }
@@ -420,11 +421,13 @@ Page {
                                   ? sysmon.battHealthExact.toFixed(1) : sysmon.battHealthPct) + " % "
                             + (sysmon.battHealthFromGauge ? qsTr("(gauge)") : qsTr("(full ÷ design)"))
                     }
-                    KeyValue { visible: sysmon.battChargeDesign > 0
-                        label: qsTr("Capacity"); value:
-                        (sysmon.battChargeFull / 1000).toFixed(0) + " / "
-                        + (sysmon.battChargeDesign / 1000).toFixed(0) + " mAh"
-                        + " (" + Math.round(100 * sysmon.battChargeFull / sysmon.battChargeDesign) + " %)" }
+                    // What is in the cell against what a full one holds --
+                    // both from whichever source survived the cross-check.
+                    KeyValue { visible: sysmon.battFullMah > 0
+                        label: qsTr("Capacity")
+                        value: sysmon.battChargeNowMah.toFixed(0) + " / "
+                            + sysmon.battFullMah.toFixed(0) + " mAh"
+                            + " (" + sysmon.battCapacity + " %)" }
                     KeyValue { visible: sysmon.battCycles >= 0
                         label: qsTr("Full cycles"); value: sysmon.battCycles
                         + " " + qsTr("(gauge, equiv. full cycles)") }
@@ -432,7 +435,7 @@ Page {
                         label: qsTr("Technology"); value: sysmon.battTech
                         + (sysmon.battModel.length ? " · " + sysmon.battModel : "") }
                     KeyValue { visible: sysmon.battHealthReport.length > 0
-                        label: qsTr("Driver health"); value: sysmon.battHealthReport }
+                        label: qsTr("Driver health"); value: sysmon.psyWord(sysmon.battHealthReport) }
                 }
             }
 
@@ -462,8 +465,12 @@ Page {
                 Column {
                     width: parent.width; spacing: Theme.paddingSmall / 2
                     Repeater {
+                        // Hottest first while the list is capped: the heading
+                        // names a maximum, and it has to be one of the rows.
                         model: page.thermalExpanded ? sysmon.thermalZones
-                                                    : sysmon.thermalZones.slice(0, page.listCap)
+                                                    : sysmon.thermalZones.slice(0).sort(
+                                                          function (a, b) { return b.temp - a.temp })
+                                                          .slice(0, page.listCap)
                         LoadBar {
                             width: parent.width
                             value: modelData.temp; maxValue: 90

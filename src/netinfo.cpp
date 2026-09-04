@@ -128,7 +128,9 @@ void parseInetInto(QVector<SockInfo> &list, const QString &file, const QString &
         const int st = f[3].toInt(nullptr, 16);
         const bool tcp = proto.startsWith(QLatin1String("tcp"));
         s.state = tcp ? tcpState(st) : (st == 7 ? QStringLiteral("UNCONN") : tcpState(st));
-        s.listening = tcp ? (st == 10) : (st == 7);
+        // UDP has no LISTEN. An unconnected socket on a well-known port does
+        // receive; one on an ephemeral port is a client and not a service.
+        s.listening = tcp ? (st == 10) : (st == 7 && s.localPort < 32768);
         const QList<QByteArray> q = f[4].split(':');
         if (q.size() == 2) {
             s.txq = q[0].toULongLong(nullptr, 16);

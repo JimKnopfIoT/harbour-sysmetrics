@@ -662,7 +662,7 @@ void Diagnostics::checkBtAdapters(QVariantList &out) const
             tr("%1 hci adapters and %2 of %3 BT rfkill switches blocked — known bluebinder artifact on hybris ports.")
                 .arg(adapters.size()).arg(btSoftBlocked).arg(btSwitches),
             det,
-            tr("The blocked twin is a leftover of the Android BT HAL bridge (bluebinder). Pairing works via the live adapter; apps that enumerate adapters may pick the dead one.")));
+            tr("A second adapter is typical of the Android BT HAL bridge (bluebinder) on hybris ports. Which of the two the Bluetooth stack manages is not visible from the rfkill switches -- a blocked switch on the managed adapter simply means Bluetooth is turned off. Apps that enumerate adapters themselves may pick the other one.")));
     } else if (btSoftBlocked == btSwitches && btSwitches > 0) {
         out.append(finding(QStringLiteral("bt-adapters"),
             tr("Bluetooth blocked"), 1,
@@ -692,13 +692,25 @@ void Diagnostics::checkWlanRadio(QVariantList &out) const
     QProcess iw;
     iw.start(QStringLiteral("iw"), QStringList() << QStringLiteral("reg") << QStringLiteral("get"));
     if (iw.waitForFinished(2000)) {
-        const QRegularExpressionMatch m = QRegularExpression(
-            QStringLiteral("country (\\w+):")).match(QString::fromUtf8(iw.readAllStandardOutput()));
-        if (m.hasMatch()) {
-            const QString cc = m.captured(1);
+        const QString regOut = QString::fromUtf8(iw.readAllStandardOutput());
+        QString cc;
+        bool fromPhy = false;
+        const int phyAt = regOut.indexOf(QStringLiteral("phy#"));
+        const QRegularExpression ccRe(QStringLiteral("country (\\w+):"));
+        if (phyAt >= 0) {
+            const QRegularExpressionMatch pm = ccRe.match(regOut, phyAt);
+            if (pm.hasMatch()) { cc = pm.captured(1); fromPhy = true; }
+        }
+        if (cc.isEmpty()) {
+            const QRegularExpressionMatch gm = ccRe.match(regOut);
+            if (gm.hasMatch())
+                cc = gm.captured(1);
+        }
+        if (!cc.isEmpty()) {
             const bool world = cc == QLatin1String("00") || cc == QLatin1String("98")
                             || cc == QLatin1String("99");
-            det.append(detail(tr("Regulatory domain"), cc,
+            det.append(detail(tr("Regulatory domain"),
+                              fromPhy ? cc : cc + QLatin1Char(' ') + tr("(global, the radio names none)"),
                               world ? QStringLiteral("bad") : QStringLiteral("ok")));
             if (world) {
                 level = qMax(level, 1);
@@ -734,13 +746,17 @@ void Diagnostics::checkWlanRadio(QVariantList &out) const
         }
         break;
     }
-    if (!fwRowAdded && QFileInfo::exists(QStringLiteral("/sys/kernel/debug/icnss")))
-        det.append(detail(tr("Firmware crashes"), tr("root mode shows the counter here")));
+    if (!fwRowAdded)
+        det.append(detail(tr("Firmware crashes"),
+                          QFileInfo::exists(QStringLiteral("/sys/kernel/debug/icnss"))
+                            ? tr("root mode shows the counter here")
+                            : tr("this driver keeps no counter this app can read")));
 
     if (det.isEmpty())
         return;
     if (verdict.isEmpty())
-        verdict = tr("Regulatory domain set, no firmware crashes recorded.");
+        verdict = fwRowAdded ? tr("Regulatory domain set, no firmware crashes recorded.")
+                             : tr("Regulatory domain set. No firmware crash counter on this driver.");
     out.append(finding(QStringLiteral("wlan-radio"),
         tr("WLAN radio"), level, verdict, det,
         level > 0 && verdict.contains(QLatin1String("5 GHz"))
@@ -759,7 +775,19 @@ void Diagnostics::checkMicGain(QVariantList &out) const
                               QStringLiteral("/vendor/lib/hw"),  QStringLiteral("/odm/lib/hw") }) {
         const QStringList libs = QDir(d).entryList(
             QStringList() << QStringLiteral("audio.primary.*.so"), QDir::Files);
-        if (!libs.isEmpty()) { hal = d + QLatin1Char('/') + libs.first(); break; }
+        if (libs.isEmpty())
+            continue;
+        const QString compat = readTrim(QStringLiteral("/proc/device-tree/compatible")).toLower();
+        QString pick;
+        for (const QString &l : libs) {
+            const QString mid = l.section(QLatin1Char('.'), 2, 2).toLower();
+            if (mid.isEmpty() || mid == QLatin1String("default"))
+                continue;
+            if (!compat.isEmpty() && compat.contains(mid)) { pick = l; break; }
+            if (pick.isEmpty()) pick = l;
+        }
+        hal = d + QLatin1Char('/') + (pick.isEmpty() ? libs.first() : pick);
+        break;
     }
     if (hal.isEmpty())
         return; // no Android audio HAL — not applicable

@@ -7,7 +7,7 @@
 %bcond_with ultimate
 Name:       harbour-sysmetrics
 Summary:    System diagnostics for Sailfish OS
-Version:    0.3.2
+Version:    0.3.3
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/JimKnopfIoT/harbour-sysmetrics
@@ -71,6 +71,75 @@ systemctl daemon-reload >/dev/null 2>&1 || :
 %{_datadir}/polkit-1/rules.d/50-harbour-sysmetrics.rules
 
 %changelog
+* Fri Sep 04 2026 harbour-sysmetrics contributors 0.3.3-1
+- Every figure on the battery, charger, network, storage and wake pages was
+  read back against three phones -- two MediaTek, one Qualcomm -- and compared
+  with the node it comes from. What follows is what disagreed.
+- A state of health is no longer reported where full and design capacity are
+  the same number. One phone ships both from the same device-tree entry, so
+  their ratio is 100 % by construction; the page showed a green "as new" built
+  on a division of a number by itself. It now says so, and prints the gauge's
+  own full-charge figure beside it where that disagrees.
+- The charger's input limit came from current_max, which on one charger is the
+  battery-side ceiling rather than the input's. input_current_limit decides
+  where it exists. Input voltages are refused unless they can be a voltage:
+  vendor nodes report millivolt where the class says microvolt, and a switched
+  off wireless input answered 1070 volt.
+- WLAN band and channel were wrong wherever iw prints frequencies with a
+  decimal point (since iw 6.x): the integer parse answered zero, and zero reads
+  as a valid 2.4 GHz channel. A 5 GHz link was labelled 2.4 GHz.
+- The WLAN chip vendor was read from the driver name, and a driver plainly
+  called "wlan" was attributed to Qualcomm on a MediaTek phone. The device
+  tree's compatible string decides now.
+- The regulatory-domain check read the global block of iw reg get instead of
+  the radio's own, and reported a country where the phy stood at 99/DFS-UNSET.
+- "What keeps the device awake" ranked sources by how long they were held,
+  under a heading that promised the time suspend was actually prevented. The
+  kernel counts both; the list now reads the second, takes it from
+  /sys/class/wakeup (world-readable, unlike debugfs) and drops the kernel's
+  aggregate row for deleted sources.
+- Storage counted device-mapper layers as separate devices, so the same writes
+  appeared up to three times. A filesystem mounted at several places is listed
+  once. Read-only system images are no longer painted red for being full.
+- Type-C roles printed the kernel's selection list verbatim, so "source [sink]"
+  read as source while the phone was the sink. The bracketed entry is the
+  active one, and it is the one shown.
+- USB-PD is now reported on chipsets without a pd_active node, from the port's
+  own contract state, and PPS is named where the driver distinguishes it.
+- Corrected in the glossary and the notes: the current's sign (it is negative
+  while discharging, not while charging), the CPU busy sum (nice was missing),
+  deep sleep (not every phone suspends to RAM), the charger ADC current (it is
+  the battery's, sign included), and an entry describing a per-process power
+  figure that 0.3.2 removed. New entries for design capacity and for QMAX.
+- Smaller: a missing cycle counter no longer counts as zero cycles and no
+  longer produces a verdict; UFS WriteBooster is read from the register that
+  carries it; the wear figure names its band instead of an approximate percent;
+  caches without a size are not listed; the hottest zone is among the zones the
+  overview shows; unconnected UDP client sockets are not counted as listening;
+  a Bluetooth node is not picked by the first two letters of its name.
+- The battery page now names three capacities and sources each one separately:
+  the design capacity from the driver where nothing contradicts it and from the
+  maker's figure where the driver's is demonstrably not this cell, the full
+  capacity from the driver or from the gauge's own register, and the current
+  capacity as the charge level applied to whichever full capacity holds. The
+  figure a driver is shown to have wrong is not displayed at all any more --
+  a note says what it reports and why it was dropped. On one phone that means
+  5450 and 5584 mAh in place of 3760 twice.
+- Rows that could only say "—" are gone: no design voltage, no capacity, no
+  identity line where the kernel publishes none. Where a phone exports no
+  capacity register at all, a note says so instead of leaving four blanks.
+- The words the kernel uses for a state are translated. "Good", "Charging",
+  "Fast" and eighteen more are defined by the power-supply class, so they are
+  ours to translate; what a vendor invented is left as it is.
+- The charge target voltage is read where it exists (constant_charge_voltage,
+  or the battery's voltage_max) and labelled as the charger's register rather
+  than the cell's: measured on one phone, 4.52 V programmed against 4.447 V at
+  the cell while 1.2 A flowed.
+- The eight per-band charge counters are gone. They were a Qualcomm register
+  printed as a row of numbers with nothing to do with them.
+- New in the glossary: design capacity and where it comes from, QMAX and why it
+  moves, the charge target, and an entry on what to expect from a phone this
+  app was never measured against.
 * Thu Sep 03 2026 harbour-sysmetrics contributors 0.3.2-1
 - The per-process milliamp figures are gone, and with them the section that
   carried them. Nothing in a phone meters a process. What 0.3.1 showed was a
