@@ -7,7 +7,7 @@
 %bcond_with ultimate
 Name:       harbour-sysmetrics
 Summary:    System diagnostics for Sailfish OS
-Version:    0.3.3
+Version:    0.3.4
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/JimKnopfIoT/harbour-sysmetrics
@@ -71,6 +71,28 @@ systemctl daemon-reload >/dev/null 2>&1 || :
 %{_datadir}/polkit-1/rules.d/50-harbour-sysmetrics.rules
 
 %changelog
+* Fri Sep 04 2026 harbour-sysmetrics contributors 0.3.4-1
+- The three cameras of a MediaTek phone are recognised. The sensor names were
+  only ever read from the vendor modules Qualcomm ships, so on the other stack
+  the list stayed empty and the section still called itself CAMSS. The driver
+  names them in procfs instead -- with the frame it grabs, which is not the
+  sensor's pixel count and says so. The calibration EEPROMs and the processing
+  engines are counted from their device nodes, where a V4L2-only count reported
+  zero of each.
+- Qt and QML warnings are written to a log file (~/.cache, truncated at each
+  start, capped). On this platform a broken binding leaves an empty row and
+  says nothing anywhere -- the file is the only place it becomes visible. A
+  healthy run writes one line: that the log was opened.
+- Internally, every figure now goes through one list of candidate sources --
+  path, unit and the window the result has to fall into -- and the first that
+  answers is remembered. "Nothing answered" is a state of its own now, so a
+  missing register is no longer a zero: a gauge that counts no cycles no longer
+  produces a verdict built on zero of them.
+- The battery capacities had two readers, the sampler and the detail page, each
+  finding them on its own. Two paths to one number is how a page ends up
+  contradicting itself; there is one reader now.
+- The charge target voltage is found on Qualcomm too (voltage_max), and the
+  input voltage on the older MediaTek phone, which keeps it on the battery node.
 * Fri Sep 04 2026 harbour-sysmetrics contributors 0.3.3-1
 - Every figure on the battery, charger, network, storage and wake pages was
   read back against three phones -- two MediaTek, one Qualcomm -- and compared

@@ -22,6 +22,7 @@
 #include <QtDBus/QDBusObjectPath>
 
 #include "rootclient.h"
+#include "source.h"
 
 #include <signal.h>
 #include <sys/resource.h>
@@ -675,20 +676,6 @@ static QString readTrim(const QString &p)
     return QString::fromLatin1(QByteArray(buf, total).trimmed());
 }
 
-// The power-supply class says microvolt; several MediaTek charger nodes write
-// millivolt. The window decides which was meant, and refuses rather than guesses.
-static double supplyVolts(const QString &p)
-{
-    const double raw = readTrim(p).toDouble();
-    if (raw == 0)
-        return 0;
-    if (raw / 1e6 >= 3.0 && raw / 1e6 <= 30.0)
-        return raw / 1e6;
-    if (raw / 1e3 >= 3.0 && raw / 1e3 <= 30.0)
-        return raw / 1e3;
-    return 0;
-}
-
 static QString hwDevice();
 
 // What the maker states for the cell of this phone, in mAh, where this app
@@ -756,7 +743,8 @@ QVariantMap SysMon::batteryHardware() const
     m.insert(QStringLiteral("serial"), readTrim(b + QStringLiteral("serial_number")));
     m.insert(QStringLiteral("technology"), readTrim(b + QStringLiteral("technology")));
     m.insert(QStringLiteral("health"), readTrim(b + QStringLiteral("health")));
-    m.insert(QStringLiteral("cycles"), readTrim(b + QStringLiteral("cycle_count")));
+    if (m_s.battCycles >= 0)
+        m.insert(QStringLiteral("cycles"), m_s.battCycles);
 
     // Qualcomm's gauge keeps far more than the one cycle figure it advertises.
     // These live under bms/ next to the battery node; every one of them is
@@ -806,25 +794,21 @@ QVariantMap SysMon::batteryHardware() const
         if (!prof.isEmpty())
             m.insert(QStringLiteral("profileId"), prof);
     }
-    double designUah = readTrim(b + QStringLiteral("charge_full_design")).toDouble();
-    double fullUah = readTrim(b + QStringLiteral("charge_full")).toDouble();
-    QString capUnit = QStringLiteral("mAh");
-    if (designUah <= 0) { // energy-reporting gauge (µWh)
-        designUah = readTrim(b + QStringLiteral("energy_full_design")).toDouble();
-        fullUah = readTrim(b + QStringLiteral("energy_full")).toDouble();
-        capUnit = QStringLiteral("mWh");
-    }
-    m.insert(QStringLiteral("designCapacity"), designUah / 1000.0);
-    m.insert(QStringLiteral("fullCapacity"), fullUah / 1000.0);
-    m.insert(QStringLiteral("capacityUnit"), capUnit);
-    m.insert(QStringLiteral("voltageDesign"),
-             readTrim(b + QStringLiteral("voltage_max_design")).toDouble() / 1e6);
+    // The capacities come from the sampler, which resolved once where this
+    // phone keeps them. Reading them again here would be a second path to the
+    // same number, and two paths are how a page ends up contradicting itself.
+    m.insert(QStringLiteral("designCapacity"), m_s.battChargeDesign);
+    m.insert(QStringLiteral("fullCapacity"), m_s.battChargeFull);
+
+    Source designV;
+    designV.add(b + QStringLiteral("voltage_max_design"), 1e-6, 3.0, 6.0);
+    m.insert(QStringLiteral("voltageDesign"), designV.value(0));
     // What the charger actually charges this cell to. Not the design voltage,
     // and on gauges that publish no design voltage it is the only one there is.
-    double cv = supplyVolts(b + QStringLiteral("constant_charge_voltage"));
-    if (cv <= 0)
-        cv = supplyVolts(b + QStringLiteral("voltage_max"));
-    m.insert(QStringLiteral("chargeTargetVolt"), cv);
+    Source target;
+    target.add(b + QStringLiteral("constant_charge_voltage"), 1e-6, 3.0, 6.0)
+          .add(b + QStringLiteral("voltage_max"), 1e-6, 3.0, 6.0);
+    m.insert(QStringLiteral("chargeTargetVolt"), target.value(0));
     m.insert(QStringLiteral("chargeType"), readTrim(b + QStringLiteral("charge_type")));
 
     // A second opinion on the pack. A gauge beside the battery node keeps its
@@ -833,7 +817,6 @@ QVariantMap SysMon::batteryHardware() const
     // unit of that node is a vendor decision (µAh here, 0.1 mAh there), so only
     // a reading that can be a phone battery at all is accepted, and it is shown
     // beside the class figure rather than replacing it.
-    const double designMah = designUah / 1000.0;
     QString gaugeFrom;
     const double gaugeMah = gaugeFullChargeMah(psy, b, &gaugeFrom);
     if (gaugeMah > 0) {
@@ -985,41 +968,45 @@ static void pdSourceCaps(QVariantMap &m)
 
 // One reading of wakeup_sources, unranked: two pages ask it different
 // questions. The header decides the columns -- their order has changed.
-QVariantList SysMon::readWakeupSources()
+// The sysfs class: same counters as debugfs, world-readable, and it carries
+// the one debugfs has no column name for -- how long suspend was prevented.
+static QVariantList wakeupFromClass()
 {
     QVariantList out;
-    // The sysfs class carries the same counters world-readable, plus the one
-    // debugfs' table lacks a name for here: how long suspend was actually
-    // prevented. Preferred; debugfs stays the fallback for older kernels.
     const QDir wcls(QStringLiteral("/sys/class/wakeup"));
-    if (wcls.exists()) {
-        for (const QString &e : wcls.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-            const QString d = wcls.filePath(e) + QLatin1Char('/');
-            const QString name = readTrim(d + QStringLiteral("name"));
-            if (name.isEmpty() || name == QLatin1String("deleted"))
-                continue;   // the kernel's aggregate of destroyed sources
-            QVariantMap w;
-            w.insert(QStringLiteral("name"), name);
-            w.insert(QStringLiteral("count"), readTrim(d + QStringLiteral("wakeup_count")).toDouble());
-            w.insert(QStringLiteral("activeCount"), readTrim(d + QStringLiteral("active_count")).toDouble());
-            w.insert(QStringLiteral("heldSec"), readTrim(d + QStringLiteral("total_time_ms")).toDouble() / 1000.0);
-            w.insert(QStringLiteral("longestSec"), readTrim(d + QStringLiteral("max_time_ms")).toDouble() / 1000.0);
-            w.insert(QStringLiteral("preventSec"),
-                     readTrim(d + QStringLiteral("prevent_suspend_time_ms")).toDouble() / 1000.0);
-            out.append(w);
-        }
-        if (!out.isEmpty())
-            return out;
+    if (!wcls.exists())
+        return out;
+    for (const QString &e : wcls.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        const QString d = wcls.filePath(e) + QLatin1Char('/');
+        const QString name = readTrim(d + QStringLiteral("name"));
+        if (name.isEmpty() || name == QLatin1String("deleted"))
+            continue;   // the kernel's aggregate of destroyed sources
+        QVariantMap w;
+        w.insert(QStringLiteral("name"), name);
+        w.insert(QStringLiteral("count"), readTrim(d + QStringLiteral("wakeup_count")).toDouble());
+        w.insert(QStringLiteral("activeCount"), readTrim(d + QStringLiteral("active_count")).toDouble());
+        w.insert(QStringLiteral("heldSec"), readTrim(d + QStringLiteral("total_time_ms")).toDouble() / 1000.0);
+        w.insert(QStringLiteral("longestSec"), readTrim(d + QStringLiteral("max_time_ms")).toDouble() / 1000.0);
+        w.insert(QStringLiteral("preventSec"),
+                 readTrim(d + QStringLiteral("prevent_suspend_time_ms")).toDouble() / 1000.0);
+        out.append(w);
     }
+    return out;
+}
 
-    // debugfs is 0700 though the file is not, so: unprivileged read, then the
-    // root helper, and where neither answers the section does not appear.
+// The debugfs table, for kernels without that class. debugfs is 0700 though
+// the file is not, so: unprivileged read first, then the root helper.
+// The header decides the columns -- their order has changed between kernels.
+static QVariantList wakeupFromDebugfs()
+{
+    QVariantList out;
+    const QString path = QStringLiteral("/sys/kernel/debug/wakeup_sources");
     QByteArray raw;
-    QFile ws(QStringLiteral("/sys/kernel/debug/wakeup_sources"));
+    QFile ws(path);
     if (ws.open(QIODevice::ReadOnly))
         raw = ws.readAll();
     if (raw.isEmpty() && RootClient::instance()->active())
-        raw = RootClient::instance()->readFile(QStringLiteral("/sys/kernel/debug/wakeup_sources"));
+        raw = RootClient::instance()->readFile(path);
     if (raw.isEmpty())
         return out;
 
@@ -1043,6 +1030,8 @@ QVariantList SysMon::readWakeupSources()
         QByteArray nameBytes = f.value(0);
         for (int e = 1; e <= extra; ++e)
             nameBytes += ' ' + f.value(e);
+        if (nameBytes == "deleted")
+            continue;
         const auto col = [&](int c) -> qulonglong {
             return c < 0 ? 0 : f.value(c + extra).toULongLong();
         };
@@ -1054,11 +1043,16 @@ QVariantList SysMon::readWakeupSources()
         w.insert(QStringLiteral("longestSec"), col(cMax) / 1000.0);
         if (cPrev >= 0)
             w.insert(QStringLiteral("preventSec"), col(cPrev) / 1000.0);
-        if (w.value(QStringLiteral("name")).toString() == QLatin1String("deleted"))
-            continue;   // the kernel's aggregate of destroyed sources
         out.append(w);
     }
     return out;
+}
+
+// One reading, unranked: two pages ask it different questions.
+QVariantList SysMon::readWakeupSources()
+{
+    const QVariantList fromClass = wakeupFromClass();
+    return fromClass.isEmpty() ? wakeupFromDebugfs() : fromClass;
 }
 
 // Ranked by how long each source held the system awake. Unlike the attributed
@@ -1136,17 +1130,27 @@ QVariantMap SysMon::chargerDetail() const
     m.insert(QStringLiteral("source"), src);
     m.insert(QStringLiteral("typeRaw"), type);
     m.insert(QStringLiteral("protocol"), chargerProtocol(type));
-    double inV = supplyVolts(b + QStringLiteral("voltage_now"));
-    if (inV <= 0)   // older MediaTek keeps it on the battery node, in millivolt
-        inV = supplyVolts(QStringLiteral("/sys/class/power_supply/battery/ChargerVoltage"));
-    m.insert(QStringLiteral("inputVoltage"), inV);
-    m.insert(QStringLiteral("inputVoltageMax"), supplyVolts(b + QStringLiteral("voltage_max")));
+    Source inputV;
+    inputV.add(b + QStringLiteral("voltage_now"), 1e-6, 3.0, 30.0)   // class: µV
+          .add(b + QStringLiteral("voltage_now"), 1e-3, 3.0, 30.0)   // vendor: mV
+          .add(QStringLiteral("/sys/devices/platform/charger/ADC_Charger_Voltage"),
+               1e-3, 3.0, 30.0)                                      // MediaTek ADC
+          .add(QStringLiteral("/sys/class/power_supply/battery/ChargerVoltage"),
+               1e-3, 3.0, 30.0);                                     // legacy MediaTek
+    m.insert(QStringLiteral("inputVoltage"), inputV.value(0));
+    m.insert(QStringLiteral("inputVoltageFrom"), inputV.from());
+
+    Source inputVMax;
+    inputVMax.add(b + QStringLiteral("voltage_max"), 1e-6, 3.0, 30.0)
+             .add(b + QStringLiteral("voltage_max"), 1e-3, 3.0, 30.0);
+    m.insert(QStringLiteral("inputVoltageMax"), inputVMax.value(0));
+
     // current_max is the input limit on Qualcomm; on the MediaTek charger it
     // mirrors the battery-side ICC. Where input_current_limit exists it decides.
-    const QString icl = readTrim(b + QStringLiteral("input_current_limit"));
-    m.insert(QStringLiteral("inputCurrentMax"),
-             (icl.toDouble() > 0 ? icl.toDouble()
-                                 : readTrim(b + QStringLiteral("current_max")).toDouble()) / 1e6);
+    Source inputIMax;
+    inputIMax.add(b + QStringLiteral("input_current_limit"), 1e-6, 0.05, 10.0)
+             .add(b + QStringLiteral("current_max"), 1e-6, 0.05, 10.0);
+    m.insert(QStringLiteral("inputCurrentMax"), inputIMax.value(0));
     const QString pd = readTrim(b + QStringLiteral("pd_active"));
     if (!pd.isEmpty()) {
         m.insert(QStringLiteral("pdActive"), pd.toInt() > 0);
@@ -1333,8 +1337,9 @@ QVariantMap SysMon::chargingPath() const
         m.insert(QStringLiteral("scEnd"), readTrim(mtk + QStringLiteral("sc_etime")));
         m.insert(QStringLiteral("fastChargeIndicator"), readTrim(mtk + QStringLiteral("fast_chg_indicator")));
         m.insert(QStringLiteral("safetyTimer"), readTrim(QStringLiteral("/proc/mtk_battery_cmd/en_safety_timer")));
-        m.insert(QStringLiteral("setCvVolt"),
-                 supplyVolts(QStringLiteral("/proc/mtk_battery_cmd/set_cv")));
+        Source setCv;
+        setCv.add(QStringLiteral("/proc/mtk_battery_cmd/set_cv"), 1e-6, 3.0, 6.0);
+        m.insert(QStringLiteral("setCvVolt"), setCv.value(0));
     }
 
     // Which charging protocols this kernel implements at all. PD, PPS, Pump
@@ -3472,12 +3477,13 @@ QVariantMap SysMon::usbDetail() const
     return out;
 }
 
-QVariantMap SysMon::cameraDetail() const
+// What the kernel registered in the V4L2 class: capture nodes and sub-devices,
+// counted by what their names say they are. Qualcomm registers its sensors,
+// EEPROMs and flash units here; MediaTek registers only the flash.
+static void collectV4l2(QVariantList &captureNodes, QVariantList &subdevs,
+                        int &sensors, int &eeproms, int &flashes,
+                        bool &isp, bool &cpas)
 {
-    QVariantMap m;
-    QVariantList captureNodes, subdevs;
-    int sensors = 0, eeproms = 0, flashes = 0;
-    bool isp = false, cpas = false;
     const QDir d(QStringLiteral("/sys/class/video4linux"));
     QStringList entries = d.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
     entries.sort();
@@ -3489,62 +3495,137 @@ QVariantMap SysMon::cameraDetail() const
             n.insert(QStringLiteral("node"), QStringLiteral("/dev/") + e);
             n.insert(QStringLiteral("label"), name);
             captureNodes.append(n);
-        } else {
-            const QString ln = name.toLower();
-            if (ln.contains(QLatin1String("sensor"))) ++sensors;
-            else if (ln.contains(QLatin1String("eeprom"))) ++eeproms;
-            else if (ln.contains(QLatin1String("flash")) || ln.contains(QLatin1String("led"))) ++flashes;
-            else if (ln.contains(QLatin1String("isp"))) isp = true;
-            else if (ln.contains(QLatin1String("cpas"))) cpas = true;
-            QVariantMap sd;
-            sd.insert(QStringLiteral("name"), e);
-            sd.insert(QStringLiteral("label"), name);
-            subdevs.append(sd);
+            continue;
         }
+        const QString ln = name.toLower();
+        if (ln.contains(QLatin1String("sensor"))) ++sensors;
+        else if (ln.contains(QLatin1String("eeprom"))) ++eeproms;
+        else if (ln.contains(QLatin1String("flash")) || ln.contains(QLatin1String("led"))) ++flashes;
+        else if (ln.contains(QLatin1String("isp"))) isp = true;
+        else if (ln.contains(QLatin1String("cpas"))) cpas = true;
+        QVariantMap sd;
+        sd.insert(QStringLiteral("name"), e);
+        sd.insert(QStringLiteral("label"), name);
+        subdevs.append(sd);
     }
-    // sensor models from vendor camera modules (CAMX exposes no V4L2 caps)
+}
+
+// Qualcomm: the part numbers are in the vendor camera modules, because CAMX
+// exposes no V4L2 capabilities. "…sensormodule.imx766_wide.bin".
+static QVariantList collectQualcommSensors()
+{
     QVariantList cameras;
-    QStringList seenCam;
-    const QStringList camDirs = {
+    QStringList seen;
+    const QStringList dirs = {
         QStringLiteral("/vendor/lib64/camera"), QStringLiteral("/vendor/lib/camera"),
         QStringLiteral("/odm/lib64/camera"),    QStringLiteral("/odm/lib/camera") };
-    for (const QString &cd : camDirs) {
+    for (const QString &cd : dirs) {
         QDir dir(cd);
-        if (!dir.exists()) continue;
-        const QStringList mods = dir.entryList(QStringList() << QStringLiteral("*sensormodule*.bin"), QDir::Files);
+        if (!dir.exists())
+            continue;
+        const QStringList mods = dir.entryList(
+            QStringList() << QStringLiteral("*sensormodule*.bin"), QDir::Files);
         for (const QString &f : mods) {
             const int a = f.indexOf(QLatin1String("sensormodule."));
-            if (a < 0) continue;
+            if (a < 0)
+                continue;
             QString tag = f.mid(a + 13);
-            if (tag.endsWith(QLatin1String(".bin"))) tag.chop(4);
+            if (tag.endsWith(QLatin1String(".bin")))
+                tag.chop(4);
             const int us = tag.indexOf(QLatin1Char('_'));
             const QString model = us < 0 ? tag : tag.left(us);
             const QString role  = us < 0 ? QString() : tag.mid(us + 1);
             const QString key = model + QLatin1Char('/') + role;
-            if (seenCam.contains(key)) continue;
-            seenCam.append(key);
-            QString maker;
-            if (model.startsWith(QLatin1String("imx"))) maker = QStringLiteral("Sony");
-            else if (model.startsWith(QLatin1String("ov"))) maker = QStringLiteral("OmniVision");
-            else if (model.startsWith(QLatin1String("s5k"))) maker = QStringLiteral("Samsung");
-            else if (model.startsWith(QLatin1String("hi"))) maker = QStringLiteral("SK Hynix");
-            else if (model.startsWith(QLatin1String("gc"))) maker = QStringLiteral("GalaxyCore");
+            if (seen.contains(key))
+                continue;
+            seen.append(key);
             QVariantMap c;
             c.insert(QStringLiteral("model"), model);
-            c.insert(QStringLiteral("maker"), maker);
-            c.insert(QStringLiteral("role"),  role);
+            if (!role.isEmpty())
+                c.insert(QStringLiteral("role"), role);
             cameras.append(c);
         }
     }
-    // camera stack platform: Qualcomm CAMSS/camx vs MediaTek imgsensor/mtkcam
-    QString camPlatform;
+    return cameras;
+}
+
+// MediaTek: the driver names its sensors in procfs, one block each --
+// "CAM[0]:imx766_mipi_raw;" followed by the frame it grabs per mode.
+static QVariantList collectMediatekSensors()
+{
+    QVariantList cameras;
+    const QString info = readTrim(QStringLiteral("/proc/driver/camera_info"));
+    QString pending;
+    for (const QString &ln : info.split(QLatin1Char('\n'))) {
+        const QString l = ln.trimmed();
+        if (l.startsWith(QLatin1String("CAM[")) && l.contains(QLatin1Char(':'))) {
+            pending = l.section(QLatin1Char(':'), 1).section(QLatin1Char(';'), 0, 0).trimmed();
+            if (pending.endsWith(QLatin1String("_mipi_raw")))
+                pending.chop(9);
+        } else if (!pending.isEmpty() && l.startsWith(QLatin1String("Cap:"))) {
+            const QStringList n = l.section(QLatin1Char('='), 1).split(QLatin1Char(','));
+            const int w = n.value(0).trimmed().toInt();
+            const int h = n.value(1).trimmed().toInt();
+            QVariantMap c;
+            c.insert(QStringLiteral("model"), pending);
+            if (w > 0 && h > 0) {
+                c.insert(QStringLiteral("width"), w);
+                c.insert(QStringLiteral("height"), h);
+            }
+            cameras.append(c);
+            pending.clear();
+        }
+    }
+    return cameras;
+}
+
+// The same stack keeps its EEPROMs and processing engines as plain character
+// devices, so counting the V4L2 class alone reported zero of each.
+static void collectMediatekNodes(int &eeproms, bool &isp, QStringList &engines)
+{
+    const QDir dev(QStringLiteral("/dev"));
+    if (eeproms == 0)
+        eeproms = dev.entryList(QStringList() << QStringLiteral("camera_eeprom*"),
+                                QDir::System | QDir::Files).size();
+    if (!isp)
+        isp = QFileInfo::exists(QStringLiteral("/dev/camera-isp"));
+    engines = dev.entryList(QStringList() << QStringLiteral("camera-*"),
+                            QDir::System | QDir::Files);
+    engines.sort();
+}
+
+QVariantMap SysMon::cameraDetail() const
+{
+    QVariantMap m;
+    QVariantList captureNodes, subdevs;
+    int sensors = 0, eeproms = 0, flashes = 0;
+    bool isp = false, cpas = false;
+    collectV4l2(captureNodes, subdevs, sensors, eeproms, flashes, isp, cpas);
+
+    // Which stack this phone runs decides where the sensors are named at all.
     const bool mtkCam = QFileInfo::exists(QStringLiteral("/proc/driver/camsensor"))
                      || QFileInfo::exists(QStringLiteral("/sys/bus/platform/drivers/seninf"))
                      || !QDir(QStringLiteral("/sys/module"))
                              .entryList(QStringList() << QStringLiteral("imgsensor*"), QDir::Dirs).isEmpty();
-    if (mtkCam) camPlatform = QStringLiteral("mediatek");
-    else if (cpas) camPlatform = QStringLiteral("qualcomm");
-    m.insert(QStringLiteral("platform"), camPlatform);
+
+    QVariantList cameras = collectQualcommSensors();
+    if (cameras.isEmpty() && mtkCam)
+        cameras = collectMediatekSensors();
+
+    if (mtkCam) {
+        QStringList engines;
+        collectMediatekNodes(eeproms, isp, engines);
+        if (sensors == 0)
+            sensors = cameras.size();
+        if (!engines.isEmpty())
+            m.insert(QStringLiteral("engines"), engines);
+        m.insert(QStringLiteral("platform"), QStringLiteral("mediatek"));
+    } else if (cpas) {
+        m.insert(QStringLiteral("platform"), QStringLiteral("qualcomm"));
+    } else {
+        m.insert(QStringLiteral("platform"), QString());
+    }
+
     m.insert(QStringLiteral("cameras"), cameras);
     m.insert(QStringLiteral("captureNodes"), captureNodes);
     m.insert(QStringLiteral("subdevs"), subdevs);
@@ -4065,7 +4146,7 @@ double SysMon::battGaugeFullMah() const
 double SysMon::battFullMah() const
 {
     const double gauge = battGaugeFullMah();
-    const double driver = m_s.battChargeFull / 1000.0;
+    const double driver = m_s.battChargeFull;
     return battCapacityDisputed() ? gauge : (driver > 0 ? driver : gauge);
 }
 
@@ -4074,7 +4155,7 @@ double SysMon::battFullMah() const
 // only stand-in, and it is labelled as such wherever it is displayed.
 double SysMon::battDesignMah() const
 {
-    const double driver = m_s.battChargeDesign / 1000.0;
+    const double driver = m_s.battChargeDesign;
     if (driver > 0 && !battCapacityDisputed())
         return driver;
     return ratedCapacityMah();
@@ -4082,7 +4163,7 @@ double SysMon::battDesignMah() const
 
 bool SysMon::battDesignFromMaker() const
 {
-    const double driver = m_s.battChargeDesign / 1000.0;
+    const double driver = m_s.battChargeDesign;
     return (driver <= 0 || battCapacityDisputed()) && ratedCapacityMah() > 0;
 }
 
@@ -4098,7 +4179,7 @@ bool SysMon::battCapacityDisputed() const
 {
     // Not cached: the sampler fills the design capacity after the first
     // binding has already asked, and a cached "no" would then stand for good.
-    const double design = m_s.battChargeDesign / 1000.0;
+    const double design = m_s.battChargeDesign;
     const double gauge = battGaugeFullMah();
     return design > 0 && gauge > 0 && qAbs(gauge - design) > 0.15 * design;
 }

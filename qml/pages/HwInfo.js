@@ -1183,7 +1183,9 @@ function batt() {
 
     // Charge cycles: the headline figure is a mean, and the bands it averages
     // say more than it does.
-    var crows2 = [ row(qsTr("Equivalent full cycles"), h.cycles) ]
+    var crows2 = []
+    if (h.cycles !== undefined)
+        crows2.push(row(qsTr("Equivalent full cycles"), h.cycles))
     if (h.ageLevel !== undefined)
         crows2.push(row(qsTr("Ageing profile"), qsTr("step %1").arg(h.ageLevel)))
     if (h.esrMilliOhm)
@@ -1505,21 +1507,33 @@ function camera() {
         for (var i = 0; i < cams.length; ++i) {
             var c = cams[i]
             var label = c.maker ? (c.maker + " " + c.model.toUpperCase()) : c.model.toUpperCase()
+            if (c.width && c.height)
+                label += "  ·  " + c.width + "×" + c.height
             crows.push(row(c.role ? roleName(c.role) : qsTr("Camera %1").arg(i + 1), label, {mono:true}))
         }
         s.push({ title: qsTr("Image sensors"),
-            note: qsTr("Recovered from the vendor camera modules (sensormodule/*.bin) — the actual sensor part numbers behind the HAL."),
+            note: d.platform === "mediatek"
+                ? qsTr("Read from the driver's own procfs node, which names each sensor and the frame it grabs in capture mode. That size is what the driver configures, not the sensor's full pixel count — a sensor sold as 50 MP commonly grabs a quarter of that, four pixels combined into one. Which camera is which is not in there: the numbering is the driver's order, not front and back.")
+                : qsTr("Recovered from the vendor camera modules (sensormodule/*.bin) — the actual sensor part numbers behind the HAL."),
             rows: crows })
     }
 
-    s.push({ title: qsTr("Camera subsystem (CAMSS)"),
-        note: qsTr("The cameras run behind the Android camera HAL (camx). The kernel exposes only the CAMSS infrastructure — these counts are real."),
+    s.push({ title: d.platform === "mediatek" ? qsTr("Camera subsystem (imgsensor)")
+                                             : qsTr("Camera subsystem (CAMSS)"),
+        note: d.platform === "mediatek"
+            ? qsTr("The cameras run behind the Android camera HAL. The kernel exposes the imgsensor infrastructure and its processing nodes — these counts are real, and they count what the kernel registered, not what a lens cover hides.")
+            : qsTr("The cameras run behind the Android camera HAL (camx). The kernel exposes only the CAMSS infrastructure — these counts are real."),
         rows: [
             row(qsTr("Image sensors"), d.sensors),
             row(qsTr("Calibration EEPROMs"), d.eeproms),
             row(qsTr("Flash units"), d.flashes),
             row(qsTr("ISP"), d.isp ? qsTr("present") : qsTr("no")),
-            row(qsTr("CAMSS sub-devices"), (d.subdevs || []).length)
+            row(d.platform === "mediatek" ? qsTr("Processing engines")
+                                          : qsTr("CAMSS sub-devices"),
+                d.platform === "mediatek" ? (d.engines || []).length
+                                          : (d.subdevs || []).length,
+                { right: d.platform === "mediatek" && d.engines
+                         ? d.engines.join(" ").replace(/camera-/g, "") : "" })
         ]})
 
     s.push({ title: qsTr("Sensor characteristics"),

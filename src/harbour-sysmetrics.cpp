@@ -28,8 +28,12 @@
 #include "sampler.h"
 #include "sysmon.h"
 
+#include <QDateTime>
+#include <QDir>
 #include <QFile>
 #include <QSettings>
+#include <QStandardPaths>
+#include <QTextStream>
 
 #include <cstring>
 #include <sys/stat.h>
@@ -49,6 +53,47 @@ public:
     bool isEmpty() const override { return false; }
 };
 
+// QML failures are invisible on this platform: a broken binding leaves an
+// empty row, the app writes to a channel the journal does not carry, and
+// nothing says a page did not load. So every warning goes to a file the user
+// (and this app's own error page) can read. Truncated at each start, capped,
+// warnings and worse only -- a healthy run writes nothing at all.
+static QFile *g_msgFile = nullptr;
+
+static void messageToFile(QtMsgType type, const QMessageLogContext &ctx, const QString &msg)
+{
+    static const char *level[] = { "debug", "warning", "critical", "fatal", "info" };
+    if (type != QtWarningMsg && type != QtCriticalMsg && type != QtFatalMsg)
+        return;
+    if (!g_msgFile || g_msgFile->size() > 200000)
+        return;
+    QTextStream out(g_msgFile);
+    out << QDateTime::currentDateTime().toString(QStringLiteral("HH:mm:ss")) << "  "
+        << level[type <= QtInfoMsg ? type : 0] << "  " << msg;
+    if (ctx.file)
+        out << "   [" << ctx.file << ':' << ctx.line << ']';
+    out << '\n';
+    out.flush();
+}
+
+static void startMessageLog()
+{
+    const QString dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    if (dir.isEmpty() || !QDir().mkpath(dir))
+        return;
+    g_msgFile = new QFile(dir + QStringLiteral("/qml-warnings.log"));
+    if (!g_msgFile->open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+        delete g_msgFile;
+        g_msgFile = nullptr;
+        return;
+    }
+    QTextStream head(g_msgFile);
+    head << QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
+         << "  started  " << SYSMETRICS_VERSION_STRING << '\n';
+    head.flush();
+    qInstallMessageHandler(messageToFile);
+}
+
 int main(int argc, char *argv[])
 {
     for (int i = 1; i < argc; ++i)
@@ -62,6 +107,7 @@ int main(int argc, char *argv[])
     ::umask(0077);
 
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
+    startMessageLog();
 
     // A file from an earlier version keeps the mode it was created with, so
     // tighten it once rather than leaving old installs open.

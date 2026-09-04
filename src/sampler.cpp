@@ -454,99 +454,84 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
     }
 
     // battery: prefer "battery", else first type=Battery supply
-    QString bat;
-    const QDir psy(QStringLiteral("/sys/class/power_supply"));
-    if (psy.exists(QStringLiteral("battery")))
-        bat = psy.filePath(QStringLiteral("battery"));
-    else
-        for (const QString &e : psy.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
-            if (readAll(psy.filePath(e) + QStringLiteral("/type")).trimmed() == "Battery") {
-                bat = psy.filePath(e);
-                break;
-            }
+    // Every figure below is looked up through a list of candidates: the class
+    // name first, the vendor spellings after it, each with the unit it is in
+    // and the window it has to fall into. Nothing answering means unknown --
+    // never zero.
+    if (m_batDir.isEmpty()) {
+        const QDir psy(QStringLiteral("/sys/class/power_supply"));
+        if (psy.exists(QStringLiteral("battery")))
+            m_batDir = psy.filePath(QStringLiteral("battery"));
+        else
+            for (const QString &e : psy.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
+                if (readNode(psy.filePath(e) + QStringLiteral("/type")) == "Battery") {
+                    m_batDir = psy.filePath(e);
+                    break;
+                }
+        if (!m_batDir.isEmpty()) {
+            const QString b = m_batDir;
+            m_srcCapacity.add(b, "capacity", 1.0, 0, 100);
+            m_srcCurrent.add(b, "current_now", 1e-6, -25, 25)          // A
+                        .add(b, "BatteryAverageCurrent", 1e-3, -25, 25);
+            m_srcVoltage.add(b, "voltage_now", 1e-6, 1.0, 6.0)         // V
+                        .add(b, "batt_vol", 1e-3, 1.0, 6.0)
+                        .add(b, "BatterySenseVoltage", 1e-3, 1.0, 6.0);
+            m_srcTemp.add(b, "temp", 0.1, -40, 150)                    // °C
+                     .add(b, "batt_temp", 0.1, -40, 150);
+            m_srcFull.add(b, "charge_full", 1e-3, 500, 20000);         // mAh
+            m_srcDesign.add(b, "charge_full_design", 1e-3, 500, 20000);
+            m_srcSoh.add(b, "soh", 1.0, 1, 100)                        // percent
+                    .add(QStringLiteral("/sys/class/power_supply/bms/soh"), 1.0, 1, 100);
+            m_srcCycles.add(b, "cycle_count", 1.0, 0, 10000);
+        }
+    }
+    const QString bat = m_batDir;
     if (!bat.isEmpty()) {
-        s.battCapacity = readAll(bat + QStringLiteral("/capacity")).trimmed().toInt();
-        // Standard sysfs first; older MediaTek exposes only CamelCase legacy
-        // names in different units (mA/mV instead of µA/µV).
-        const QByteArray cur = readAll(bat + QStringLiteral("/current_now")).trimmed();
-        const QByteArray curLegacy = cur.isEmpty()
-            ? readAll(bat + QStringLiteral("/BatteryAverageCurrent")).trimmed()
-            : QByteArray();
-        s.battCurrentA = cur.isEmpty() ? curLegacy.toLongLong() / 1e3
-                                       : cur.toLongLong() / 1e6;
-        // A node that answers is not yet a figure that means anything. The
-        // Gemini PDA keeps BatteryAverageCurrent at 0 even under full load,
-        // while the ADC behind it moves by 389 mV -- the driver never converts
-        // it. Neither name present means no current at all; present but stuck
-        // at zero while the cell discharges means the same for this app,
-        // because a discharging phone always draws something. One non-zero
-        // reading settles it for good.
-        const bool haveNode = !cur.isEmpty() || !curLegacy.isEmpty();
+        double v = 0;
+        s.battCapacity = m_srcCapacity.read(&v) ? (int)v : -1;
+        const bool haveCurrent = m_srcCurrent.read(&v);
+        s.battCurrentA = haveCurrent ? v : 0;
+        s.battVoltageV = m_srcVoltage.value(0);
+        s.battTempC = m_srcTemp.value(0);
+        s.battStatus = QString::fromLatin1(readNode(bat + QStringLiteral("/status")));
+
+        // A node that answers is not yet a figure that means anything: one
+        // gauge keeps its legacy current at a flat zero under full load. A
+        // discharging phone always draws something, so three such samples
+        // retire the figure -- and one non-zero reading settles it for good.
         if (s.battCurrentA != 0)
             m_battCurrentSeen = true;
-        const QByteArray vol = readAll(bat + QStringLiteral("/voltage_now")).trimmed();
-        s.battVoltageV = vol.isEmpty()
-            ? readAll(bat + QStringLiteral("/batt_vol")).trimmed().toLongLong() / 1e3
-            : vol.toLongLong() / 1e6;
-        QByteArray t = readAll(bat + QStringLiteral("/temp")).trimmed();
-        if (t.isEmpty()) t = readAll(bat + QStringLiteral("/batt_temp")).trimmed();
-        s.battTempC = t.toInt() / 10.0;
-        s.battStatus = QString::fromLatin1(readAll(bat + QStringLiteral("/status")).trimmed());
-        // MediaTek writes "Cmd discharging" where mainline writes "Discharging",
-        // so the word decides and not the whole string.
         if (!m_battCurrentSeen && s.battCurrentA == 0
                 && s.battStatus.contains(QLatin1String("discharging"), Qt::CaseInsensitive))
             ++m_battZeroWhileDischarging;
         else if (s.battCurrentA != 0)
             m_battZeroWhileDischarging = 0;
         s.battCurrentValid = m_battCurrentSeen
-                || (haveNode && m_battZeroWhileDischarging < 3);
+                || (haveCurrent && m_battZeroWhileDischarging < 3);
         s.battPowerW = s.battCurrentValid ? qAbs(s.battCurrentA) * s.battVoltageV : 0;
-        qulonglong full = readAll(bat + QStringLiteral("/charge_full")).trimmed().toULongLong();
-        qulonglong design = readAll(bat + QStringLiteral("/charge_full_design")).trimmed().toULongLong();
-        // Some drivers expose energy_* (µWh) instead of charge_* (µAh) -- and at
-        // least one gauge puts a charge in 0.1 mAh there instead. Only a value
-        // that can be a phone's energy is taken; the rest is refused.
-        auto plausibleWh = [](const QByteArray &v) -> qulonglong {
-            const qulonglong u = v.toULongLong();
-            return (u >= 1000000ULL && u <= 200000000ULL) ? u : 0;   // 1 Wh … 200 Wh
-        };
-        if (!full)
-            full = plausibleWh(readAll(bat + QStringLiteral("/energy_full")).trimmed());
-        if (!design)
-            design = plausibleWh(readAll(bat + QStringLiteral("/energy_full_design")).trimmed());
-        s.battChargeFull = full;
-        s.battChargeDesign = design;
-        // prefer the gauge's own state-of-health; fall back to full/design ratio
-        // The soh register is a black box, and on this platform it answers with a
-        // flat 100 while the gauge's own capacity registers say otherwise. The
-        // ratio wins because it can be checked against the two capacities shown
-        // beside it; the register is kept as a figure of its own instead of
-        // deciding what is displayed.
-        int soh = readAll(bat + QStringLiteral("/soh")).trimmed().toInt();
-        if (soh <= 0)
-            soh = readAll(QStringLiteral("/sys/class/power_supply/bms/soh")).trimmed().toInt();
-        s.battSohRegister = (soh > 0 && soh <= 100) ? soh : -1;
-        // Two identical numbers are one number. Where the gauge has never
+
+        s.battChargeFull = m_srcFull.value(0);
+        s.battChargeDesign = m_srcDesign.value(0);
+        s.battSohRegister = m_srcSoh.read(&v) ? (int)v : -1;
+        // Two identical numbers are one number: where the gauge has never
         // adjusted charge_full, both come from the same profile entry and their
-        // ratio is 100 % by construction -- a verdict built on that would rest
-        // on nothing, so no state of health is reported at all.
-        s.battHealthCatalogue = full && design && full == design;
-        if (full && design && !s.battHealthCatalogue) {
+        // ratio is 100 % by construction. No state of health is reported then.
+        const double full = s.battChargeFull, design = s.battChargeDesign;
+        s.battHealthCatalogue = full > 0 && design > 0 && full == design;
+        s.battHealthExact = -1;
+        s.battHealthPct = -1;
+        s.battHealthFromGauge = false;
+        if (full > 0 && design > 0 && !s.battHealthCatalogue) {
             s.battHealthExact = 100.0 * full / design;
             s.battHealthPct = (int)(s.battHealthExact + 0.5);
-            s.battHealthFromGauge = false;
         } else if (s.battHealthCatalogue) {
             s.battHealthExact = 100.0;
-            s.battHealthPct = -1;
-            s.battHealthFromGauge = false;
         } else if (s.battSohRegister > 0) {
             s.battHealthExact = s.battSohRegister;
             s.battHealthPct = s.battSohRegister;
             s.battHealthFromGauge = true;
         }
-        const QByteArray cyc = readAll(bat + QStringLiteral("/cycle_count")).trimmed();
-        s.battCycles = cyc.isEmpty() ? -1 : cyc.toInt();
+        s.battCycles = m_srcCycles.read(&v) ? (int)v : -1;
         s.battTech = QString::fromLatin1(readAll(bat + QStringLiteral("/technology")).trimmed());
         s.battModel = QString::fromLatin1(readAll(bat + QStringLiteral("/model_name")).trimmed());
         s.battHealthReport = QString::fromLatin1(readAll(bat + QStringLiteral("/health")).trimmed());

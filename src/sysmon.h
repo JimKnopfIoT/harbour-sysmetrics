@@ -58,6 +58,7 @@ class SysMon : public QObject
     Q_PROPERTY(bool battDesignFromMaker READ battDesignFromMaker NOTIFY updated)
     Q_PROPERTY(double battChargeNowMah READ battChargeNowMah NOTIFY updated)
     Q_PROPERTY(int battCycles READ battCycles NOTIFY updated)
+    // mAh, 0 = the kernel publishes none
     Q_PROPERTY(double battChargeFull READ battChargeFull NOTIFY updated)
     Q_PROPERTY(double battChargeDesign READ battChargeDesign NOTIFY updated)
     Q_PROPERTY(QString battTech READ battTech NOTIFY updated)
