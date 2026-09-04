@@ -63,6 +63,7 @@ struct SysSnap {
     double battHealthExact = -1;   // same figure, undivided by rounding
     int battSohRegister = -1;      // what the gauge's soh register claims
     bool battHealthFromGauge = false;
+    bool battHealthCatalogue = false;  // full == design: one profile figure, not a measurement
     int battCycles = -1;
     double battChargeFull = 0, battChargeDesign = 0;  // µAh
     QString battStatus, battTech;

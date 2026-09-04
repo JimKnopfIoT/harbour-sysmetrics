@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <QFileInfo>
 #include <QHash>
+#include <QMap>
 #include <QProcess>
 #include <QRegExp>
 #include <QSet>
@@ -170,11 +171,24 @@ QVariantList SysMon::storageMounts() const
     if (!f.open(QIODevice::ReadOnly))
         return out;
 
-    QSet<QString> seenMp;
+    // Last entry wins: /proc/self/mounts is in mount order, and what statvfs
+    // measures is whatever ended up on top.
+    QMap<QString, QList<QByteArray>> byMount;
+    QStringList mountOrder;
     for (const QByteArray &line : f.readAll().split('\n')) {
-        const QList<QByteArray> c = line.split(' ');
-        if (c.size() < 3)
+        const QList<QByteArray> c0 = line.split(' ');
+        if (c0.size() < 3)
             continue;
+        QByteArray mpKey = c0[1];
+        const QString key = QString::fromLocal8Bit(mpKey);
+        if (!byMount.contains(key))
+            mountOrder.append(key);
+        byMount.insert(key, c0);
+    }
+
+    QSet<QString> seenDev;
+    for (const QString &mountKey : mountOrder) {
+        const QList<QByteArray> c = byMount.value(mountKey);
         const QByteArray fstype = c[2];
         if (pseudo.contains(fstype))
             continue;
@@ -190,13 +204,18 @@ QVariantList SysMon::storageMounts() const
             }
         }
         const QString mount = QString::fromLocal8Bit(mp);
-        if (seenMp.contains(mount))
+        // One image mounted at several places is one filesystem. Listing it
+        // once per mount point turned a handful of read-only system images
+        // into dozens of identical bars.
+        const QString dev = QString::fromLocal8Bit(c[0]);
+        if (dev.startsWith(QLatin1String("/dev/")) && seenDev.contains(dev))
             continue;
 
         struct statvfs vfs;
         if (statvfs(mp.constData(), &vfs) != 0 || vfs.f_blocks == 0)
             continue;
-        seenMp.insert(mount);
+        if (dev.startsWith(QLatin1String("/dev/")))
+            seenDev.insert(dev);
 
         const double frsize = vfs.f_frsize ? vfs.f_frsize : vfs.f_bsize;
         const double total = (double)vfs.f_blocks * frsize;
@@ -205,7 +224,7 @@ QVariantList SysMon::storageMounts() const
         const double used = total - free;
 
         QVariantMap m;
-        m.insert(QStringLiteral("device"), QString::fromLocal8Bit(c[0]));
+        m.insert(QStringLiteral("device"), dev);
         m.insert(QStringLiteral("mount"), mount);
         m.insert(QStringLiteral("fstype"), QString::fromLatin1(fstype));
         m.insert(QStringLiteral("readonly"), c.size() > 3 && c[3].startsWith("ro"));
@@ -295,7 +314,8 @@ QVariantList SysMon::storageHardware() const
                         m.insert(QStringLiteral("ufsSpec"),
                                  QString::number(spec >> 8) + QLatin1Char('.') + QString::number((spec >> 4) & 0xF));
                     const int wbt = rd(dd + QStringLiteral("wb_type")).toInt(nullptr, 16);
-                    m.insert(QStringLiteral("writeBooster"), wbt > 0 || (rd(dd + QStringLiteral("ufs_features")).toInt(nullptr,16) & 0x1));
+                    const int extFeat = rd(dd + QStringLiteral("ext_feature_sup")).toInt(nullptr, 16);
+                    m.insert(QStringLiteral("writeBooster"), wbt > 0 || (extFeat & 0x100));
                     m.insert(QStringLiteral("queueDepth"), rd(dd + QStringLiteral("queue_depth")).toInt(nullptr, 16));
                     m.insert(QStringLiteral("numLuns"), rd(dd + QStringLiteral("number_of_luns")).toInt(nullptr, 16));
                     m.insert(QStringLiteral("numWluns"), rd(dd + QStringLiteral("number_of_wluns")).toInt(nullptr, 16));
@@ -399,7 +419,18 @@ QVariantMap SysMon::wifiDetail() const
                             .symLinkTarget().section(QLatin1Char('/'), -1);
     m.insert(QStringLiteral("driver"), drv);
     QString vendor;
-    if (drv.contains(QStringLiteral("cnss")) || drv.contains(QStringLiteral("icnss"))
+    // A platform driver may be called plainly "wlan" (MediaTek does), so the
+    // node's own compatible string decides where it exists.
+    const QString compat =
+        readTrim(QStringLiteral("/sys/class/net/") + iface + QStringLiteral("/device/of_node/compatible"))
+        .toLower();
+    if (compat.contains(QStringLiteral("mediatek")) || compat.contains(QStringLiteral("mtk")))
+        vendor = QStringLiteral("MediaTek");
+    else if (compat.contains(QStringLiteral("qcom")) || compat.contains(QStringLiteral("qca")))
+        vendor = QStringLiteral("Qualcomm Atheros");
+    else if (compat.contains(QStringLiteral("brcm")) || compat.contains(QStringLiteral("broadcom")))
+        vendor = QStringLiteral("Broadcom");
+    else if (drv.contains(QStringLiteral("cnss")) || drv.contains(QStringLiteral("icnss"))
         || drv.startsWith(QStringLiteral("wlan")) || drv.contains(QStringLiteral("qca")))
         vendor = QStringLiteral("Qualcomm Atheros");
     else if (drv.contains(QStringLiteral("bcm")) || drv.contains(QStringLiteral("dhd")))
@@ -429,7 +460,9 @@ QVariantMap SysMon::wifiDetail() const
             else if (l.startsWith(QStringLiteral("SSID:")))
                 m.insert(QStringLiteral("ssid"), l.mid(5).trimmed());
             else if (l.startsWith(QStringLiteral("freq:"))) {
-                const int f = l.mid(5).trimmed().toInt();
+                // "freq: 5520.0" since iw 6.x -- an integer parse answers 0,
+                // and 0 reads as a valid 2.4 GHz channel further down.
+                const int f = qRound(l.mid(5).trimmed().toDouble());
                 m.insert(QStringLiteral("freqMhz"), f);
                 m.insert(QStringLiteral("channel"), chanFromFreq(f));
                 m.insert(QStringLiteral("band"), bandOfFreq(f));
@@ -487,7 +520,8 @@ QVariantMap SysMon::wifiDetail() const
         } else if (l.startsWith(QStringLiteral("HE PHY")) || l.contains(QStringLiteral("HE Iftypes"))) {
             he = true;
         } else if (l.contains(QStringLiteral(" MHz ["))) {
-            const int mhz = l.section(QStringLiteral(" MHz"), 0, 0).section(QLatin1Char('*'), -1).trimmed().toInt();
+            const int mhz = qRound(l.section(QStringLiteral(" MHz"), 0, 0)
+                                   .section(QLatin1Char('*'), -1).trimmed().toDouble());
             if (bandName == QStringLiteral("?") && mhz > 0)
                 bandName = bandOfFreq(mhz);
             const int ch = chanFromFreq(mhz);
@@ -603,8 +637,11 @@ QVariantList SysMon::networkHardware() const
             m.insert(QStringLiteral("driver"), driver);
             QString vendor = rd(dev + QStringLiteral("vendor"));
             QString model = rd(dev + QStringLiteral("device"));
-            if (model.isEmpty())
-                model = rd(dev + QStringLiteral("modalias"));
+            if (model.isEmpty()) {
+                const QString compat = rd(dev + QStringLiteral("of_node/compatible"));
+                model = compat.isEmpty() ? rd(dev + QStringLiteral("modalias"))
+                                         : compat.split(QLatin1Char('\0')).value(0);
+            }
             m.insert(QStringLiteral("vendor"), vendor);
             m.insert(QStringLiteral("model"), model);
         }
@@ -638,6 +675,65 @@ static QString readTrim(const QString &p)
     return QString::fromLatin1(QByteArray(buf, total).trimmed());
 }
 
+// The power-supply class says microvolt; several MediaTek charger nodes write
+// millivolt. The window decides which was meant, and refuses rather than guesses.
+static double supplyVolts(const QString &p)
+{
+    const double raw = readTrim(p).toDouble();
+    if (raw == 0)
+        return 0;
+    if (raw / 1e6 >= 3.0 && raw / 1e6 <= 30.0)
+        return raw / 1e6;
+    if (raw / 1e3 >= 3.0 && raw / 1e3 <= 30.0)
+        return raw / 1e3;
+    return 0;
+}
+
+static QString hwDevice();
+
+// What the maker states for the cell of this phone, in mAh, where this app
+// knows the model. A catalogue figure, not a reading -- and the only source
+// left where the kernel's own design capacity is demonstrably not this cell.
+static double ratedCapacityMah()
+{
+    const QString model = hwDevice();
+    if (model == QLatin1String("jp2601"))
+        return 5450.0;
+    return 0;
+}
+
+// A gauge's own full-charge figure, in mAh, or 0 where none is readable.
+// The unit is a vendor decision, so only a reading that can be a phone battery
+// is accepted: µAh here, 0.1 mAh there, plain mAh on the older debug node.
+static double gaugeFullChargeMah(const QDir &psy, const QString &batteryDir, QString *from = nullptr)
+{
+    auto asMah = [](double v) -> double {
+        if (v / 1000.0 >= 500 && v / 1000.0 <= 20000) return v / 1000.0;
+        if (v / 10.0 >= 500 && v / 10.0 <= 20000) return v / 10.0;
+        if (v >= 500 && v <= 20000) return v;
+        return 0;
+    };
+    for (const QString &e : psy.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        const QString g = psy.filePath(e) + QLatin1Char('/');
+        if (g == batteryDir)
+            continue;
+        QString raw = readTrim(g + QStringLiteral("charge_full"));
+        if (raw.isEmpty()) raw = readTrim(g + QStringLiteral("energy_full"));
+        if (raw.isEmpty()) raw = readTrim(g + QStringLiteral("charge_full_design"));
+        if (raw.isEmpty()) raw = readTrim(g + QStringLiteral("energy_full_design"));
+        const double mah = asMah(raw.toDouble());
+        if (mah > 0) {
+            if (from) *from = e;
+            return mah;
+        }
+    }
+    const double mah = asMah(readTrim(
+        QStringLiteral("/sys/devices/platform/battery_meter/FG_g_fg_dbg_bat_qmax")).toDouble());
+    if (mah > 0 && from)
+        *from = QStringLiteral("battery_meter");
+    return mah;
+}
+
 QVariantMap SysMon::batteryHardware() const
 {
     QVariantMap m;
@@ -667,22 +763,6 @@ QVariantMap SysMon::batteryHardware() const
     // optional, so each is gated on being readable and sane.
     {
         const QString g = QStringLiteral("/sys/class/power_supply/bms/");
-        // Eight counters, one per state-of-charge band. cycle_count is their
-        // mean, which is why it reads far lower than the charging actually done.
-        const QString buckets = readTrim(g + QStringLiteral("cycle_counts"));
-        if (!buckets.isEmpty()) {
-            const QStringList parts = buckets.split(QLatin1Char(' '), QString::SkipEmptyParts);
-            QVariantList vals;
-            qulonglong sum = 0;
-            for (const QString &p : parts) {
-                vals.append(p.toInt());
-                sum += p.toULongLong();
-            }
-            if (!vals.isEmpty()) {
-                m.insert(QStringLiteral("cycleBuckets"), vals);
-                m.insert(QStringLiteral("cycleBandTotal"), (double)sum);
-            }
-        }
         const QString age = readTrim(g + QStringLiteral("batt_age_level"));
         if (!age.isEmpty())
             m.insert(QStringLiteral("ageLevel"), age.toInt());
@@ -713,8 +793,15 @@ QVariantMap SysMon::batteryHardware() const
             haveLearn = true;
             learn += v.toULongLong();
         }
-        if (haveLearn)
+        if (haveLearn) {
             m.insert(QStringLiteral("learnEvents"), (double)learn);
+            // Only the first of the four is a completed learning pass; a trial
+            // is an attempt and the other two count charges.
+            m.insert(QStringLiteral("learnPasses"),
+                     readTrim(g + QStringLiteral("learning_counter")).toDouble());
+            m.insert(QStringLiteral("learnTrials"),
+                     readTrim(g + QStringLiteral("learning_trial_counter")).toDouble());
+        }
         const QString prof = readTrim(g + QStringLiteral("battery_type"));
         if (!prof.isEmpty())
             m.insert(QStringLiteral("profileId"), prof);
@@ -732,8 +819,36 @@ QVariantMap SysMon::batteryHardware() const
     m.insert(QStringLiteral("capacityUnit"), capUnit);
     m.insert(QStringLiteral("voltageDesign"),
              readTrim(b + QStringLiteral("voltage_max_design")).toDouble() / 1e6);
+    // What the charger actually charges this cell to. Not the design voltage,
+    // and on gauges that publish no design voltage it is the only one there is.
+    double cv = supplyVolts(b + QStringLiteral("constant_charge_voltage"));
+    if (cv <= 0)
+        cv = supplyVolts(b + QStringLiteral("voltage_max"));
+    m.insert(QStringLiteral("chargeTargetVolt"), cv);
     m.insert(QStringLiteral("chargeType"), readTrim(b + QStringLiteral("charge_type")));
+
+    // A second opinion on the pack. A gauge beside the battery node keeps its
+    // own full-charge figure, and it need not agree with the class value -- on
+    // one phone the class says 3760 mAh where the gauge divides by 5584. The
+    // unit of that node is a vendor decision (µAh here, 0.1 mAh there), so only
+    // a reading that can be a phone battery at all is accepted, and it is shown
+    // beside the class figure rather than replacing it.
+    const double designMah = designUah / 1000.0;
+    QString gaugeFrom;
+    const double gaugeMah = gaugeFullChargeMah(psy, b, &gaugeFrom);
+    if (gaugeMah > 0) {
+        m.insert(QStringLiteral("gaugeFullMah"), gaugeMah);
+        m.insert(QStringLiteral("gaugeSupply"), gaugeFrom);
+    }
     return m;
+}
+
+// The typec class marks the active entry in brackets: "source [sink]".
+static QString typecActive(const QString &v)
+{
+    const int a = v.indexOf(QLatin1Char('['));
+    const int b = v.indexOf(QLatin1Char(']'));
+    return (a >= 0 && b > a) ? v.mid(a + 1, b - a - 1) : v;
 }
 
 static QString chargerProtocol(const QString &t)
@@ -873,6 +988,30 @@ static void pdSourceCaps(QVariantMap &m)
 QVariantList SysMon::readWakeupSources()
 {
     QVariantList out;
+    // The sysfs class carries the same counters world-readable, plus the one
+    // debugfs' table lacks a name for here: how long suspend was actually
+    // prevented. Preferred; debugfs stays the fallback for older kernels.
+    const QDir wcls(QStringLiteral("/sys/class/wakeup"));
+    if (wcls.exists()) {
+        for (const QString &e : wcls.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+            const QString d = wcls.filePath(e) + QLatin1Char('/');
+            const QString name = readTrim(d + QStringLiteral("name"));
+            if (name.isEmpty() || name == QLatin1String("deleted"))
+                continue;   // the kernel's aggregate of destroyed sources
+            QVariantMap w;
+            w.insert(QStringLiteral("name"), name);
+            w.insert(QStringLiteral("count"), readTrim(d + QStringLiteral("wakeup_count")).toDouble());
+            w.insert(QStringLiteral("activeCount"), readTrim(d + QStringLiteral("active_count")).toDouble());
+            w.insert(QStringLiteral("heldSec"), readTrim(d + QStringLiteral("total_time_ms")).toDouble() / 1000.0);
+            w.insert(QStringLiteral("longestSec"), readTrim(d + QStringLiteral("max_time_ms")).toDouble() / 1000.0);
+            w.insert(QStringLiteral("preventSec"),
+                     readTrim(d + QStringLiteral("prevent_suspend_time_ms")).toDouble() / 1000.0);
+            out.append(w);
+        }
+        if (!out.isEmpty())
+            return out;
+    }
+
     // debugfs is 0700 though the file is not, so: unprivileged read, then the
     // root helper, and where neither answers the section does not appear.
     QByteArray raw;
@@ -892,6 +1031,7 @@ QVariantList SysMon::readWakeupSources()
     const int cWakeup = head.indexOf(QByteArray("wakeup_count"));
     const int cTotal  = head.indexOf(QByteArray("total_time"));
     const int cMax    = head.indexOf(QByteArray("max_time"));
+    const int cPrev   = head.indexOf(QByteArray("prevent_suspend_time"));
 
     for (int i = 1; i < lines.size(); ++i) {
         const QList<QByteArray> f = lines.at(i).simplified().split(' ');
@@ -912,6 +1052,10 @@ QVariantList SysMon::readWakeupSources()
         w.insert(QStringLiteral("activeCount"), (double)col(cActive));
         w.insert(QStringLiteral("heldSec"), col(cTotal) / 1000.0);
         w.insert(QStringLiteral("longestSec"), col(cMax) / 1000.0);
+        if (cPrev >= 0)
+            w.insert(QStringLiteral("preventSec"), col(cPrev) / 1000.0);
+        if (w.value(QStringLiteral("name")).toString() == QLatin1String("deleted"))
+            continue;   // the kernel's aggregate of destroyed sources
         out.append(w);
     }
     return out;
@@ -922,12 +1066,20 @@ QVariantList SysMon::readWakeupSources()
 QVariantList SysMon::wakeupSources() const
 {
     QVariantList out;
-    for (const QVariant &v : readWakeupSources())
-        if (v.toMap().value(QStringLiteral("heldSec")).toDouble() > 0)
+    const QVariantList all = readWakeupSources();
+    bool havePrevent = false;
+    for (const QVariant &v : all)
+        if (v.toMap().value(QStringLiteral("preventSec")).toDouble() > 0) {
+            havePrevent = true;
+            break;
+        }
+    const QString key = havePrevent ? QStringLiteral("preventSec") : QStringLiteral("heldSec");
+    for (const QVariant &v : all)
+        if (v.toMap().value(key).toDouble() > 0)
             out.append(v);
-    std::sort(out.begin(), out.end(), [](const QVariant &a, const QVariant &b) {
-        return a.toMap().value(QStringLiteral("heldSec")).toDouble()
-             > b.toMap().value(QStringLiteral("heldSec")).toDouble();
+    std::sort(out.begin(), out.end(), [key](const QVariant &a, const QVariant &b) {
+        return a.toMap().value(key).toDouble()
+             > b.toMap().value(key).toDouble();
     });
     return out;
 }
@@ -969,6 +1121,11 @@ QVariantMap SysMon::chargerDetail() const
     m.insert(QStringLiteral("online"), !src.isEmpty() || charging);
     m.insert(QStringLiteral("charging"), charging);
     m.insert(QStringLiteral("status"), batStatus);
+    // Charging with no input supply matched is a real state (the battery says
+    // so, no node owns up to it). The rows still render, so they get an answer.
+    m.insert(QStringLiteral("source"), QString());
+    m.insert(QStringLiteral("typeRaw"), QString());
+    m.insert(QStringLiteral("protocol"), QString());
     if (src.isEmpty())
         return m;
 
@@ -979,12 +1136,22 @@ QVariantMap SysMon::chargerDetail() const
     m.insert(QStringLiteral("source"), src);
     m.insert(QStringLiteral("typeRaw"), type);
     m.insert(QStringLiteral("protocol"), chargerProtocol(type));
-    m.insert(QStringLiteral("inputVoltage"), readTrim(b + QStringLiteral("voltage_now")).toDouble() / 1e6);
-    m.insert(QStringLiteral("inputVoltageMax"), readTrim(b + QStringLiteral("voltage_max")).toDouble() / 1e6);
-    m.insert(QStringLiteral("inputCurrentMax"), readTrim(b + QStringLiteral("current_max")).toDouble() / 1e6);
+    double inV = supplyVolts(b + QStringLiteral("voltage_now"));
+    if (inV <= 0)   // older MediaTek keeps it on the battery node, in millivolt
+        inV = supplyVolts(QStringLiteral("/sys/class/power_supply/battery/ChargerVoltage"));
+    m.insert(QStringLiteral("inputVoltage"), inV);
+    m.insert(QStringLiteral("inputVoltageMax"), supplyVolts(b + QStringLiteral("voltage_max")));
+    // current_max is the input limit on Qualcomm; on the MediaTek charger it
+    // mirrors the battery-side ICC. Where input_current_limit exists it decides.
+    const QString icl = readTrim(b + QStringLiteral("input_current_limit"));
+    m.insert(QStringLiteral("inputCurrentMax"),
+             (icl.toDouble() > 0 ? icl.toDouble()
+                                 : readTrim(b + QStringLiteral("current_max")).toDouble()) / 1e6);
     const QString pd = readTrim(b + QStringLiteral("pd_active"));
     if (!pd.isEmpty()) {
         m.insert(QStringLiteral("pdActive"), pd.toInt() > 0);
+        if (pd.toInt() == 2)
+            m.insert(QStringLiteral("pdPps"), true);
         m.insert(QStringLiteral("pdCurrentMax"), readTrim(b + QStringLiteral("pd_current_max")).toDouble() / 1e6);
     }
     // actual rate into the battery
@@ -999,10 +1166,19 @@ QVariantMap SysMon::chargerDetail() const
     // Type-C negotiated roles / partner / cable (from the tcpm/typec class)
     const QString tc = QStringLiteral("/sys/class/typec/port0/");
     if (QFileInfo::exists(tc)) {
-        m.insert(QStringLiteral("typecPowerRole"), readTrim(tc + QStringLiteral("power_role")));
-        m.insert(QStringLiteral("typecDataRole"), readTrim(tc + QStringLiteral("data_role")));
+        m.insert(QStringLiteral("typecPowerRole"), typecActive(readTrim(tc + QStringLiteral("power_role"))));
+        m.insert(QStringLiteral("typecDataRole"), typecActive(readTrim(tc + QStringLiteral("data_role"))));
         // current the port/cable advertises via CC: "default", "1.5A", "3.0A"
-        m.insert(QStringLiteral("typecCurrent"), readTrim(tc + QStringLiteral("power_operation_mode")));
+        const QString opMode = readTrim(tc + QStringLiteral("power_operation_mode"));
+        m.insert(QStringLiteral("typecCurrent"), opMode);
+        // No pd_active on this chipset, but the port knows whether a contract
+        // stands. Marked as coming from the port, because the voltage and
+        // current of that contract are not readable here.
+        if (!m.contains(QStringLiteral("pdActive"))
+                && opMode == QLatin1String("usb_power_delivery")) {
+            m.insert(QStringLiteral("pdActive"), true);
+            m.insert(QStringLiteral("pdFromPort"), true);
+        }
         // Qualcomm writes the bare major ("3"), mainline writes "3.0".
         QString rev = readTrim(tc + QStringLiteral("usb_power_delivery_revision"));
         if (!rev.isEmpty() && !rev.contains(QLatin1Char('.')))
@@ -1157,7 +1333,8 @@ QVariantMap SysMon::chargingPath() const
         m.insert(QStringLiteral("scEnd"), readTrim(mtk + QStringLiteral("sc_etime")));
         m.insert(QStringLiteral("fastChargeIndicator"), readTrim(mtk + QStringLiteral("fast_chg_indicator")));
         m.insert(QStringLiteral("safetyTimer"), readTrim(QStringLiteral("/proc/mtk_battery_cmd/en_safety_timer")));
-        m.insert(QStringLiteral("setCv"), readTrim(QStringLiteral("/proc/mtk_battery_cmd/set_cv")));
+        m.insert(QStringLiteral("setCvVolt"),
+                 supplyVolts(QStringLiteral("/proc/mtk_battery_cmd/set_cv")));
     }
 
     // Which charging protocols this kernel implements at all. PD, PPS, Pump
@@ -3428,8 +3605,12 @@ QVariantMap SysMon::wirelessDetail() const
                  || le.contains(QLatin1String("wcn")))
                 && !le.contains(QLatin1String("wifi"))
                 && !m.contains(QStringLiteral("btDtNode"))) {
+                const QString compat = dtCompatible(soc.filePath(e));
+                if (compat.contains(QLatin1String("coresight"))
+                        || compat.contains(QLatin1String("dummy")))
+                    continue;   // btm0 and friends are trace sources
                 m.insert(QStringLiteral("btDtNode"), e);
-                m.insert(QStringLiteral("btDtCompatible"), dtCompatible(soc.filePath(e)));
+                m.insert(QStringLiteral("btDtCompatible"), compat);
             }
         }
     }
@@ -3499,7 +3680,9 @@ QVariantMap SysMon::wirelessDetail() const
             continue;
         const bool blocked = readTrim(rf.filePath(e) + QStringLiteral("/soft")) == QLatin1String("1")
                           || readTrim(rf.filePath(e) + QStringLiteral("/hard")) == QLatin1String("1");
-        rfk << type + (blocked ? QStringLiteral(": blocked") : QStringLiteral(": ok"));
+        const QString who = readTrim(rf.filePath(e) + QStringLiteral("/name"));
+        rfk << type + (who.isEmpty() ? QString() : QStringLiteral(" (") + who + QLatin1Char(')'))
+               + (blocked ? QStringLiteral(": blocked") : QStringLiteral(": ok"));
     }
     m.insert(QStringLiteral("rfkill"), rfk.join(QStringLiteral(" · ")));
     return m;
@@ -3838,6 +4021,88 @@ bool SysMon::setNice(int pid, int nice)
     return false;
 }
 
+// The power-supply class defines these words; the driver only picks one.
+// Anything a vendor invented is passed through untouched.
+QString SysMon::psyWord(const QString &raw) const
+{
+    const QString k = raw.trimmed();
+    const QString l = k.toLower();
+    if (l.isEmpty())                                 return k;
+    if (l.contains(QLatin1String("discharging")))    return tr("discharging");
+    if (l == QLatin1String("charging"))              return tr("charging");
+    if (l == QLatin1String("not charging"))          return tr("not charging");
+    if (l == QLatin1String("full"))                  return tr("full");
+    if (l == QLatin1String("unknown"))               return tr("unknown");
+    if (l == QLatin1String("good"))                  return tr("good");
+    if (l == QLatin1String("overheat"))              return tr("overheat");
+    if (l == QLatin1String("dead"))                  return tr("dead");
+    if (l == QLatin1String("over voltage"))          return tr("over voltage");
+    if (l == QLatin1String("unspecified failure"))   return tr("unspecified failure");
+    if (l == QLatin1String("cold"))                  return tr("cold");
+    if (l == QLatin1String("cool"))                  return tr("cool");
+    if (l == QLatin1String("warm"))                  return tr("warm");
+    if (l == QLatin1String("hot"))                   return tr("hot");
+    if (l == QLatin1String("watchdog timer expire")) return tr("watchdog timer expired");
+    if (l == QLatin1String("safety timer expire"))   return tr("safety timer expired");
+    if (l == QLatin1String("calibration required"))  return tr("calibration required");
+    if (l == QLatin1String("fast"))                  return tr("fast charge");
+    if (l == QLatin1String("taper"))                 return tr("taper (constant voltage)");
+    if (l == QLatin1String("trickle"))               return tr("trickle");
+    if (l == QLatin1String("n/a"))                   return tr("not applicable");
+    return k;
+}
+
+double SysMon::battGaugeFullMah() const
+{
+    if (m_gaugeFullMah < 0) {
+        const QDir psy(QStringLiteral("/sys/class/power_supply"));
+        m_gaugeFullMah = gaugeFullChargeMah(psy,
+                             psy.filePath(QStringLiteral("battery")) + QLatin1Char('/'));
+    }
+    return m_gaugeFullMah;
+}
+
+double SysMon::battFullMah() const
+{
+    const double gauge = battGaugeFullMah();
+    const double driver = m_s.battChargeFull / 1000.0;
+    return battCapacityDisputed() ? gauge : (driver > 0 ? driver : gauge);
+}
+
+// The design capacity, or 0 where no source survives. The driver's figure is
+// dropped rather than shown once the gauge contradicts it; the maker's is the
+// only stand-in, and it is labelled as such wherever it is displayed.
+double SysMon::battDesignMah() const
+{
+    const double driver = m_s.battChargeDesign / 1000.0;
+    if (driver > 0 && !battCapacityDisputed())
+        return driver;
+    return ratedCapacityMah();
+}
+
+bool SysMon::battDesignFromMaker() const
+{
+    const double driver = m_s.battChargeDesign / 1000.0;
+    return (driver <= 0 || battCapacityDisputed()) && ratedCapacityMah() > 0;
+}
+
+double SysMon::battChargeNowMah() const
+{
+    const double full = battFullMah();
+    if (full <= 0 || m_s.battCapacity < 0)
+        return 0;
+    return full * m_s.battCapacity / 100.0;
+}
+
+bool SysMon::battCapacityDisputed() const
+{
+    // Not cached: the sampler fills the design capacity after the first
+    // binding has already asked, and a cached "no" would then stand for good.
+    const double design = m_s.battChargeDesign / 1000.0;
+    const double gauge = battGaugeFullMah();
+    return design > 0 && gauge > 0 && qAbs(gauge - design) > 0.15 * design;
+}
+
 QString SysMon::battQuality() const
 {
     // State-of-health from full/design capacity, tempered by cycle count and
@@ -3846,7 +4111,7 @@ QString SysMon::battQuality() const
     const int cyc = m_s.battCycles;
     const QString drv = m_s.battHealthReport;
     if (!drv.isEmpty() && drv != QLatin1String("Good") && drv != QLatin1String("Unknown"))
-        return drv;   // driver reports Overheat/Cold/Dead/Over voltage etc.
+        return psyWord(drv);   // driver reports Overheat/Cold/Dead/Over voltage etc.
 
     // The wording below is our reading of the number, not something the battery
     // reports: the thresholds are ours and are spelled out in the glossary. Say
@@ -3883,6 +4148,10 @@ QString SysMon::battQualityBasis() const
     const QString drv = m_s.battHealthReport;
     if (!drv.isEmpty() && drv != QLatin1String("Good") && drv != QLatin1String("Unknown"))
         return tr("reported by the driver");
+    if (m_s.battHealthCatalogue)
+        return m_s.battCycles >= 0
+            ? tr("no state of health: full and design capacity are the same profile figure — the word above rests on the cycle count alone")
+            : tr("no state of health: full and design capacity are the same profile figure");
     if (m_s.battHealthPct >= 0)
         return m_s.battHealthFromGauge
                 ? tr("state of health from the gauge")
@@ -4044,6 +4313,7 @@ QVariantMap SysMon::sinceBootDetail() const
             if (!QFileInfo::exists(QStringLiteral("/sys/block/") + name)
                     || name.startsWith(QLatin1String("loop"))
                     || name.startsWith(QLatin1String("zram"))
+                    || name.startsWith(QLatin1String("dm-"))   // repeats its slave's traffic
                     || name.startsWith(QLatin1String("ram")))
                 continue;
             const double rd = f.value(5).toULongLong() * 512.0;

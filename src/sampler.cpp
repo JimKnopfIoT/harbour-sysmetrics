@@ -504,11 +504,17 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
         s.battPowerW = s.battCurrentValid ? qAbs(s.battCurrentA) * s.battVoltageV : 0;
         qulonglong full = readAll(bat + QStringLiteral("/charge_full")).trimmed().toULongLong();
         qulonglong design = readAll(bat + QStringLiteral("/charge_full_design")).trimmed().toULongLong();
-        // some drivers only expose energy_* (µWh) instead of charge_* (µAh)
+        // Some drivers expose energy_* (µWh) instead of charge_* (µAh) -- and at
+        // least one gauge puts a charge in 0.1 mAh there instead. Only a value
+        // that can be a phone's energy is taken; the rest is refused.
+        auto plausibleWh = [](const QByteArray &v) -> qulonglong {
+            const qulonglong u = v.toULongLong();
+            return (u >= 1000000ULL && u <= 200000000ULL) ? u : 0;   // 1 Wh … 200 Wh
+        };
         if (!full)
-            full = readAll(bat + QStringLiteral("/energy_full")).trimmed().toULongLong();
+            full = plausibleWh(readAll(bat + QStringLiteral("/energy_full")).trimmed());
         if (!design)
-            design = readAll(bat + QStringLiteral("/energy_full_design")).trimmed().toULongLong();
+            design = plausibleWh(readAll(bat + QStringLiteral("/energy_full_design")).trimmed());
         s.battChargeFull = full;
         s.battChargeDesign = design;
         // prefer the gauge's own state-of-health; fall back to full/design ratio
@@ -521,16 +527,26 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
         if (soh <= 0)
             soh = readAll(QStringLiteral("/sys/class/power_supply/bms/soh")).trimmed().toInt();
         s.battSohRegister = (soh > 0 && soh <= 100) ? soh : -1;
-        if (full && design) {
+        // Two identical numbers are one number. Where the gauge has never
+        // adjusted charge_full, both come from the same profile entry and their
+        // ratio is 100 % by construction -- a verdict built on that would rest
+        // on nothing, so no state of health is reported at all.
+        s.battHealthCatalogue = full && design && full == design;
+        if (full && design && !s.battHealthCatalogue) {
             s.battHealthExact = 100.0 * full / design;
             s.battHealthPct = (int)(s.battHealthExact + 0.5);
+            s.battHealthFromGauge = false;
+        } else if (s.battHealthCatalogue) {
+            s.battHealthExact = 100.0;
+            s.battHealthPct = -1;
             s.battHealthFromGauge = false;
         } else if (s.battSohRegister > 0) {
             s.battHealthExact = s.battSohRegister;
             s.battHealthPct = s.battSohRegister;
             s.battHealthFromGauge = true;
         }
-        s.battCycles = readAll(bat + QStringLiteral("/cycle_count")).trimmed().toInt();
+        const QByteArray cyc = readAll(bat + QStringLiteral("/cycle_count")).trimmed();
+        s.battCycles = cyc.isEmpty() ? -1 : cyc.toInt();
         s.battTech = QString::fromLatin1(readAll(bat + QStringLiteral("/technology")).trimmed());
         s.battModel = QString::fromLatin1(readAll(bat + QStringLiteral("/model_name")).trimmed());
         s.battHealthReport = QString::fromLatin1(readAll(bat + QStringLiteral("/health")).trimmed());

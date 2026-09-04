@@ -317,12 +317,13 @@ function cpu() {
     }
 
     var caches = d.caches || []
-    if (caches.length) {
-        var cr = []
-        for (var c = 0; c < caches.length; ++c)
+    var cr = []
+    for (var c = 0; c < caches.length; ++c)
+        if (caches[c].size)
             cr.push(row("L" + caches[c].level + " " + caches[c].type, caches[c].size))
-        s.push({ title: qsTr("Caches"), rows: cr })
-    }
+    if (cr.length)
+        s.push({ title: qsTr("Caches"), rows: cr,
+                 note: qsTr("Read from the first core. Where the clusters differ, the other one keeps its own sizes and this node does not carry them.") })
     if (d.features) {
         var feats = d.features.split(" ")
         var frows = []
@@ -480,7 +481,7 @@ function cpu() {
                         sysmon.fmtBytes(bfiles[fi2].bytes) + "  ·  " + bfiles[fi2].date.slice(0, 10),
                         {mono:true, right: bfiles[fi2].root.replace("/lib/", "").replace("/vendor/", "v/")}))
         blobSec.push({ title: qsTr("Firmware files on disk"), collapsed: true,
-                 note: qsTr("%1 files, %2 in total — the images the kernel loads into a radio, a DSP or a sensor when it starts them. The names carry the chip family, and the dates say when the vendor last touched them. This is what is available to load, not proof that any of it was loaded.")
+                 note: qsTr("%1 files, %2 in total — the images the kernel loads into a radio, a DSP or a sensor when it starts them. The names usually carry a chip family — a vendor ships more than the one file this phone needs — and the dates say when they were last touched. This is what is available to load, not proof that any of it was loaded.")
                         .arg(blobs.blobCount).arg(sysmon.fmtBytes(blobs.blobBytes)),
                  rows: br })
     }
@@ -636,7 +637,7 @@ function wearRows(h) {
              : h.healthVerdict === "warning" ? "#ffb44a" : "#ff5a52"
     out.push(row(qsTr("Wear"),
                  h.lifeExceeded === true ? qsTr("estimated lifetime exceeded")
-                                         : qsTr("~%1 % life used").arg(h.lifeUsedPct),
+                                         : qsTr("%1–%2 % life used").arg(h.lifeUsedPct).arg(h.lifeUsedPct + 10),
                  h.lifeExceeded === true ? {color: "#ff5a52"} : undefined))
     if (h.preEol > 0)
         out.push(row(qsTr("Spare blocks"),
@@ -744,9 +745,11 @@ function storage() {
     var bars = []
     for (var m = 0; m < mounts.length; ++m) {
         var mn = mounts[m]
-        bars.push({ label: mn.mount + "  (" + mn.fstype + ")", value: mn.used, max: mn.total,
+        bars.push({ label: mn.mount + "  (" + mn.fstype + (mn.readonly ? ", " + qsTr("read-only") : "") + ")",
+                    value: mn.used, max: mn.total,
                     caption: sysmon.fmtBytes(mn.used) + " / " + sysmon.fmtBytes(mn.total),
-                    color: mn.pct > 90 ? "#ff5a52" : mn.pct > 75 ? "#ffb44a" : "#31e0a0" })
+                    color: mn.readonly ? "#8a8a8a"
+                         : mn.pct > 90 ? "#ff5a52" : mn.pct > 75 ? "#ffb44a" : "#31e0a0" })
     }
     s.push({ title: qsTr("Partitions"), bars: bars, rows: [] })
     return { title: qsTr("Storage"), helpTopics: ["storage","raw","firmware"], sections: s.concat(catSections("storage")).concat(fwStorage()).concat(fwModules(["ufs","mmc","blocktag","scsi"])).concat(dtSections("ufs mmc sdhci storage", qsTr("Device tree — storage"))).concat(rawSections("storage")) }
@@ -884,7 +887,7 @@ function net() {
             for (var fx = 0; fx < fwf.length; ++fx)
                 fwr.push(row(fwf[fx].name, fwf[fx].dir, {mono:true}))
             s.unshift({ title: qsTr("Firmware files for this radio"), collapsed: true,
-                note: qsTr("The firmware images shipped for this radio, by name and by the directory each sits in. The names carry the chip family, which is what makes them worth listing at all. That a file is present says it is available to load — not that this system loaded it."),
+                note: qsTr("The firmware images shipped for this radio, by name and by the directory each sits in. The names usually carry a chip family, though a vendor commonly ships a whole family's worth of files and only one of them belongs to the chip in this phone. That a file is present says it is available to load — not that this system loaded it."),
                 rows: fwr })
         }
         s.unshift({ title: qsTr("WLAN chipset"),
@@ -908,9 +911,13 @@ function batt() {
 
     if (c.online) {
         var crows = [
-            row(qsTr("Status"), c.status),
-            row(qsTr("Protocol"), c.protocol + (c.typeRaw ? "  (" + c.typeRaw + ")" : "")),
-            row(qsTr("Charge type"), c.chargeType),
+            row(qsTr("Status"), sysmon.psyWord(c.status)),
+            row(qsTr("Protocol"), (c.protocol ? c.protocol : qsTr("no input supply claims this charge"))
+                + (c.typeRaw ? "  (" + c.typeRaw + ")" : "")
+                + (cp.adapterType && cp.adapterType !== "None" && c.typeRaw
+                   && cp.adapterType.toLowerCase().indexOf(String(c.typeRaw).toLowerCase()) < 0
+                   ? "  ·  " + qsTr("adapter: %1").arg(cp.adapterType) : "")),
+            row(qsTr("Charge type"), sysmon.psyWord(c.chargeType)),
             row(qsTr("Charging power"), c.chargePower !== undefined ? c.chargePower.toFixed(1) + " W" : "—", {color:"#8ef94a"}),
             row(qsTr("Into battery"), (c.chargeCurrent !== undefined ? (c.chargeCurrent*1000).toFixed(0) + " mA" : "—")
                 + (c.batteryVoltage ? "  @ " + c.batteryVoltage.toFixed(2) + " V" : "")),
@@ -919,9 +926,12 @@ function batt() {
                 + (c.inputCurrentMax ? "  ·  max " + c.inputCurrentMax.toFixed(2) + " A" : ""))
         ]
         if (c.pdActive !== undefined)
-            crows.push(row("USB-PD", c.pdActive
-                ? qsTr("active — up to %1 V / %2 A").arg(c.inputVoltageMax.toFixed(0)).arg(c.pdCurrentMax.toFixed(1))
-                : qsTr("not active")))
+            crows.push(row("USB-PD", !c.pdActive ? qsTr("not active")
+                : c.pdFromPort ? qsTr("a contract stands (seen on the Type-C port; its voltage and current are not readable here)")
+                : (c.pdPps ? qsTr("active, PPS") : qsTr("active"))
+                  + (c.inputVoltageMax && c.pdCurrentMax
+                     ? "  ·  " + qsTr("port can do up to %1 V / %2 A")
+                        .arg(c.inputVoltageMax.toFixed(0)).arg(c.pdCurrentMax.toFixed(1)) : "")))
         if (c.typecPowerRole)
             crows.push(row(qsTr("Type-C role"), c.typecPowerRole + (c.typecDataRole ? "  ·  " + c.typecDataRole : "")))
         if (c.typecCurrent)
@@ -1032,10 +1042,11 @@ function batt() {
         if (cp.vbus !== undefined)
             vr.push(row(qsTr("Bus voltage"), cp.vbus.toFixed(3) + " V", {color:"#8ef94a"}))
         if (cp.adcCurrent !== undefined)
-            vr.push(row(qsTr("Charging current"), (cp.adcCurrent * 1000).toFixed(0) + " mA", {color:"#8ef94a"}))
+            vr.push(row(qsTr("Battery current (charger ADC)"), (cp.adcCurrent * 1000).toFixed(0) + " mA",
+                        {color: cp.adcCurrent > 0 ? "#8ef94a" : undefined}))
         vr.push(row(qsTr("Adapter"), cp.adapterType))
         vr.push(row(qsTr("Charging mode"), cp.chargingMode, {mono:true}))
-        vr.push(row(qsTr("Charger type (driver)"), cp.chargerType, {mono:true}))
+        vr.push(row(qsTr("Charger type (driver enum, uninterpreted)"), cp.chargerType, {mono:true}))
         vr.push(row(qsTr("Pump Express"), cp.pumpExpress))
         vr.push(row(qsTr("High-voltage charging"), cp.highVoltage))
         vr.push(row(qsTr("Software JEITA"), cp.swJeita))
@@ -1044,21 +1055,21 @@ function batt() {
         vr.push(row(qsTr("Over-voltage threshold"),
                     cp.ovpVolt ? cp.ovpVolt.toFixed(1) + " V" : "—"))
         vr.push(row(qsTr("Fast-charge indicator"), cp.fastChargeIndicator, {mono:true}))
-        if (cp.scTargetSoc || cp.scCurrentLimit)
+        if (cp.smartCharging === "1" && (cp.scTargetSoc || cp.scCurrentLimit))
             vr.push(row(qsTr("Smart-charge schedule"),
                         (cp.scTargetSoc ? qsTr("hold at %1 %").arg(cp.scTargetSoc) : "")
                         + (cp.scCurrentLimit ? "  ·  " + qsTr("limit %1 mA").arg(cp.scCurrentLimit) : "")
                         + (cp.scStart || cp.scEnd ? "  ·  " + (cp.scStart || "0") + "–" + (cp.scEnd || "0") + " s" : "")))
         if (cp.safetyTimer !== undefined && cp.safetyTimer !== "")
             vr.push(row(qsTr("Safety timer"), cp.safetyTimer))
-        if (cp.setCv !== undefined && cp.setCv !== "")
-            vr.push(row(qsTr("Charge-voltage override"), cp.setCv, {mono:true}))
+        if (cp.setCvVolt)
+            vr.push(row(qsTr("Charge target voltage (driver)"), cp.setCvVolt.toFixed(3) + " V"))
         vr.push(row(qsTr("Corrosion detection"), cp.rustDetect))
         vr.push(row(qsTr("Throttle flag"),
                     cp.throttleFlag === "1" ? qsTr("1 — has tripped at least once") : cp.throttleFlag,
                     {color: cp.throttleFlag === "1" ? "#ffb44a" : undefined}))
         chargeDetail.push({ title: qsTr("Charging path (%1)").arg(cp.vendor), collapsed: true,
-            note: qsTr("From the charger driver's own directory, which sits below the power-supply class. The two figures at the top are its ADC readings — bus voltage in millivolt, charging current in milliamp — and they are the only ones here converted into units, because that scale was checked against the battery node at the same operating point. The throttle flag latches: it says the driver's thermal limit has tripped at some point, not that it is limiting now. It has been observed standing at 1 while full current flowed again, so it answers whether, never how much."),
+            note: qsTr("From the charger driver's own directory, which sits below the power-supply class. The two figures at the top are its ADC readings — bus voltage in millivolt, battery current in milliamp — and their scale was checked against the battery node at the same operating point. That current is the cell's, sign included: it stays there while the cable is out and then reads negative, because the node reports the battery either way. The threshold and target voltages further down are converted from microvolt; everything else is the driver's own figure, uninterpreted. The throttle flag latches: it says the driver's thermal limit has tripped at some point, not that it is limiting now. It has been observed standing at 1 while full current flowed again, so it answers whether, never how much."),
             rows: vr })
     }
 
@@ -1069,7 +1080,7 @@ function batt() {
             var su = supplies[si]
             var st = []
             if (su.type && su.type !== "Unknown") st.push(su.type)
-            if (su.status) st.push(su.status)
+            if (su.status) st.push(sysmon.psyWord(su.status))
             if (su.usbTypeActive && su.usbTypeActive !== "Unknown") st.push(su.usbTypeActive)
             var up = su.online !== "" && su.online !== "0"
             if (su.online !== "") st.push(up ? qsTr("online") : qsTr("offline"))
@@ -1111,35 +1122,61 @@ function batt() {
             note: qsTr("Kernel modules with a part in charging. Each negotiation protocol ships as its own module, so this says what the hardware is able to negotiate at all — independently of what happens to be plugged in. Names are the drivers' own."),
             rows: [ row(qsTr("Modules"), cp.modules.join("   "), {mono:true}) ] })
 
-    sections.push({ title: qsTr("Identity"), rows: [
-        row(qsTr("Supply"), h.supply, {mono:true}),
-        row(qsTr("Manufacturer"), h.manufacturer),
-        row(qsTr("Model"), h.model),
-        row(qsTr("Serial"), h.serial, {mono:true}),
-        row(qsTr("Technology"), h.technology)
-    ]})
-    var hrows = [
-        row(qsTr("Design capacity"), (h.designCapacity ? h.designCapacity.toFixed(0) + " " + h.capacityUnit : "—")),
-        row(qsTr("Full capacity"), (h.fullCapacity ? h.fullCapacity.toFixed(0) + " " + h.capacityUnit : "—")),
-        row(qsTr("Full ÷ design"), sysmon.battHealthExact >= 0 ? sysmon.battHealthExact.toFixed(1) + " %" : "—",
-            {color: sysmon.battHealthPct >= 80 ? "#8ef94a" : sysmon.battHealthPct >= 65 ? "#ffb44a" : "#ff5a52"})
-    ]
-    // The register that claims to know, kept beside the ratio instead of
-    // replacing it, so a disagreement stays visible.
+    var idrows = [ row(qsTr("Supply"), h.supply, {mono:true}) ]
+    if (h.manufacturer) idrows.push(row(qsTr("Manufacturer"), h.manufacturer))
+    if (h.model) idrows.push(row(qsTr("Model"), h.model))
+    if (h.serial) idrows.push(row(qsTr("Serial"), h.serial, {mono:true}))
+    if (h.technology) idrows.push(row(qsTr("Technology"), h.technology))
+    sections.push({ title: qsTr("Identity"), rows: idrows })
+    // Three capacities, each from the best source that survives a cross-check.
+    // Where the kernel's own figure is contradicted by the gauge it is not
+    // shown at all -- it names a different cell, and the note below says so.
+    var hrows = []
+    if (sysmon.battDesignMah > 0)
+        hrows.push(row(qsTr("Design capacity"), sysmon.battDesignMah.toFixed(0) + " mAh",
+                       { right: sysmon.battDesignFromMaker ? qsTr("maker") : "" }))
+    if (sysmon.battFullMah > 0)
+        hrows.push(row(qsTr("Full capacity"), sysmon.battFullMah.toFixed(0) + " mAh",
+                       { right: sysmon.battCapacityDisputed || !h.fullCapacity ? h.gaugeSupply : "" }))
+    if (sysmon.battChargeNowMah > 0)
+        hrows.push(row(qsTr("Current capacity"), sysmon.battChargeNowMah.toFixed(0) + " mAh",
+                       { right: qsTr("%1 % of %2 mAh").arg(sysmon.battCapacity)
+                                 .arg(sysmon.battFullMah.toFixed(0)) }))
+    if (sysmon.battHealthExact >= 0)
+        hrows.push(row(qsTr("Full ÷ design"), sysmon.battHealthExact.toFixed(1) + " %",
+            {color: sysmon.battHealthPct < 0 ? undefined
+                  : sysmon.battHealthPct >= 80 ? "#8ef94a"
+                  : sysmon.battHealthPct >= 65 ? "#ffb44a" : "#ff5a52"}))
     if (sysmon.battSohRegister >= 0)
         hrows.push(row(qsTr("soh register"), sysmon.battSohRegister + " %", {mono:true}))
-    if (h.learnEvents !== undefined)
-        hrows.push(row(qsTr("Capacity measurements"), h.learnEvents))
+    if (h.learnPasses !== undefined)
+        hrows.push(row(qsTr("Completed learning passes"), h.learnPasses.toFixed(0),
+                       { right: h.learnTrials ? qsTr("%1 attempted").arg(h.learnTrials.toFixed(0)) : "" }))
     if (h.profileId) hrows.push(row(qsTr("Battery profile"), h.profileId, {mono:true}))
-    hrows.push(row(qsTr("Design voltage"), h.voltageDesign ? h.voltageDesign.toFixed(2) + " V" : "—"))
-    hrows.push(row(qsTr("Driver health"), h.health))
+    if (h.voltageDesign)
+        hrows.push(row(qsTr("Design voltage"), h.voltageDesign.toFixed(2) + " V"))
+    if (h.chargeTargetVolt)
+        hrows.push(row(qsTr("Charge target (charger register)"), h.chargeTargetVolt.toFixed(2) + " V",
+                       { right: qsTr("not the cell") }))
+    hrows.push(row(qsTr("Driver health"), sysmon.psyWord(h.health)))
     hrows.push(row(qsTr("Quality"), sysmon.battQuality))
     hrows.push(row(qsTr("Based on"), sysmon.battQualityBasis))
     sections.push({ title: qsTr("Capacity & health"), rows: hrows })
+    // Empty rows look like a failure of this app. Say whose gap it is.
+    if (!h.designCapacity && !h.fullCapacity)
+        sections.push({ note: qsTr("This kernel publishes no capacity registers for the battery: no design capacity, no full capacity, and so no state of health either. Nothing is missing here — the driver exports none, and the gauge on this phone is asked for the charge level and nothing else. A capacity would have to come from the cell's datasheet, which is not something the phone knows."),
+                        rows: [] })
+    if (sysmon.battCapacityDisputed)
+        sections.push({ note: qsTr("The kernel on this phone reports %1 mAh as both the design and the full capacity of the cell. That figure is not shown above, because it is contradicted by the gauge behind it and by what the cell is sold as: it is an entry in the platform's device tree that describes a different cell. What is shown instead is the maker's figure for the design capacity and the gauge's own for the full one. The charge percentage was never affected — the gauge computes it internally and does not divide by the driver's number.").arg(h.designCapacity ? h.designCapacity.toFixed(0) : "?"),
+                        rows: [] })
 
     // Without a single learned capacity, "full capacity" is a profile entry and
     // the ratio above compares two catalogue numbers -- worth saying, because
     // the same figure would be an ageing measurement on a gauge that had learned.
+    if (sysmon.battHealthCatalogue)
+        sections.push({ note: qsTr("Full capacity and design capacity are byte for byte the same number here, so their ratio is 100 % by construction and says nothing about this cell. Both come from the battery profile the platform ships, and the gauge has never written a capacity of its own over them. This page therefore reports no state of health at all rather than a green 100 %.")
+                              + (h.gaugeFullMah ? "\n\n" + qsTr("The gauge beside it divides by %1 mAh instead, and that is the figure the percentage on this page is built on. Two numbers, one cell — at most one of them describes it.").arg(h.gaugeFullMah.toFixed(0)) : ""),
+                        rows: [] })
     if (h.learnEvents === 0)
         sections.push({ note: qsTr("This gauge has never measured a capacity of its own: all of its learning counters stand at zero, and charge_full comes from the battery profile. The percentage above therefore compares the profile of the installed cell against the design capacity of the original — it is not a measurement of ageing. On a replacement cell with a smaller nominal capacity it will read low from the first day and never move."),
                         rows: [] })
@@ -1147,10 +1184,6 @@ function batt() {
     // Charge cycles: the headline figure is a mean, and the bands it averages
     // say more than it does.
     var crows2 = [ row(qsTr("Equivalent full cycles"), h.cycles) ]
-    if (h.cycleBandTotal !== undefined) {
-        crows2.push(row(qsTr("Band crossings"), Math.round(h.cycleBandTotal)))
-        if (h.cycleBuckets) crows2.push(row(qsTr("Per band"), h.cycleBuckets.join("  ·  "), {mono:true}))
-    }
     if (h.ageLevel !== undefined)
         crows2.push(row(qsTr("Ageing profile"), qsTr("step %1").arg(h.ageLevel)))
     if (h.esrMilliOhm)
@@ -1160,8 +1193,8 @@ function batt() {
     if (h.batteryIdOhm)
         crows2.push(row(qsTr("Battery ID resistor"), (h.batteryIdOhm / 1000).toFixed(1) + " kΩ"))
     sections.push({ title: qsTr("Wear indicators"), rows: crows2 })
-    if (h.cycleBandTotal !== undefined)
-        sections.push({ note: qsTr("The gauge counts how often each of eight state-of-charge bands was crossed; the cycle figure it reports is the mean of those eight, which is why it reads far lower than the charging actually done. The resistances come from three separate registers of the Qualcomm gauge, each on its own scale — the ESR is the one that tracks ageing, while the ID resistor only identifies the cell."),
+    if (h.esrMilliOhm || h.storedMilliOhm || h.batteryIdOhm)
+        sections.push({ note: qsTr("The resistances come from three separate registers of the gauge, each on its own scale: the ESR is the one that tracks ageing, while the ID resistor only identifies the cell. The cycle figure beside them is the gauge's own count of equivalent full cycles."),
                         rows: [] })
     // Both numbers are on the page now; flag it when they contradict each other,
     // because then at most one of them can be describing the cell.
@@ -1174,7 +1207,7 @@ function batt() {
     // that has none the rows are absent rather than zero, like every other
     // figure this app cannot source.
     var lrows = [
-        row(qsTr("Level"), sysmon.battCapacity + " %  ·  " + sysmon.battStatus),
+        row(qsTr("Level"), sysmon.battCapacity + " %  ·  " + sysmon.psyWord(sysmon.battStatus)),
         row(qsTr("Voltage"), sysmon.battVoltageV.toFixed(3) + " V")
     ]
     if (sysmon.battCurrentValid) {
@@ -1191,14 +1224,18 @@ function batt() {
     if (wk && wk.length) {
         var wrows = []
         var upS = sysmon.uptimeSec
+        var hasPrevent = wk[0].preventSec !== undefined && wk[0].preventSec > 0
         for (var wi = 0; wi < wk.length && wi < 8; ++wi) {
-            var held = sysmon.fmtDuration(Math.round(wk[wi].heldSec))
-            if (upS > 0) held += "  ·  " + (100 * wk[wi].heldSec / upS).toFixed(0) + " %"
+            var secs = hasPrevent ? wk[wi].preventSec : wk[wi].heldSec
+            var held = sysmon.fmtDuration(Math.round(secs))
+            if (upS > 0) held += "  ·  " + (100 * secs / upS).toFixed(0) + " %"
             wrows.push(row(wk[wi].name, held,
                            { right: wk[wi].count > 0 ? wk[wi].count.toFixed(0) + " ×" : "" }))
         }
         sections.push({ title: qsTr("What keeps the device awake"),
-            note: qsTr("How long each source held the system out of suspend since boot, and how often. Counted by the kernel, not estimated here."),
+            note: hasPrevent
+                ? qsTr("How long each source actually prevented suspend since boot, and how often it fired. The kernel counts this separately from how long a source was merely held: a display wakelock is active for as long as the screen is on, but it only prevents suspend while the system would otherwise have gone down. This list ranks the figure the heading names.")
+                : qsTr("How long each source was held active since boot, and how often. This kernel does not report the time suspend was actually prevented, so a source that is held while the phone is awake anyway counts here too."),
             rows: wrows })
     }
 
@@ -1551,7 +1588,8 @@ function usb() {
         s.push({ title: qsTr("Charging (USB-C input)"),
             note: qsTr("A charger is not a USB data device, so it is shown here as the power input. Full details are under Battery."),
             rows: [
-                row(qsTr("Protocol"), c.protocol + (c.typeRaw ? "  (" + c.typeRaw + ")" : "")),
+                row(qsTr("Protocol"), (c.protocol ? c.protocol : qsTr("no input supply claims this charge"))
+                    + (c.typeRaw ? "  (" + c.typeRaw + ")" : "")),
                 row(qsTr("Charging power"), c.chargePower !== undefined ? c.chargePower.toFixed(1) + " W" : "—", {color:"#8ef94a"}),
                 row(qsTr("Input"), (c.inputVoltage ? c.inputVoltage.toFixed(2) + " V" : "—")
                     + (c.inputCurrentMax ? "  ·  max " + c.inputCurrentMax.toFixed(2) + " A" : "")),
