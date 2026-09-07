@@ -508,7 +508,9 @@ void Sampler::sampleSystem(SysSnap &s, qulonglong &totalDelta)
             m_battZeroWhileDischarging = 0;
         s.battCurrentValid = m_battCurrentSeen
                 || (haveCurrent && m_battZeroWhileDischarging < 3);
-        s.battPowerW = s.battCurrentValid ? qAbs(s.battCurrentA) * s.battVoltageV : 0;
+        // The sign is the direction: negative leaves the cell, charger attached
+        // or not. The current beside it was always signed; the power now agrees.
+        s.battPowerW = s.battCurrentValid ? s.battCurrentA * s.battVoltageV : 0;
 
         s.battChargeFull = m_srcFull.value(0);
         s.battChargeDesign = m_srcDesign.value(0);

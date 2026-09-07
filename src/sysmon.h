@@ -181,8 +181,10 @@ public:
     Q_INVOKABLE QVariantMap wifiDetail() const;
     Q_INVOKABLE QVariantMap batteryHardware() const;
     Q_INVOKABLE QVariantMap chargerDetail() const;
+    Q_INVOKABLE QStringList chargerLog() const;
     Q_INVOKABLE QVariantMap chargingPath() const;
-    Q_INVOKABLE QVariantList powerSupplyDump() const;
+    Q_INVOKABLE QVariantList powerSupplyDump(bool withAttrs = false) const;
+    Q_INVOKABLE QVariantList powerSupplyAttrs(const QString &name) const;
     Q_INVOKABLE QVariantMap thermalDetail() const;
     Q_INVOKABLE QVariantList rawNodes(const QString &topic) const;
     Q_INVOKABLE QVariantList deviceTreeParts(const QString &filter = QString()) const;

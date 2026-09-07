@@ -917,7 +917,10 @@ function batt() {
                 + (cp.adapterType && cp.adapterType !== "None" && c.typeRaw
                    && cp.adapterType.toLowerCase().indexOf(String(c.typeRaw).toLowerCase()) < 0
                    ? "  ·  " + qsTr("adapter: %1").arg(cp.adapterType) : "")),
-            row(qsTr("Charge type"), sysmon.psyWord(c.chargeType)),
+            row(qsTr("Charge type"), c.chargeType
+                    ? sysmon.psyWord(c.chargeType)
+                    : qsTr("not exposed by this chipset"),
+                { active: c.chargeType ? undefined : false }),
             row(qsTr("Charging power"), c.chargePower !== undefined ? c.chargePower.toFixed(1) + " W" : "—", {color:"#8ef94a"}),
             row(qsTr("Into battery"), (c.chargeCurrent !== undefined ? (c.chargeCurrent*1000).toFixed(0) + " mA" : "—")
                 + (c.batteryVoltage ? "  @ " + c.batteryVoltage.toFixed(2) + " V" : "")),
@@ -932,6 +935,18 @@ function batt() {
                   + (c.inputVoltageMax && c.pdCurrentMax
                      ? "  ·  " + qsTr("port can do up to %1 V / %2 A")
                         .arg(c.inputVoltageMax.toFixed(0)).arg(c.pdCurrentMax.toFixed(1)) : "")))
+        // Which silicon does the work: on a divider topology, the difference
+        // between the linear charger and the pump — eleven watts against two.
+        if (c.chargeStages && c.chargeStages.length) {
+            for (var sx = 0; sx < c.chargeStages.length; ++sx) {
+                var stg = c.chargeStages[sx]
+                crows.push(row(sx === 0 ? qsTr("Stage carrying the charge") : "",
+                               stg.name + "  ·  " + (stg.pump
+                                   ? qsTr("charge pump — direct charging")
+                                   : qsTr("linear charger")),
+                               {color: "#8ef94a"}))
+            }
+        }
         if (c.typecPowerRole)
             crows.push(row(qsTr("Type-C role"), c.typecPowerRole + (c.typecDataRole ? "  ·  " + c.typecDataRole : "")))
         if (c.typecCurrent)
@@ -995,23 +1010,39 @@ function batt() {
 
             if (c.pdMaxPower)
                 prows.push(row(qsTr("Maximum offered"), c.pdMaxPower.toFixed(0) + " W"))
-            prows.push(row(qsTr("Extensions"),
-                "PPS " + (c.pdPps ? qsTr("yes") : qsTr("no"))
-                + "  ·  EPR " + (c.pdEpr ? qsTr("yes") : qsTr("no"))
-                + "  ·  AVS " + (c.pdAvs ? qsTr("yes") : qsTr("no"))))
-            if (c.pdSpecFloor)
-                prows.push(row(qsTr("Source implements at least"), "PD " + c.pdSpecFloor))
-            sections.push({ title: qsTr("Power source capabilities"),
-                note: qsTr("Every object the charger offered, read from the raw PDOs. The revision in the PD message header can only express 1.0, 2.0 or 3.0 — 3.1 and 3.2 keep it at 3.0 on purpose. What a source implements beyond 3.0 is therefore derived from the extensions it offers: PPS means 3.0 or later, EPR means 3.1, SPR-AVS means 3.2. An absent extension means it was not offered here, not that the charger cannot do it."),
-                rows: prows })
+            // The raw PDOs carry the flags, the decoded table does not -- and
+            // where a flag was never read, no answer is given for it.
+            if (c.pdCapsFrom === "tcpc") {
+                prows.push(row(qsTr("Extensions"),
+                    "PPS " + (c.pdPps ? qsTr("yes") : qsTr("no"))
+                    + "  ·  " + qsTr("EPR / AVS: this interface does not say")))
+                sections.push({ title: qsTr("Power source capabilities"),
+                    note: qsTr("Every object the charger offered, as the Type-C port controller prints them in caps_info. It hands over the decoded table rather than the raw objects: voltage, current and which object is in force are exact, while the flags the raw PDOs carry — the EPR bit, the AVS subtype — are not part of it. Nothing is claimed about them here."),
+                    rows: prows })
+            } else {
+                prows.push(row(qsTr("Extensions"),
+                    "PPS " + (c.pdPps ? qsTr("yes") : qsTr("no"))
+                    + "  ·  EPR " + (c.pdEpr ? qsTr("yes") : qsTr("no"))
+                    + "  ·  AVS " + (c.pdAvs ? qsTr("yes") : qsTr("no"))))
+                if (c.pdSpecFloor)
+                    prows.push(row(qsTr("Source implements at least"), "PD " + c.pdSpecFloor))
+                sections.push({ title: qsTr("Power source capabilities"),
+                    note: qsTr("Every object the charger offered, read from the raw PDOs. The revision in the PD message header can only express 1.0, 2.0 or 3.0 — 3.1 and 3.2 keep it at 3.0 on purpose. What a source implements beyond 3.0 is therefore derived from the extensions it offers: PPS means 3.0 or later, EPR means 3.1, SPR-AVS means 3.2. An absent extension means it was not offered here, not that the charger cannot do it."),
+                    rows: prows })
+            }
         }
 
-        // handshake / kernel-log (root mode only; full PD packets are not in sysfs)
+        // Handshake from the ring buffer: read directly where the kernel allows
+        // it, through the helper where it does not. Full PD packets are in
+        // neither — no chipset here puts them in sysfs.
         var rootActive = false
         try { rootActive = (typeof rootmon !== "undefined") && rootmon.active } catch (eR) { rootActive = false }
-        if (rootActive) {
-            var log = []
+        var log = []
+        try { log = sysmon.chargerLog() } catch (eK) { log = [] }
+        if (!log.length && rootActive) {
             try { log = rootmon.chargerLog() } catch (eL) { log = [] }
+        }
+        if (log.length || rootActive) {
             // human-readable timeline of what happened
             var events = humanizeChargerLog(log)
             var erows = []
@@ -1025,10 +1056,12 @@ function batt() {
             var hrows = []
             for (var j = 0; j < log.length; ++j) hrows.push(row("", log[j], {mono:true}))
             if (hrows.length)
-                chargeDetail.push({ title: qsTr("Kernel log (raw excerpt)"), collapsed: true, rows: hrows })
+                chargeDetail.push({ title: qsTr("Kernel log (raw excerpt)"), collapsed: true,
+                    note: qsTr("The charger lines around the moment this charger was attached, and the newest ones. What lies in between is largely the same status poll repeating — a PPS contract renews itself every few seconds and says so every time."),
+                    rows: hrows })
         } else {
             sections.push({ title: qsTr("Charger handshake"),
-                rows: [ row(qsTr("Log"), qsTr("Root mode required — start the helper to read the kernel charger log.")) ] })
+                rows: [ row(qsTr("Log"), qsTr("This kernel keeps its log from ordinary processes (dmesg_restrict) — root mode reads it.")) ] })
         }
     }
 
@@ -1086,9 +1119,11 @@ function batt() {
             if (su.online !== "") st.push(up ? qsTr("online") : qsTr("offline"))
             if (su.model) st.push(su.model)
             var live = up || su.status === "Charging"
+            var natt = su.attrCount !== undefined ? su.attrCount
+                     : (su.attrs ? su.attrs.length : 0)
             sr.push(row(su.name + (su.driver ? "  ·  " + su.driver : ""), st.join("  ·  "),
                         { active: live ? undefined : false,
-                          right: (su.attrs ? su.attrs.length : 0) + "" }))
+                          right: natt + "" }))
         }
         chargeDetail.push({ title: qsTr("Charging chain"), collapsed: true,
             note: qsTr("Every node the kernel registered under the power-supply class, the driver behind it and — on the right — how many attributes it exports. A single-path charger registers one input and the battery; a divider topology registers each silicon stage separately, and only the ones actually carrying current come up online. The grayed ones are present but idle."),
@@ -1244,15 +1279,23 @@ function batt() {
     // Every register of every supply, unabridged. On a divider topology this
     // is where the gauge's own hundred-odd registers live, and none of them
     // reach the curated sections above because no one has named them.
+    // Read on open, not on build: hundreds of I2C registers across nine stages.
+    // The header knows their number without touching one.
     var dumps = []
     for (var di = 0; di < supplies.length; ++di) {
         var sd = supplies[di]
-        var at = sd.attrs || []
-        if (!at.length) continue
-        var ar = []
-        for (var ai = 0; ai < at.length; ++ai)
-            ar.push(row(at[ai].name, at[ai].value, {mono:true}))
-        dumps.push({ title: sd.name + (sd.driver ? "  ·  " + sd.driver : ""), rows: ar })
+        var natt2 = sd.attrCount !== undefined ? sd.attrCount
+                  : (sd.attrs ? sd.attrs.length : 0)
+        if (!natt2) continue
+        dumps.push({ title: sd.name + (sd.driver ? "  ·  " + sd.driver : ""),
+                     rowsFn: (function (nm) {
+                         return function () {
+                             var at = sysmon.powerSupplyAttrs(nm), ar = []
+                             for (var ai = 0; ai < at.length; ++ai)
+                                 ar.push(row(at[ai].name, at[ai].value, {mono:true}))
+                             return ar
+                         }
+                     })(sd.name) })
     }
     var dumpNote = qsTr("Every attribute of every power-supply node, exactly as the kernel wrote it. Units are the drivers' own and are not uniform: the same key can count microamps on one node and milliamps on the next, so nothing here is converted. An empty value is a node that answered with nothing.")
     if (dumps.length && dumps.length <= 3)
@@ -1686,27 +1729,147 @@ function humanizeChargerLog(lines) {
             return { text: qsTr("Charger type detected") }
         if (m.indexOf("hvdcp") >= 0)
             return { text: qsTr("Quick Charge negotiation") }
-        if (m.indexOf("pd hard") >= 0)
+        if (m.indexOf("pd hard") >= 0 || m.indexOf("hard_reset") >= 0)
             return { text: qsTr("USB-PD hard reset"), color: "#ffb44a" }
+
+        // MediaTek says the same things in the policy engine's own vocabulary:
+        // the sink starts, waits for the source's capabilities, evaluates them,
+        // asks for one object, the source accepts and switches over, and the
+        // contract stands. A PPS contract then keeps renewing that request for
+        // as long as it lasts.
+        if (m.indexOf("unattached.snk") >= 0 || m.indexOf("attach = 0") >= 0)
+            return { text: qsTr("Cable disconnected (Type-C removed)"), color: "#ffb44a" }
+        if (m.indexOf("typec_attach_thread") >= 0 && m.indexOf("attach = 0") < 0)
+            return { text: qsTr("Cable attached (Type-C)"), color: "#31e0a0" }
+        var bc = msg.match(/port stat:\s*\d+\(([A-Za-z0-9+]+)\)/)
+        if (bc)
+            return { text: qsTr("Charger type detected: %1").arg(bc[1]) }
+        if (m.indexOf("snk_start") >= 0 || m.indexOf("snk_disc") >= 0)
+            return { text: qsTr("Sink policy engine started") }
+        if (m.indexOf("snk_wait_cap") >= 0)
+            return { text: qsTr("Waiting for the source to send its capabilities") }
+        if (m.indexOf("evt:src_cap") >= 0 || m.indexOf("snk_eva_cap") >= 0)
+            return { text: qsTr("Source sent its capabilities, sink evaluating them"), color: "#31e0a0" }
+        if (m.indexOf("snk_sel_cap") >= 0)
+            return { text: qsTr("One object requested from the source") }
+        if (m.indexOf("evt:accept") >= 0)
+            return { text: qsTr("Source accepted the request") }
+        if (m.indexOf("snk_trans_sink") >= 0)
+            return { text: qsTr("Source switching over to the agreed supply") }
+        if (m.indexOf("evt:ps_rdy") >= 0 || m.indexOf("snk_ready") >= 0)
+            return { text: qsTr("Supply ready — the contract is in force"), color: "#8ef94a" }
+        if (m.indexOf("snk_get_pps") >= 0 || m.indexOf("pps_status") >= 0)
+            return { text: qsTr("PPS status read from the source") }
+        if (m.indexOf("snk_get_cap_ext") >= 0)
+            return { text: qsTr("Extended capabilities read from the source") }
+        if (m.indexOf("evt:no_support") >= 0)
+            return { text: qsTr("Source answered: message not supported") }
+        // The objects themselves are listed from sysfs a section above — here
+        // only the fact that they arrived, and which one was taken.
+        if (m.indexOf("dpm:srccap") >= 0 && m.indexOf("select") < 0)
+            return { key: "srccap", text: qsTr("Source listed its objects") }
+        var sel = msg.match(/Select\s*(?:Src)?Cap(\d+)/i)
+        if (sel)
+            return { text: qsTr("Object %1 selected").arg(sel[1]), color: "#31e0a0" }
+        if (m.indexOf("newreq") >= 0)
+            return { text: qsTr("Request sent to the source") }
+        // A PPS supply is steered in small steps: one row, latest setpoint.
+        var setcap = msg.match(/pd_set_cap type:(\d+)\s+(\d+)mV\s+(\d+)mA/)
+        if (setcap)
+            return { key: "setcap",
+                     text: (setcap[1] === "3" ? qsTr("PPS setpoint: %1 V / %2 A")
+                                              : qsTr("Requested: %1 V / %2 A"))
+                            .arg((parseInt(setcap[2]) / 1000).toFixed(2))
+                            .arg((parseInt(setcap[3]) / 1000).toFixed(2)) }
+        if (m.indexOf("selected_adapter_ready") >= 0)
+            return { text: qsTr("Charging path handed to the PD adapter driver") }
+        if (m.indexOf("plug in, type") >= 0)
+            return { text: qsTr("Charger plugged in"), color: "#31e0a0" }
+        if (m.indexOf("plug_out") >= 0 || m.indexOf("plug out") >= 0)
+            return { text: qsTr("Charger unplugged"), color: "#ffb44a" }
+        var rdy = msg.match(/handle_pd_rdy_attach\s+(\d+)mV\s+(\d+)mA\s+(\d+)uW/)
+        if (rdy)
+            return { text: qsTr("Port reports the contract: %1 V / %2 A  ·  %3 W")
+                            .arg((parseInt(rdy[1]) / 1000).toFixed(1))
+                            .arg((parseInt(rdy[2]) / 1000).toFixed(2))
+                            .arg((parseInt(rdy[3]) / 1e6).toFixed(0)) }
+
+        // Direct charging negotiates for itself; these lines say where the
+        // source cannot serve it.
+        var lmt = msg.match(/get_ita_lmt.*?lcd=(\d+)\((\d+)/)
+        if (lmt)
+            return { key: "italmt",
+                     text: qsTr("Direct-charge input limit: %1 mA of %2 mA offered")
+                            .arg(lmt[1]).arg(lmt[2]) }
+        if (m.indexOf("match_cap") >= 0)
+            return { text: qsTr("Source has no object matching the request"), color: "#ffb44a" }
+        if (m.indexOf("ta charging fail") >= 0)
+            return { text: qsTr("Direct charging could not be started"), color: "#ffb44a" }
+        if (m.indexOf("pe50_stop") >= 0)
+            return { text: qsTr("Direct-charge algorithm gave up and reset the source"),
+                     color: "#ffb44a" }
+        if (m.indexOf("vbus_0v") >= 0)
+            return { text: qsTr("Bus voltage collapsed to 0 V"), color: "#ffb44a" }
+        if (m.indexOf("vbus_high") >= 0)
+            return { text: qsTr("Bus voltage is back") }
+        var st = msg.match(/pe50_algo_threadfn state = (\w+)/)
+        if (st)
+            return { key: "pe50state", text: qsTr("Direct-charge algorithm: %1").arg(st[1]) }
+
         if (m.indexOf("pd_active") >= 0 || m.indexOf("usbpd") >= 0 || m.indexOf("pd_") >= 0)
             return { text: qsTr("USB Power Delivery negotiation") }
         return null
     }
-    var out = [], t0 = null, lastText = null
+    // A PPS contract renews itself every few seconds — one fact, not forty
+    // rows. A repeat folds into a count on the row it started.
+    var out = [], t0 = null
     for (var i = 0; i < lines.length; ++i) {
-        var c = classify(lines[i])
-        if (!c || c.text === lastText) continue
-        lastText = c.text
-        var tm = lines[i].match(/\[\s*(\d+)\.(\d+)\]/)
+        // The filter wrote repeat counts onto the survivor; that is the weight.
+        var line = lines[i]
+        var mult = 1
+        var rx = line.match(/\s+\[x(\d+)\]\s*$/)
+        if (rx) { mult = parseInt(rx[1]); line = line.slice(0, rx.index) }
+        var c = classify(line)
+        if (!c) continue
+        var tm = line.match(/\[\s*(\d+)\.(\d+)\]/)
         var tlabel = "—"
         if (tm) {
             var t = parseFloat(tm[1] + "." + tm[2])
             if (t0 === null) t0 = t
             tlabel = "+" + (t - t0).toFixed(1) + " s"
         }
-        out.push({ t: tlabel, text: c.text, color: c.color })
+        // Moving values fold on their kind, and the row shows the newest.
+        var key = c.key || c.text
+        // A renewal is a cycle of about half a dozen events; the lookback spans
+        // one, so further back is a new step rather than a repeat.
+        var fold = -1
+        for (var b = out.length - 1; b >= 0 && b >= out.length - 6; --b)
+            if (out[b].key === key) { fold = b; break }
+        if (fold >= 0) {
+            out[fold].repeat = (out[fold].repeat || 1) + mult
+            out[fold].last = tlabel
+            out[fold].text = c.text
+            continue
+        }
+        out.push({ t: tlabel, key: key, text: c.text, color: c.color,
+                   repeat: mult, last: tlabel })
     }
-    if (out.length > 25) out = out.slice(out.length - 25)
+    for (var r = 0; r < out.length; ++r) {
+        if (!(out[r].repeat > 1)) continue
+        // One line per object: the count is their number, not a repetition.
+        if (out[r].key === "srccap")
+            out[r].text = qsTr("Source listed %1 objects").arg(out[r].repeat)
+        else
+            out[r].text += "   " + qsTr("(%1×, last %2)").arg(out[r].repeat).arg(out[r].last)
+    }
+    // Handshake at the front, current state at the back; the middle is cut and
+    // the row replacing it says how much.
+    if (out.length > 25) {
+        var cut = out.length - 24
+        out = out.slice(0, 17)
+            .concat([{ t: "⋯", text: qsTr("%1 further events").arg(cut) }])
+            .concat(out.slice(out.length - 7))
+    }
     return out
 }
 
