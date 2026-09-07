@@ -398,8 +398,12 @@ Page {
                         fillColor: Qt.rgba(Diag.amber.r, Diag.amber.g, Diag.amber.b, 0.14)
                         gridColor: Diag.grid
                     }
-                    KeyValue { label: sysmon.battCharging ? qsTr("Charging power") : qsTr("Power draw")
-                        value: sysmon.battPowerW.toFixed(2) + " W"
+                    // Label follows the measurement, not the status word: on a
+                    // card read in passing, a minus sign is easy to miss.
+                    KeyValue { label: sysmon.battPowerW !== 0
+                            ? (sysmon.battPowerW > 0 ? qsTr("Charging power") : qsTr("Power draw"))
+                            : (sysmon.battCharging ? qsTr("Charging power") : qsTr("Power draw"))
+                        value: Math.abs(sysmon.battPowerW).toFixed(2) + " W"
                         valueColor: Diag.amber }
                     KeyValue { label: qsTr("Current"); value: (sysmon.battCurrentA * 1000).toFixed(0) + " mA" }
                     KeyValue { label: qsTr("Voltage"); value: sysmon.battVoltageV.toFixed(3) + " V" }

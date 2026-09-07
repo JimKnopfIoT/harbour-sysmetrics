@@ -21,6 +21,7 @@
 #include <QtDBus/QDBusArgument>
 #include <QtDBus/QDBusObjectPath>
 
+#include "chargerlog.h"
 #include "rootclient.h"
 #include "source.h"
 
@@ -29,6 +30,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/klog.h>
 #include <sys/statvfs.h>
 #include <ifaddrs.h>
 #include <linux/ethtool.h>
@@ -56,11 +58,10 @@ void SysMon::onSystem(const SysSnap &snap)
     push(m_memHist, snap.memTotal ? 100.0 * (snap.memTotal - snap.memAvailable) / snap.memTotal : 0);
     push(m_rxHist, snap.netRxRate);
     push(m_txHist, snap.netTxRate);
-    // discharge positive, charge negative: drain graph reads upward. Matching
-    // the whole string missed MediaTek's "Cmd discharging" and plotted a
-    // discharging phone as if it were charging.
-    const double drain = snap.battStatus.contains(QLatin1String("discharging"), Qt::CaseInsensitive)
-                         ? snap.battPowerW : -snap.battPowerW;
+    // Discharge positive: the drain graph reads upward. The direction used to
+    // come from the status word, which misplots a phone that says "Charging"
+    // while the cell empties. The power is signed now, so the measurement says.
+    const double drain = -snap.battPowerW;
     push(m_battHist, drain);
     emit updated();
 }
@@ -966,6 +967,111 @@ static void pdSourceCaps(QVariantMap &m)
     }
 }
 
+// Source capabilities on MediaTek, which has no usbpd class. The port
+// controller prints them decoded in caps_info: "type vmin vmax oper" per line
+// (0 fixed, 1 battery, 2 variable, 3 augmented), mV and mA, under a header per
+// table; selected_cap is the position in remote_src_cap, counted from one.
+// The raw PDOs' flags -- EPR bit, AVS subtype, RDO -- are not in it, so nothing
+// derived from those is claimed here.
+static void pdSourceCapsTcpc(QVariantMap &m)
+{
+    const QDir cls(QStringLiteral("/sys/class/tcpc"));
+    if (!cls.exists())
+        return;
+    QString port;
+    for (const QString &e : cls.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        if (QFileInfo::exists(cls.filePath(e) + QStringLiteral("/caps_info"))) {
+            port = cls.filePath(e) + QLatin1Char('/');
+            break;
+        }
+    }
+    if (port.isEmpty())
+        return;
+
+    QFile f(port + QStringLiteral("caps_info"));
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+    const QStringList lines = QString::fromUtf8(f.readAll()).split(QLatin1Char('\n'));
+
+    QVariantList pdos;
+    QString section;
+    int selected = 0;
+    double maxW = 0;
+    bool pps = false;
+
+    for (const QString &raw : lines) {
+        const QString line = raw.trimmed();
+        if (line.isEmpty())
+            continue;
+        if (line.startsWith(QLatin1String("selected_cap"))) {
+            selected = line.section(QLatin1Char('='), 1).trimmed().toInt();
+            continue;
+        }
+        if (line.contains(QLatin1String("_cap("))) {
+            section = line.left(line.indexOf(QLatin1Char('(')));
+            continue;
+        }
+        const QStringList fld = line.split(QRegExp(QStringLiteral("\\s+")), QString::SkipEmptyParts);
+        if (fld.size() != 4)
+            continue;
+        const int type = fld.at(0).toInt();
+        const double vmin = fld.at(1).toDouble() / 1000.0;
+        const double vmax = fld.at(2).toDouble() / 1000.0;
+        const double oper = fld.at(3).toDouble() / 1000.0;
+
+        QVariantMap p;
+        switch (type) {
+        case 1:     // battery: the last field is power, not current
+            p.insert(QStringLiteral("kind"), QStringLiteral("battery"));
+            p.insert(QStringLiteral("voltageMin"), vmin);
+            p.insert(QStringLiteral("voltageMax"), vmax);
+            p.insert(QStringLiteral("power"), oper);
+            break;
+        case 2:
+            p.insert(QStringLiteral("kind"), QStringLiteral("variable"));
+            p.insert(QStringLiteral("voltageMin"), vmin);
+            p.insert(QStringLiteral("voltageMax"), vmax);
+            p.insert(QStringLiteral("current"), oper);
+            break;
+        case 3:
+            // Augmented with a range: PPS. The subtype is not named here, so an
+            // AVS object would be indistinguishable.
+            p.insert(QStringLiteral("kind"), QStringLiteral("pps"));
+            p.insert(QStringLiteral("voltageMin"), vmin);
+            p.insert(QStringLiteral("voltageMax"), vmax);
+            p.insert(QStringLiteral("current"), oper);
+            break;
+        default:
+            p.insert(QStringLiteral("kind"), QStringLiteral("fixed"));
+            p.insert(QStringLiteral("voltage"), vmax);
+            p.insert(QStringLiteral("current"), oper);
+            break;
+        }
+
+        if (section != QLatin1String("remote_src_cap"))
+            continue;
+        p.insert(QStringLiteral("index"), pdos.size() + 1);
+        if (type == 3)
+            pps = true;
+        maxW = qMax(maxW, (type == 1 ? oper : vmax * oper));
+        pdos.append(p);
+    }
+
+    if (pdos.isEmpty())
+        return;
+
+    m.insert(QStringLiteral("pdos"), pdos);
+    m.insert(QStringLiteral("pdMaxPower"), maxW);
+    m.insert(QStringLiteral("pdPps"), pps);
+    // This reader knows less than the raw PDOs; the page words it accordingly.
+    m.insert(QStringLiteral("pdCapsFrom"), QStringLiteral("tcpc"));
+    if (selected > 0 && selected <= pdos.size())
+        m.insert(QStringLiteral("pdRequestedObject"), selected);
+    // Policy engine ready is the explicit contract.
+    if (readTrim(port + QStringLiteral("pe_ready")) == QLatin1String("yes"))
+        m.insert(QStringLiteral("pdContract"), QStringLiteral("explicit"));
+}
+
 // One reading of wakeup_sources, unranked: two pages ask it different
 // questions. The header decides the columns -- their order has changed.
 // The sysfs class: same counters as debugfs, world-readable, and it carries
@@ -1163,9 +1269,29 @@ QVariantMap SysMon::chargerDetail() const
     const double ci = readTrim(bat + QStringLiteral("current_now")).toDouble() / 1e6;
     const double bv = readTrim(bat + QStringLiteral("voltage_now")).toDouble() / 1e6;
     m.insert(QStringLiteral("chargeType"), readTrim(bat + QStringLiteral("charge_type")));
-    m.insert(QStringLiteral("chargeCurrent"), qAbs(ci));
+    // Which stage carries the charge. charge_type is a Qualcomm field and
+    // absent here, but every stage keeps its own status -- read, not derived.
+    QVariantList stages;
+    const QDir psyDir(QStringLiteral("/sys/class/power_supply"));
+    for (const QString &n : psyDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+        if (n == QLatin1String("battery"))
+            continue;
+        if (readTrim(psyDir.filePath(n) + QStringLiteral("/status"))
+                != QLatin1String("Charging"))
+            continue;
+        QVariantMap st;
+        st.insert(QStringLiteral("name"), n);
+        const QString low = n.toLower();
+        st.insert(QStringLiteral("pump"), low.contains(QLatin1String("dvchg"))
+                                          || low.contains(QLatin1String("div")));
+        stages.append(st);
+    }
+    if (!stages.isEmpty())
+        m.insert(QStringLiteral("chargeStages"), stages);
+    // Signed: where it runs the other way, that is the fact worth having.
+    m.insert(QStringLiteral("chargeCurrent"), ci);
     m.insert(QStringLiteral("batteryVoltage"), bv);
-    m.insert(QStringLiteral("chargePower"), qAbs(ci) * bv);
+    m.insert(QStringLiteral("chargePower"), ci * bv);
 
     // Type-C negotiated roles / partner / cable (from the tcpm/typec class)
     const QString tc = QStringLiteral("/sys/class/typec/port0/");
@@ -1211,7 +1337,25 @@ QVariantMap SysMon::chargerDetail() const
         }
     }
     pdSourceCaps(m);
+    if (!m.contains(QStringLiteral("pdos")))
+        pdSourceCapsTcpc(m);
     return m;
+}
+
+// The negotiation out of the kernel ring buffer. Readable unprivileged where
+// dmesg_restrict is 0; where it is not, klogctl fails and the page falls back
+// to the root helper.
+QStringList SysMon::chargerLog() const
+{
+    const int len = klogctl(10 /*SIZE_BUFFER*/, nullptr, 0);
+    if (len <= 0)
+        return QStringList();
+    QByteArray buf(len + 1, 0);
+    const int n = klogctl(3 /*READ_ALL*/, buf.data(), len);
+    if (n <= 0)
+        return QStringList();
+    buf.truncate(n);
+    return chargerLogLines(buf);
 }
 
 // ---------------------------------------------------------------------------
@@ -1262,6 +1406,9 @@ static bool sysfsUnsafe(const QString &name)
     return never.contains(name);
 }
 
+// Attribute count without reading any: on I2C stages the reads are the cost.
+static int sysfsAttributeCount(const QString &dir);
+
 static QVariantList sysfsAttributes(const QString &dir)
 {
     static const QStringList skip = { QStringLiteral("uevent"),
@@ -1283,6 +1430,20 @@ static QVariantList sysfsAttributes(const QString &dir)
         out.append(a);
     }
     return out;
+}
+
+static int sysfsAttributeCount(const QString &dir)
+{
+    static const QStringList skip = { QStringLiteral("uevent"),
+                                      QStringLiteral("modalias"),
+                                      QStringLiteral("driver_override") };
+    int n = 0;
+    const QFileInfoList files =
+        QDir(dir).entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Name);
+    for (const QFileInfo &fi : files)
+        if (!skip.contains(fi.fileName()) && !sysfsUnsafe(fi.fileName()) && fi.isReadable())
+            ++n;
+    return n;
 }
 
 QVariantMap SysMon::chargingPath() const
@@ -1377,7 +1538,7 @@ QVariantMap SysMon::chargingPath() const
 // file per register. The list is complete rather than curated: which node
 // carries the interesting figure differs per device, and an attribute this app
 // has never heard of is still worth seeing.
-QVariantList SysMon::powerSupplyDump() const
+QVariantList SysMon::powerSupplyDump(bool withAttrs) const
 {
     QVariantList out;
     const QDir psy(QStringLiteral("/sys/class/power_supply"));
@@ -1408,10 +1569,26 @@ QVariantList SysMon::powerSupplyDump() const
                 }
             s.insert(QStringLiteral("usbTypes"), all.join(QStringLiteral("  ")));
         }
-        s.insert(QStringLiteral("attrs"), sysfsAttributes(psy.filePath(name)));
+        // Seconds on a divider topology, so the page asks only when opened.
+        if (withAttrs)
+            s.insert(QStringLiteral("attrs"), sysfsAttributes(psy.filePath(name)));
+        else
+            s.insert(QStringLiteral("attrCount"), sysfsAttributeCount(psy.filePath(name)));
         out.append(s);
     }
     return out;
+}
+
+// One node's registers, read when its dump is opened. The name comes from QML,
+// so it stays a single directory entry under the class.
+QVariantList SysMon::powerSupplyAttrs(const QString &name) const
+{
+    if (name.isEmpty() || name.contains(QLatin1Char('/')) || name.startsWith(QLatin1Char('.')))
+        return QVariantList();
+    const QString d = QStringLiteral("/sys/class/power_supply/") + name;
+    if (!QFileInfo(d).isDir())
+        return QVariantList();
+    return sysfsAttributes(d);
 }
 
 // The thermal framework in full: every zone the kernel registers, its trip

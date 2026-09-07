@@ -8,6 +8,8 @@
 #endif
 #include "roothelper.h"
 
+#include "chargerlog.h"
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QElapsedTimer>
@@ -182,26 +184,7 @@ QByteArray cmdChargerLog()
     if (n < 0)
         return QByteArray();
     buf.truncate(n);
-
-    QStringList keep;
-    for (const QByteArray &raw : buf.split('\n')) {
-        QByteArray l = raw;
-        // strip the "<pri>" syslog prefix
-        if (l.startsWith('<')) {
-            const int gt = l.indexOf('>');
-            if (gt > 0)
-                l = l.mid(gt + 1);
-        }
-        const QByteArray low = l.toLower();
-        if (low.contains("charger") || low.contains("pd_") || low.contains("usbpd")
-            || low.contains("typec") || low.contains("apsd") || low.contains("hvdcp")
-            || low.contains("smblib") || low.contains("real_charger") || low.contains("pmic")
-            || low.contains("icl_settled") || low.contains(" pd ") || low.contains("power_supply"))
-            keep << QString::fromUtf8(l);
-    }
-    while (keep.size() > 60)
-        keep.removeFirst();
-    return keep.join(QLatin1Char('\n')).toUtf8();
+    return chargerLogLines(buf).join(QLatin1Char('\n')).toUtf8();
 }
 
 // Log excerpt for bug reports: journal + kernel ring buffer, filtered to
