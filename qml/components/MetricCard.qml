@@ -78,8 +78,14 @@ Rectangle {
             }
         }
 
+        // A card without a figure drew this row anyway, and an empty label in
+        // the largest font still takes a line: every card that only carries a
+        // description had a blank line the height of a headline under its
+        // title.
         Row {
             spacing: 0
+            visible: card.value.length > 0 || card.unit.length > 0
+                     || card.note.length > 0
             Label {
                 text: card.value
                 font.pixelSize: Theme.fontSizeExtraLarge

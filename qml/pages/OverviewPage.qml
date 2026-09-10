@@ -302,72 +302,14 @@ Page {
             MetricCard {
                 width: page.width - 2 * Theme.horizontalPageMargin
                 x: Theme.horizontalPageMargin
-                title: qsTr("Pogo pins (coming soon)")
-                accent: Theme.secondaryColor
-                drilldown: false
+                title: qsTr("Pogo pins (TOH)")
+                accent: Diag.amber
+                drilldown: true
+                // Dimmed, and still open: the page behind it is worth reading
+                // and the feature it describes does not exist yet. Grey says
+                // the second part without taking the first away.
                 opacity: 0.45
-
-                // One Column, not three loose items: MetricCard's slot is a
-                // plain Item that positions nothing, so anything put in it
-                // lands at the same spot. Every other card gets away with a
-                // single label; this one has three pieces and drew them on top
-                // of each other.
-                Column {
-                    width: parent.width
-                    spacing: Theme.paddingMedium
-
-                    Label {
-                        width: parent.width
-                        text: qsTr("The spring contacts on the back. A log of what appears and disappears when something is attached — that is what identifies which bus sits behind them, because nothing in the system says so.")
-                        font.pixelSize: Theme.fontSizeExtraSmall
-                        color: Theme.secondaryColor
-                        wrapMode: Text.Wrap
-                    }
-
-                    // The pad layout as it is on the back of the device: four
-                    // above, three below, the lower right position empty.
-                    // Counted by eye, not read from anywhere — which is why the
-                    // numbers are positions and not functions. Two of them
-                    // carry ground and supply; which two is not established,
-                    // and guessing at a pinout is how people short a supply
-                    // into a data line.
-                    Column {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        spacing: Theme.paddingSmall
-
-                        Repeater {
-                            model: [[1, 2, 3, 4], [5, 6, 7]]
-                            Row {
-                                spacing: Theme.paddingSmall
-                                Repeater {
-                                    model: modelData
-                                    Rectangle {
-                                        width: Theme.itemSizeExtraSmall / 1.6
-                                        height: width
-                                        radius: width / 2
-                                        color: "transparent"
-                                        border.color: Theme.secondaryColor
-                                        border.width: 2
-                                        Label {
-                                            anchors.centerIn: parent
-                                            text: modelData
-                                            font.pixelSize: Theme.fontSizeExtraSmall
-                                            color: Theme.secondaryColor
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Label {
-                        width: parent.width
-                        text: qsTr("Seven pads, four over three, the lower right position unused — counted on the device. One of them is ground and one is the supply; which ones is not established. The numbers are positions, nothing more.")
-                        font.pixelSize: Theme.fontSizeTiny
-                        color: Theme.secondaryColor
-                        wrapMode: Text.Wrap
-                    }
-                }
+                onClicked: page.openDetail(HwInfo.pogoPins())
             }
 
             // ---- Audio -------------------------------------------------
