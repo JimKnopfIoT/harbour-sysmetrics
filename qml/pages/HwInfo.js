@@ -1724,6 +1724,43 @@ function fateText(f) {
     return qsTr("unknown")
 }
 
+// The spring contacts on the back, for a cover that carries electronics.
+//
+// Nothing on the device describes them: no node names them, and the state of
+// the lines is behind debugfs and root. What exists is the maker's published
+// specification, and that is what this page carries - marked as published
+// rather than measured, because none of it was read off this phone.
+function pogoPins() {
+    var s = []
+    s.push({ pogoPins: true })
+
+    s.push({ title: qsTr("What each contact carries"),
+        note: qsTr("Published by the maker for covers with electronics of their own. None of this was read from the device — it describes the connector, not the state of anything."),
+        rows: [
+            row(qsTr("Power in"), qsTr("5–9\u00a0V, up to 1\u00a0A — a cover can charge the phone")),
+            row("GND", qsTr("ground")),
+            row("ID", qsTr("3,3\u00a0V — a resistor in the cover identifies it")),
+            row("INT", qsTr("up to 1,8\u00a0V — the cover interrupts the phone")),
+            row("SCL", qsTr("3,3\u00a0V — clock of the I²C/I3C bus")),
+            row("SDA", qsTr("3,3\u00a0V — data of the same bus")),
+            row(qsTr("Power out"), qsTr("5\u00a0V, up to 1\u00a0A — the phone powers the cover"))
+        ]})
+
+    s.push({ title: qsTr("Rules for a cover"),
+        note: qsTr("The phone is the controller of that bus, so a cover must not put its own pull-ups on SCL and SDA. ID and INT belong on neither 3,3\u00a0V nor 5\u00a0V. Power out is supplied while the phone reads the cover's memory chip, and after that on request until the cover is detached."),
+        rows: [
+            row(qsTr("Pitch"), "2,90\u00a0mm"),
+            row(qsTr("Where"), qsTr("lower right on the back")),
+            row(qsTr("Documentation"), "docs.sailfishos.org/Develop/Hardware/JP2601-TOH/", { mono: true })
+        ]})
+
+    s.push({ title: qsTr("Still to come"),
+        note: qsTr("What is missing is the part this app could measure: a log of what appears and disappears when a cover is attached. The cover announces itself on the I²C bus, so an entry showing up on one of the empty buses is what identifies which bus sits behind these contacts — the device says nothing about that either. It needs a cover to build against, and there is none here yet."),
+        rows: [] })
+
+    return { title: qsTr("Pogo pins"), helpTopics: [], sections: s }
+}
+
 function audio() {
     var d = sysmon.audioDetail()
     var s = []

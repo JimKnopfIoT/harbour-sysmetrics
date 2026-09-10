@@ -278,6 +278,13 @@ Page {
                         }
                     }
 
+                    // ---- the drawing of a connector ------------------------
+                    Loader {
+                        width: page.width
+                        active: sec.pogoPins === true
+                        sourceComponent: Component { PogoPinsBlock { width: page.width } }
+                    }
+
                     // ---- a measurement the page offers to run ---------------
                     // Marker, like the diagnosis: a section carrying
                     // readTest:{mount,label} is not content but a place for the
