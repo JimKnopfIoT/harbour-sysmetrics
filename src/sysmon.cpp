@@ -10,6 +10,7 @@
 #include <QHash>
 #include <QMap>
 #include <QProcess>
+#include <QProcessEnvironment>
 #include <QRegExp>
 #include <QSet>
 #include <QStringList>
@@ -41,6 +42,20 @@
 #include <string.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+// Output that gets parsed must not depend on the user's language. pactl
+// translates its own field names: on a German device "Sink #0" reads "Ziel #0"
+// and "State:" reads "Status:", so a parser looking for the English words finds
+// nothing and the page shows no outputs at all. Every tool whose text we read
+// runs in the C locale.
+static void useCLocale(QProcess &p)
+{
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert(QStringLiteral("LC_ALL"), QStringLiteral("C"));
+    env.insert(QStringLiteral("LANG"), QStringLiteral("C"));
+    env.remove(QStringLiteral("LANGUAGE"));
+    p.setProcessEnvironment(env);
+}
 
 static const int HIST_MAX = 180;
 
@@ -445,6 +460,7 @@ QVariantMap SysMon::wifiDetail() const
 
     auto runIw = [](const QStringList &args) -> QString {
         QProcess p;
+        useCLocale(p);
         p.start(QStringLiteral("/usr/sbin/iw"), args);
         if (!p.waitForFinished(2500))
             return QString();
@@ -3350,47 +3366,251 @@ QVariantMap SysMon::graphicsDetail() const
              readTrim(QStringLiteral("/sys/class/drm/card0/device/uevent")).contains(QStringLiteral("DRIVER="))
                  ? QString() : QString());
 
-    // Displays via DRM connectors
-    QVariantList displays;
-    const QDir drm(QStringLiteral("/sys/class/drm"));
-    for (const QString &conn : drm.entryList(QStringList() << QStringLiteral("card*-*"), QDir::Dirs)) {
-        const QString cp = drm.filePath(conn) + QLatin1Char('/');
-        const QString status = readTrim(cp + QStringLiteral("status"));
-        if (status != QLatin1String("connected"))
-            continue;
-        QVariantMap d;
-        d.insert(QStringLiteral("connector"), conn.section(QLatin1Char('-'), 1));
-        d.insert(QStringLiteral("status"), status);
-        const QString modes = readTrim(cp + QStringLiteral("modes"));
-        d.insert(QStringLiteral("resolution"), modes.split(QLatin1Char('\n')).value(0));
-        d.insert(QStringLiteral("enabled"), readTrim(cp + QStringLiteral("enabled")));
-        displays.append(d);
-    }
-    if (displays.isEmpty()) {
-        // no DRM connector (older MediaTek): fall back to the framebuffer
-        const QString modes = readTrim(QStringLiteral("/sys/class/graphics/fb0/modes"));
-        QString res;
-        for (int i = 0; i + 1 < modes.size(); ++i) {
-            if (modes[i].isDigit()) {
-                int a = i; while (a < modes.size() && modes[a].isDigit()) ++a;
-                if (a < modes.size() && modes[a] == QLatin1Char('x')) {
-                    int b = a + 1; while (b < modes.size() && modes[b].isDigit()) ++b;
-                    res = modes.mid(i, b - i);
-                    break;
-                }
-            }
-        }
-        if (!res.isEmpty()) {
-            QVariantMap d;
-            d.insert(QStringLiteral("connector"), QStringLiteral("fb0"));
-            d.insert(QStringLiteral("status"), QStringLiteral("connected"));
-            d.insert(QStringLiteral("resolution"), res);
-            displays.append(d);
-        }
-    }
-    m.insert(QStringLiteral("displays"), displays);
+    // The panel, the connector and the backlight are read by displayDetail()
+    // and belong to the Display chapter -- one reader per figure.
     m.insert(QStringLiteral("driver"),
              QFileInfo(QStringLiteral("/sys/class/drm/card0/device/driver")).symLinkTarget().section(QLatin1Char('/'), -1));
+    return m;
+}
+
+// ---------------------------------------------------------------------------
+// The display: which panel is behind the glass, the connector the kernel drives
+// it through, and the backlight. All of it world-readable, none of it root.
+//
+// Which panel is fitted is not a question the device tree answers on its own: a
+// model built in several production runs carries every panel it was ever built
+// with, all of them alternatives under the same DSI host. The one in this phone
+// is the one the host bound a driver to -- the mipi-dsi device with a driver
+// symlink; the others sit unbound with nothing behind them. The driver's own
+// name is the most specific identity available without root: it carries the
+// panel controller (vtdr6126), how it is wired (dphy), the mode it runs in
+// (vdo = video, cmd = command) and, on a MediaTek adaptation, the rate it was
+// built for and the glass maker.
+QVariantMap SysMon::displayDetail() const
+{
+    QVariantMap m;
+
+    // A device-tree cell is a big-endian 32-bit word.
+    auto dtCell = [](const QString &path) -> qint64 {
+        QFile f(path);
+        if (!f.open(QIODevice::ReadOnly))
+            return -1;
+        const QByteArray b = f.read(4);
+        if (b.size() != 4)
+            return -1;
+        return ((qint64)quint8(b[0]) << 24) | (quint8(b[1]) << 16)
+             | (quint8(b[2]) << 8) | quint8(b[3]);
+    };
+
+    // ---- connectors ------------------------------------------------------
+    // status says whether anything is attached, dpms whether it is powered
+    // right now. modes is every timing the driver will accept; the first is
+    // the panel's native one.
+    QVariantList conns;
+    const QDir drm(QStringLiteral("/sys/class/drm"));
+    for (const QString &conn : drm.entryList(QStringList() << QStringLiteral("card*-*"),
+                                             QDir::Dirs, QDir::Name)) {
+        const QString cp = drm.filePath(conn) + QLatin1Char('/');
+        QVariantMap c;
+        c.insert(QStringLiteral("name"), conn.section(QLatin1Char('-'), 1));
+        c.insert(QStringLiteral("card"), conn.section(QLatin1Char('-'), 0, 0));
+        c.insert(QStringLiteral("status"), readTrim(cp + QStringLiteral("status")));
+        c.insert(QStringLiteral("enabled"), readTrim(cp + QStringLiteral("enabled")));
+        c.insert(QStringLiteral("dpms"), readTrim(cp + QStringLiteral("dpms")));
+        const QString cid = readTrim(cp + QStringLiteral("connector_id"));
+        if (!cid.isEmpty())
+            c.insert(QStringLiteral("connectorId"), cid);
+        QStringList modes;
+        for (const QString &l : readTrim(cp + QStringLiteral("modes"))
+                                    .split(QLatin1Char('\n'), QString::SkipEmptyParts))
+            if (!modes.contains(l))
+                modes.append(l);
+        c.insert(QStringLiteral("modes"), modes);
+        // sysfs reports a page size for a binary attribute whatever it holds,
+        // so the length has to be read rather than stat'ed.
+        {
+            QFile ef(cp + QStringLiteral("edid"));
+            c.insert(QStringLiteral("edidBytes"),
+                     ef.open(QIODevice::ReadOnly) ? (int)ef.readAll().size() : 0);
+        }
+        conns.append(c);
+    }
+    // No DRM at all (an older MediaTek kernel drives the panel through the
+    // framebuffer instead): report what fb0 states, and say where it came from.
+    if (conns.isEmpty()) {
+        const QDir fbdir(QStringLiteral("/sys/class/graphics"));
+        for (const QString &fb : fbdir.entryList(QStringList() << QStringLiteral("fb*"),
+                                                 QDir::Dirs | QDir::Files | QDir::System,
+                                                 QDir::Name)) {
+            const QString fp = fbdir.filePath(fb) + QLatin1Char('/');
+            // virtual_size is "1080,1920"; modes carries the full mode line.
+            QString res = readTrim(fp + QStringLiteral("virtual_size"));
+            res.replace(QLatin1Char(','), QLatin1Char('x'));
+            if (res.isEmpty()) {
+                const QString modes = readTrim(fp + QStringLiteral("modes"));
+                const int at = modes.indexOf(QLatin1Char(':'));
+                res = at >= 0 ? modes.mid(at + 1).section(QLatin1Char('-'), 0, 0) : QString();
+            }
+            if (res.isEmpty())
+                continue;
+            QVariantMap c;
+            c.insert(QStringLiteral("name"), fb);
+            c.insert(QStringLiteral("framebuffer"), true);
+            c.insert(QStringLiteral("status"), QStringLiteral("connected"));
+            c.insert(QStringLiteral("enabled"),
+                     readTrim(fp + QStringLiteral("blank")) == QLatin1String("0")
+                         ? QStringLiteral("enabled") : QString());
+            c.insert(QStringLiteral("modes"), QStringList() << res);
+            c.insert(QStringLiteral("edidBytes"), 0);
+            const QString bpp = readTrim(fp + QStringLiteral("bits_per_pixel"));
+            if (!bpp.isEmpty())
+                c.insert(QStringLiteral("bitsPerPixel"), bpp.toInt());
+            const QString nm = readTrim(fp + QStringLiteral("name"));
+            if (!nm.isEmpty())
+                c.insert(QStringLiteral("fbName"), nm);
+            conns.append(c);
+            break;
+        }
+    }
+    m.insert(QStringLiteral("connectors"), conns);
+
+    // ---- the panel behind the glass --------------------------------------
+    QVariantList panels;
+    QString boundHostNode;
+    const QDir dsiDevs(QStringLiteral("/sys/bus/mipi-dsi/devices"));
+    for (const QString &e : dsiDevs.entryList(QDir::Dirs | QDir::Files
+                                              | QDir::NoDotAndDotDot | QDir::System, QDir::Name)) {
+        const QString dp = dsiDevs.filePath(e) + QLatin1Char('/');
+        QVariantMap p;
+        p.insert(QStringLiteral("device"), e);
+        p.insert(QStringLiteral("compatible"), dtString(dp + QStringLiteral("of_node/compatible")));
+        p.insert(QStringLiteral("node"), dtString(dp + QStringLiteral("of_node/name")));
+        const QString drv = QFileInfo(dp + QStringLiteral("driver")).symLinkTarget()
+                                .section(QLatin1Char('/'), -1);
+        p.insert(QStringLiteral("driver"), drv);
+        p.insert(QStringLiteral("bound"), !drv.isEmpty());
+        if (!drv.isEmpty()) {
+            // The host this panel actually hangs off, taken from where the
+            // device sits in the tree rather than from a name match: the
+            // parent of the bound mipi-dsi device is the DSI controller.
+            boundHostNode = QFileInfo(dsiDevs.filePath(e)).canonicalFilePath()
+                                .section(QLatin1Char('/'), 0, -2);
+        }
+        panels.append(p);
+    }
+    m.insert(QStringLiteral("panels"), panels);
+
+    // ---- the DSI host ----------------------------------------------------
+    // The controller the panel hangs off. switch-fps, where the adaptation sets
+    // it, is the highest rate the host is configured to switch the panel to --
+    // a property of the wiring, not a reading of what is on screen now.
+    QVariantList hosts;
+    auto addHost = [&](const QString &nodeDir, const QString &label) {
+        const QString np = nodeDir + QLatin1Char('/');
+        const QString comp = dtString(np + QStringLiteral("compatible"));
+        if (comp.isEmpty())
+            return;
+        QVariantMap h;
+        h.insert(QStringLiteral("node"), label);
+        h.insert(QStringLiteral("compatible"), comp);
+        h.insert(QStringLiteral("phy"), dtString(np + QStringLiteral("phy-names")));
+        h.insert(QStringLiteral("status"), dtString(np + QStringLiteral("status")));
+        const qint64 fps = dtCell(np + QStringLiteral("switch-fps"));
+        if (fps > 0)
+            h.insert(QStringLiteral("switchFps"), (int)fps);
+        hosts.append(h);
+    };
+    if (!boundHostNode.isEmpty())
+        addHost(boundHostNode + QStringLiteral("/of_node"),
+                boundHostNode.section(QLatin1Char('/'), -1));
+    if (hosts.isEmpty()) {
+        // No bound panel to follow: fall back to the device tree, and take only
+        // nodes whose name is the controller itself. "dsi-te" is the tearing
+        // interrupt line, not a display interface, and a prefix match picks it.
+        QRegExp isHost(QStringLiteral("^(mdss_)?dsi[0-9]*(@[0-9a-f]+)?$"));
+        for (const QString &base : { QStringLiteral("/proc/device-tree/soc"),
+                                     QStringLiteral("/proc/device-tree") }) {
+            const QDir d(base);
+            if (!d.exists())
+                continue;
+            for (const QString &e : d.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+                if (!isHost.exactMatch(e))
+                    continue;
+                addHost(d.filePath(e), e);
+            }
+            if (!hosts.isEmpty())
+                break;
+        }
+    }
+    m.insert(QStringLiteral("dsiHosts"), hosts);
+
+    // ---- backlight -------------------------------------------------------
+    // Two class directories can hold it: backlight/ on most adaptations,
+    // leds/ where the vendor registered it as an LED instead. The figure is a
+    // driver-chosen step, not a physical unit -- so it is reported against its
+    // own maximum and nothing is converted to nits.
+    QVariantMap bl;
+    struct Where { const char *dir; const char *kind; };
+    static const Where places[] = {
+        { "/sys/class/backlight", "backlight" }, { "/sys/class/leds", "leds" }
+    };
+    for (const Where &w : places) {
+        if (!bl.isEmpty())
+            break;
+        const QDir d(QLatin1String(w.dir));
+        for (const QString &e : d.entryList(QDir::Dirs | QDir::Files
+                                            | QDir::NoDotAndDotDot | QDir::System, QDir::Name)) {
+            if (qstrcmp(w.kind, "leds") == 0
+                && !e.contains(QStringLiteral("backlight"), Qt::CaseInsensitive)
+                && !e.contains(QStringLiteral("wled"), Qt::CaseInsensitive))
+                continue;
+            const QString bp = d.filePath(e) + QLatin1Char('/');
+            const QString mx = readTrim(bp + QStringLiteral("max_brightness"));
+            if (mx.isEmpty())
+                continue;
+            bl.insert(QStringLiteral("node"), e);
+            bl.insert(QStringLiteral("class"), QLatin1String(w.kind));
+            bl.insert(QStringLiteral("max"), mx.toInt());
+            // actual_brightness is what the driver has set; brightness is what
+            // was asked for. They differ while the panel is off.
+            const QString act = readTrim(bp + QStringLiteral("actual_brightness"));
+            const QString req = readTrim(bp + QStringLiteral("brightness"));
+            if (!act.isEmpty())
+                bl.insert(QStringLiteral("actual"), act.toInt());
+            if (!req.isEmpty())
+                bl.insert(QStringLiteral("brightness"), req.toInt());
+            const QString mn = readTrim(bp + QStringLiteral("min_brightness"));
+            if (!mn.isEmpty())
+                bl.insert(QStringLiteral("min"), mn.toInt());
+            // MediaTek keeps the last value the hardware was actually driven
+            // to here, which survives the panel being blanked to zero.
+            const QString hw = readTrim(bp + QStringLiteral("mt_brightness_hw_changed"));
+            if (!hw.isEmpty())
+                bl.insert(QStringLiteral("lastHw"), hw.toInt());
+            const QString ty = readTrim(bp + QStringLiteral("type"));
+            if (!ty.isEmpty())
+                bl.insert(QStringLiteral("type"), ty);
+            const QString sc = readTrim(bp + QStringLiteral("scale"));
+            if (!sc.isEmpty())
+                bl.insert(QStringLiteral("scale"), sc);
+            break;
+        }
+    }
+    m.insert(QStringLiteral("backlight"), bl);
+
+    // ---- what the display manager says -----------------------------------
+    // mce is the authority on whether the screen is on: the connector's dpms
+    // says what the kernel did, this says what the system asked for.
+    {
+        // A plain message rather than QDBusInterface: the latter introspects
+        // the service first, and one round trip is enough for one word.
+        QDBusMessage req = QDBusMessage::createMethodCall(
+            QStringLiteral("com.nokia.mce"), QStringLiteral("/com/nokia/mce/request"),
+            QStringLiteral("com.nokia.mce.request"), QStringLiteral("get_display_status"));
+        const QDBusMessage rep = QDBusConnection::systemBus().call(req, QDBus::Block, 1000);
+        if (rep.type() == QDBusMessage::ReplyMessage && !rep.arguments().isEmpty())
+            m.insert(QStringLiteral("mceDisplay"), rep.arguments().first().toString());
+    }
     return m;
 }
 
@@ -4015,6 +4235,7 @@ QVariantMap SysMon::halServices() const
         int found = 0;
         if (live) {
             QProcess p;
+            useCLocale(p);
             p.start(QStringLiteral("binder-list"), QStringList() << QStringLiteral("-d") << path);
             if (p.waitForFinished(1500)) {
                 QStringList lines;
@@ -4056,6 +4277,7 @@ QString SysMon::bugReportInfo(const QString &term) const
     QString out;
 
     QProcess rpm;
+    useCLocale(rpm);
     rpm.start(QStringLiteral("rpm"), QStringList() << QStringLiteral("-qa"));
     if (rpm.waitForFinished(15000)) {
         QStringList hits;
@@ -4214,6 +4436,7 @@ QVariantMap SysMon::audioStreams() const
     QVariantMap out;
     auto runPactl = [](const QStringList &args) -> QString {
         QProcess p;
+        useCLocale(p);
         p.start(QStringLiteral("pactl"), args);
         if (!p.waitForFinished(2500))
             return QString();
@@ -4243,6 +4466,33 @@ QVariantMap SysMon::audioStreams() const
                 cur.insert(QStringLiteral("mute"), l.mid(5).trimmed() == QLatin1String("yes"));
             else if (l.startsWith(QStringLiteral("Sample Specification:")))
                 cur.insert(QStringLiteral("spec"), l.mid(21).trimmed());
+            // Ports are what a card can switch between behind one device, and
+            // on this platform that is where the microphones live: a single
+            // capture device carries a builtin mic and a back mic as two
+            // ports. Listing only the device hides the fact that the phone has
+            // two of them.
+            else if (raw.startsWith(QStringLiteral("\t\t")) && l.contains(QStringLiteral("(type:"))
+                     && l.contains(QLatin1Char(':'))) {
+                const int colon = l.indexOf(QLatin1Char(':'));
+                const int paren = l.indexOf(QStringLiteral(" (type:"));
+                if (colon > 0 && paren > colon) {
+                    QVariantMap port;
+                    port.insert(QStringLiteral("name"), l.left(colon).trimmed());
+                    port.insert(QStringLiteral("description"),
+                                l.mid(colon + 1, paren - colon - 1).trimmed());
+                    port.insert(QStringLiteral("available"),
+                                !l.contains(QStringLiteral("not available")));
+                    const int pr = l.indexOf(QStringLiteral("priority: "));
+                    if (pr > 0)
+                        port.insert(QStringLiteral("priority"),
+                                    l.mid(pr + 10).section(QRegExp(QStringLiteral("[,)]")), 0, 0).trimmed().toInt());
+                    QVariantList ports = cur.value(QStringLiteral("ports")).toList();
+                    ports.append(port);
+                    cur.insert(QStringLiteral("ports"), ports);
+                }
+            }
+            else if (l.startsWith(QStringLiteral("Active Port:")))
+                cur.insert(QStringLiteral("activePort"), l.mid(12).trimmed());
             else if (l.startsWith(QStringLiteral("Volume:")) && !cur.contains(QStringLiteral("volume"))) {
                 // "Volume: front-left: 42598 /  65% / -9.29 dB, ..."
                 const int pc = l.indexOf(QLatin1Char('%'));

@@ -25,6 +25,7 @@ private:
     void checkLoadVsCpu(QVariantList &out, double cpuPct, double load1) const;
     void checkCameraProvider(QVariantList &out) const;
     void checkMicGain(QVariantList &out) const;
+    void checkBtAbsoluteVolume(QVariantList &out) const;
     void checkMtkHotplug(QVariantList &out) const;
     void checkBtAdapters(QVariantList &out) const;
     void checkWlanRadio(QVariantList &out) const;

@@ -225,6 +225,38 @@ Page {
             ]
         },
         {
+            title: qsTr("Display"), key: "display",
+            items: [
+                { t: qsTr("Panel"), d: qsTr("The glass and its controller — an OLED or LCD module bought as a part, with a controller chip whose name (e.g. VTDR6126, NT36672E) is what identifies it. A phone model is often built with panels from more than one supplier, which is why the device tree lists several and only one of them is fitted.") },
+                { t: qsTr("Panel driver"), d: qsTr("The kernel driver the DSI host bound to the panel actually fitted. Its name is the most specific identity software can reach without root, and on a MediaTek adaptation it carries more than the part: how the panel is wired, the mode it runs in, the rate it was built for and often the glass maker.") },
+                { t: "MIPI DSI", d: qsTr("Display Serial Interface — the short, fast serial link from the SoC to the panel. Video mode (vdo) streams every frame continuously; command mode (cmd) writes into the panel's own memory and lets the link idle. D-PHY and C-PHY are the two physical layers it can run over.") },
+                { t: "DRM " + qsTr("connector"), d: qsTr("The kernel's handle on one display output. Its status says whether anything is attached, its modes are the timings the driver will accept, and dpms says whether the output is powered right now.") },
+                { t: "EDID", d: qsTr("The identification block an external monitor sends over its cable — maker, model, supported timings. A built-in phone panel has no cable and no EDID; its properties come from the device tree instead. An empty EDID here is normal, not a fault.") },
+                { t: qsTr("Backlight steps"), d: qsTr("The brightness figure is a step on the driver's own scale, and the scale differs per device — 2047 steps on one, 255 on another. It is shown against its own maximum. Nits are not readable from software: nothing in the kernel knows how much light the panel actually emits.") },
+                { t: qsTr("Refresh rate"), d: qsTr("How often the panel is redrawn per second. What the panel is doing at this moment is not exposed to an unprivileged process on either platform here — the figure shown is what the display host is configured to be able to switch to, which is a property of the wiring and says nothing about the rate on screen now.") }
+            ]
+        },
+        {
+            title: qsTr("Buttons"), key: "buttons",
+            items: [
+                { t: qsTr("Input device"), d: qsTr("Every button, switch and touch surface reaches the system as an input device with a name the driver chose. Buttons wired straight to a GPIO pin appear as one device, buttons on the power-management chip as another, and the fingerprint reader registers a third for its own gestures.") },
+                { t: qsTr("Key code"), d: qsTr("The number the kernel puts on the wire when a button is pressed, and the name it carries in the kernel's own list — 116 is POWER, 115 VOLUMEUP, 114 VOLUMEDOWN. What the system then does with it is a separate decision made further up.") },
+                { t: qsTr("Declared, not fitted"), d: qsTr("A driver registers every key code it could ever send, and a keypad driver registers its whole matrix. So a code listed here means the driver would send it — not that there is a button on this phone that does. Only a press proves a button exists; a code that stays unlit was not pressed, which is not the same as missing.") },
+                { t: qsTr("Switch"), d: qsTr("A state rather than an event: a lid open or shut, a headphone plug in or out, a cover closed. The kernel keeps the current position and reports every change, so its value can be read out at any time.") },
+                { t: qsTr("Reading without taking"), d: qsTr("The test opens the event nodes read-only and never grabs them, so every press still reaches the system as usual — volume still changes, the power key still blanks the screen. That is deliberate: the test proves the button reached the kernel, it does not take the button away.") }
+            ]
+        },
+        {
+            title: qsTr("Fingerprint"), key: "fingerprint",
+            items: [
+                { t: qsTr("Reader"), d: qsTr("A capacitive or optical sensor on its own SPI bus, named in the device tree by its maker (Goodix, FPC, Egis and others). The image never leaves it in the clear: matching happens inside the secure environment, and the system only learns yes or no.") },
+                { t: qsTr("Fingerprint daemon"), d: qsTr("sailfish-fpd owns the reader and is the only way to it. Any application may ask it to identify a finger — that much its bus policy allows — but enrolling, removing and everything to do with the device lock stay out of reach.") },
+                { t: qsTr("Identify"), d: qsTr("Ask the reader whether the finger on it is one of the enrolled ones. The answer is a name or a no; nothing about the fingerprint itself is handed out, and nothing is unlocked by it.") },
+                { t: qsTr("Enrolled fingers"), d: qsTr("The templates stored for this user. They are listed here by the names the daemon keeps them under. This page never adds one and never deletes one.") },
+                { t: qsTr("Already identifying"), d: qsTr("When the lock screen is armed, the daemon is already identifying for it and answers a second request with a refusal. That refusal is itself proof the reader and the daemon are alive — but the finger goes to the lock screen, not to this test.") }
+            ]
+        },
+        {
             title: qsTr("Sensors"), key: "sensors",
             items: [
                 { t: qsTr("Accelerometer"), d: qsTr("Measures linear acceleration on three axes (m/s²), including gravity — how the device is tilted and moved.") },

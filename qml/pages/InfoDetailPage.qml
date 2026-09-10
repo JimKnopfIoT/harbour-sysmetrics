@@ -67,7 +67,11 @@ Page {
     Component.onCompleted: {
         if (diagTopic.length) {
             var all = diagnostics.run(sysmon.cpuPercent, sysmon.load1)
-            findings = all.filter(function (f) { return f.topic === diagTopic })
+            // A finding may name more than one page it belongs on.
+            findings = all.filter(function (f) {
+                return f.topic === diagTopic
+                    || (f.topics !== undefined && f.topics.indexOf(diagTopic) >= 0)
+            })
         }
     }
 
@@ -270,6 +274,24 @@ Page {
                                 while (a.length <= si) a.push(false)
                                 a[si] = !a[si]
                                 page.expandedSections = a
+                            }
+                        }
+                    }
+
+                    // ---- a measurement the page offers to run ---------------
+                    // Marker, like the diagnosis: a section carrying
+                    // readTest:{mount,label} is not content but a place for the
+                    // button that starts it. Nothing measures itself on page
+                    // load — a read test costs seconds and touches the medium,
+                    // so it happens when the reader asks for it.
+                    Loader {
+                        width: page.width
+                        active: sec.readTest !== undefined
+                        sourceComponent: Component {
+                            ReadTestBlock {
+                                width: page.width
+                                mountPoint: sec.readTest.mount
+                                mediumLabel: sec.readTest.label
                             }
                         }
                     }

@@ -59,7 +59,9 @@ Page {
                 font.pixelSize: Theme.fontSizeExtraSmall
                 font.family: "monospace"
                 color: Theme.primaryColor
-                wrapMode: Text.WrapAnywhere
+                // Word wrap, not WrapAnywhere: this block is versions and dates,
+                // and WrapAnywhere split them mid-number ("Apr 1 / 5", "5.1 / .0.11").
+                wrapMode: Text.Wrap
             }
             ButtonLayout {
                 Button {

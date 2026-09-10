@@ -5,10 +5,13 @@ import QtPositioning 5.0
 import "../components"
 
 // Loaded via Loader from SensorsPage; if a QML plugin is missing this file
-// fails to load and the shell shows a fallback instead.
-Item {
+// fails to load and the page shows a fallback in its place. A column, not a
+// page: the flickable, the header and everything below the live sensors belong
+// to SensorsPage, which stays readable when the sensor plugins are absent.
+Column {
     id: root
-    anchors.fill: parent
+    width: parent ? parent.width : Screen.width
+    spacing: Theme.paddingMedium
 
     property bool live: Qt.application.active
     property real gpsStartMs: 0
@@ -34,74 +37,59 @@ Item {
         }
     }
 
-    SilicaFlickable {
-        anchors.fill: parent
-        contentHeight: col.height
+    SectionHeader { text: qsTr("Motion & orientation") }
+    Column {
+        x: Theme.horizontalPageMargin
+        width: root.width - 2 * Theme.horizontalPageMargin
+        spacing: Theme.paddingSmall / 2
+        KeyValue { opacity: accel.connectedToBackend ? 1 : 0.4; label: qsTr("Accelerometer"); mono: true
+            value: accel.connectedToBackend && accel.reading
+                ? root.fmt(accel.reading.x) + ", " + root.fmt(accel.reading.y) + ", " + root.fmt(accel.reading.z) + " m/s²" : qsTr("not available") }
+        KeyValue { opacity: gyro.connectedToBackend ? 1 : 0.4; label: qsTr("Gyroscope"); mono: true
+            value: gyro.connectedToBackend && gyro.reading
+                ? root.fmt(gyro.reading.x) + ", " + root.fmt(gyro.reading.y) + ", " + root.fmt(gyro.reading.z) + " °/s" : qsTr("not available") }
+        KeyValue { opacity: rot.connectedToBackend ? 1 : 0.4; label: qsTr("Rotation (pitch/roll/yaw)"); mono: true
+            value: rot.connectedToBackend && rot.reading
+                ? root.fmt(rot.reading.x, 0) + "°, " + root.fmt(rot.reading.y, 0) + "°, " + root.fmt(rot.reading.z, 0) + "°" : qsTr("not available") }
+        KeyValue { opacity: compass.connectedToBackend ? 1 : 0.4; label: qsTr("Compass azimuth")
+            value: compass.connectedToBackend && compass.reading
+                ? root.fmt(compass.reading.azimuth, 0) + "°  (" + qsTr("calib. %1").arg(root.fmt(compass.reading.calibrationLevel, 1)) + ")" : qsTr("not available") }
+        KeyValue { opacity: mag.connectedToBackend ? 1 : 0.4; label: qsTr("Magnetometer"); mono: true
+            value: mag.connectedToBackend && mag.reading
+                ? root.fmt(mag.reading.x * 1e6, 0) + ", " + root.fmt(mag.reading.y * 1e6, 0) + ", " + root.fmt(mag.reading.z * 1e6, 0) + " µT" : qsTr("not available") }
+    }
 
-        Column {
-            id: col
-            width: root.width
-            spacing: Theme.paddingMedium
+    SectionHeader { text: qsTr("Environment") }
+    Column {
+        x: Theme.horizontalPageMargin
+        width: root.width - 2 * Theme.horizontalPageMargin
+        spacing: Theme.paddingSmall / 2
+        KeyValue { opacity: prox.connectedToBackend ? 1 : 0.4; label: qsTr("Proximity")
+            value: prox.connectedToBackend && prox.reading ? (prox.reading.near ? qsTr("near") : qsTr("far")) : qsTr("not available") }
+        KeyValue { opacity: light.connectedToBackend ? 1 : 0.4; label: qsTr("Ambient light")
+            value: light.connectedToBackend && light.reading ? light.reading.lightLevel + " (" + qsTr("level") + ")" : qsTr("not available") }
+    }
 
-            PageHeader { title: qsTr("Sensors & GPS") }
-
-            SectionHeader { text: qsTr("Motion & orientation") }
-            Column {
-                x: Theme.horizontalPageMargin
-                width: root.width - 2 * Theme.horizontalPageMargin
-                spacing: Theme.paddingSmall / 2
-                KeyValue { opacity: accel.connectedToBackend ? 1 : 0.4; label: qsTr("Accelerometer"); mono: true
-                    value: accel.connectedToBackend && accel.reading
-                        ? root.fmt(accel.reading.x) + ", " + root.fmt(accel.reading.y) + ", " + root.fmt(accel.reading.z) + " m/s²" : qsTr("not available") }
-                KeyValue { opacity: gyro.connectedToBackend ? 1 : 0.4; label: qsTr("Gyroscope"); mono: true
-                    value: gyro.connectedToBackend && gyro.reading
-                        ? root.fmt(gyro.reading.x) + ", " + root.fmt(gyro.reading.y) + ", " + root.fmt(gyro.reading.z) + " °/s" : qsTr("not available") }
-                KeyValue { opacity: rot.connectedToBackend ? 1 : 0.4; label: qsTr("Rotation (pitch/roll/yaw)"); mono: true
-                    value: rot.connectedToBackend && rot.reading
-                        ? root.fmt(rot.reading.x, 0) + "°, " + root.fmt(rot.reading.y, 0) + "°, " + root.fmt(rot.reading.z, 0) + "°" : qsTr("not available") }
-                KeyValue { opacity: compass.connectedToBackend ? 1 : 0.4; label: qsTr("Compass azimuth")
-                    value: compass.connectedToBackend && compass.reading
-                        ? root.fmt(compass.reading.azimuth, 0) + "°  (" + qsTr("calib. %1").arg(root.fmt(compass.reading.calibrationLevel, 1)) + ")" : qsTr("not available") }
-                KeyValue { opacity: mag.connectedToBackend ? 1 : 0.4; label: qsTr("Magnetometer"); mono: true
-                    value: mag.connectedToBackend && mag.reading
-                        ? root.fmt(mag.reading.x * 1e6, 0) + ", " + root.fmt(mag.reading.y * 1e6, 0) + ", " + root.fmt(mag.reading.z * 1e6, 0) + " µT" : qsTr("not available") }
-            }
-
-            SectionHeader { text: qsTr("Environment") }
-            Column {
-                x: Theme.horizontalPageMargin
-                width: root.width - 2 * Theme.horizontalPageMargin
-                spacing: Theme.paddingSmall / 2
-                KeyValue { opacity: prox.connectedToBackend ? 1 : 0.4; label: qsTr("Proximity")
-                    value: prox.connectedToBackend && prox.reading ? (prox.reading.near ? qsTr("near") : qsTr("far")) : qsTr("not available") }
-                KeyValue { opacity: light.connectedToBackend ? 1 : 0.4; label: qsTr("Ambient light")
-                    value: light.connectedToBackend && light.reading ? light.reading.lightLevel + " (" + qsTr("level") + ")" : qsTr("not available") }
-            }
-
-            SectionHeader { text: qsTr("GPS / positioning") }
-            TextSwitch { id: gpsSwitch; text: qsTr("Enable GPS")
-                description: qsTr("Starts the positioning hardware; costs battery.") }
-            Column {
-                x: Theme.horizontalPageMargin
-                width: root.width - 2 * Theme.horizontalPageMargin
-                spacing: Theme.paddingSmall / 2
-                visible: gpsSwitch.checked
-                KeyValue { label: qsTr("Status"); value: gps.valid ? qsTr("fix acquired") : qsTr("searching …")
-                    valueColor: gps.valid ? Diag.green : Diag.amber }
-                KeyValue { label: qsTr("Time to first fix"); value: root.ttff >= 0 ? root.ttff.toFixed(1) + " s" : "—" }
-                KeyValue { label: qsTr("Latitude"); mono: true
-                    value: gps.position.latitudeValid ? gps.position.coordinate.latitude.toFixed(6) : "—" }
-                KeyValue { label: qsTr("Longitude"); mono: true
-                    value: gps.position.longitudeValid ? gps.position.coordinate.longitude.toFixed(6) : "—" }
-                KeyValue { label: qsTr("Altitude"); value: gps.position.altitudeValid ? gps.position.coordinate.altitude.toFixed(0) + " m" : "—" }
-                KeyValue { label: qsTr("Accuracy"); value: gps.position.horizontalAccuracyValid ? "± " + gps.position.horizontalAccuracy.toFixed(0) + " m" : "—" }
-                KeyValue { label: qsTr("Speed"); value: gps.position.speedValid ? (gps.position.speed * 3.6).toFixed(1) + " km/h" : "—" }
-                Label { width: parent.width; visible: gps.sourceError !== PositionSource.NoError
-                    text: qsTr("Positioning error — is Location enabled in system settings?")
-                    wrapMode: Text.Wrap; font.pixelSize: Theme.fontSizeTiny; color: Diag.amber }
-            }
-            Item { width: 1; height: Theme.paddingLarge }
-        }
-        VerticalScrollDecorator {}
+    SectionHeader { text: qsTr("GPS / positioning") }
+    TextSwitch { id: gpsSwitch; text: qsTr("Enable GPS")
+        description: qsTr("Starts the positioning hardware; costs battery.") }
+    Column {
+        x: Theme.horizontalPageMargin
+        width: root.width - 2 * Theme.horizontalPageMargin
+        spacing: Theme.paddingSmall / 2
+        visible: gpsSwitch.checked
+        KeyValue { label: qsTr("Status"); value: gps.valid ? qsTr("fix acquired") : qsTr("searching …")
+            valueColor: gps.valid ? Diag.green : Diag.amber }
+        KeyValue { label: qsTr("Time to first fix"); value: root.ttff >= 0 ? root.ttff.toFixed(1) + " s" : "—" }
+        KeyValue { label: qsTr("Latitude"); mono: true
+            value: gps.position.latitudeValid ? gps.position.coordinate.latitude.toFixed(6) : "—" }
+        KeyValue { label: qsTr("Longitude"); mono: true
+            value: gps.position.longitudeValid ? gps.position.coordinate.longitude.toFixed(6) : "—" }
+        KeyValue { label: qsTr("Altitude"); value: gps.position.altitudeValid ? gps.position.coordinate.altitude.toFixed(0) + " m" : "—" }
+        KeyValue { label: qsTr("Accuracy"); value: gps.position.horizontalAccuracyValid ? "± " + gps.position.horizontalAccuracy.toFixed(0) + " m" : "—" }
+        KeyValue { label: qsTr("Speed"); value: gps.position.speedValid ? (gps.position.speed * 3.6).toFixed(1) + " km/h" : "—" }
+        Label { width: parent.width; visible: gps.sourceError !== PositionSource.NoError
+            text: qsTr("Positioning error — is Location enabled in system settings?")
+            wrapMode: Text.Wrap; font.pixelSize: Theme.fontSizeTiny; color: Diag.amber }
     }
 }

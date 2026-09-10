@@ -44,6 +44,9 @@ HEADERS += \
     src/deviceinfo.h \
     src/detailmon.h \
     src/diagnostics.h \
+    src/keymon.h \
+    src/readtest.h \
+    src/fpmon.h \
     src/btinfo.h \
     src/netmon.h \
     src/recorder.h \
@@ -56,11 +59,15 @@ SOURCES += \
     src/source.cpp \
     src/sampler.cpp \
     src/sysmon.cpp \
+    src/audiopolicy.cpp \
+    src/readtest.cpp \
     src/procmodel.cpp \
     src/netinfo.cpp \
     src/deviceinfo.cpp \
     src/detailmon.cpp \
     src/diagnostics.cpp \
+    src/keymon.cpp \
+    src/fpmon.cpp \
     src/btinfo.cpp \
     src/netmon.cpp \
     src/recorder.cpp \
@@ -114,4 +121,6 @@ DISTFILES += \
     qml/pages/InfoDetailPage.qml \
     qml/pages/HwInfo.js \
     qml/pages/SensorsPage.qml \
-    qml/pages/SensorContent.qml
+    qml/pages/SensorContent.qml \
+    qml/pages/ButtonTestPage.qml \
+    qml/pages/FingerprintPage.qml
