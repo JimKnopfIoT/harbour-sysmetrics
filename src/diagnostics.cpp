@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QProcess>
+#include <QProcessEnvironment>
 #include <QRegularExpression>
 #include <QDate>
 
@@ -53,6 +54,7 @@ QVariantMap finding(const QString &id, const QString &title, int level,
 
 const QString kAdvCamUrl    = QStringLiteral("https://github.com/JimKnopfIoT/harbour-advanced-camera");
 const QString kMicGainUrl   = QStringLiteral("https://github.com/JimKnopfIoT/harbour-micgain");
+const QString kSpeakerGainUrl = QStringLiteral("https://github.com/JimKnopfIoT/speaker-gain");
 
 QString mhz(qlonglong khz) { return QString::number(khz / 1000) + QStringLiteral(" MHz"); }
 
@@ -94,6 +96,7 @@ static QString topicFor(const QString &id)
     if (id.startsWith(QLatin1String("gpu-")))    return QStringLiteral("gpu");
     if (id.startsWith(QLatin1String("camera-"))) return QStringLiteral("camera");
     if (id == QLatin1String("mic-gain"))         return QStringLiteral("audio");
+    if (id == QLatin1String("audio-bt-volume"))  return QStringLiteral("bluetooth");
     if (id.startsWith(QLatin1String("bt-")))     return QStringLiteral("bluetooth");
     if (id.startsWith(QLatin1String("wlan-")))   return QStringLiteral("network");
     if (id.startsWith(QLatin1String("charger-")) || id.startsWith(QLatin1String("batt-")))
@@ -103,6 +106,17 @@ static QString topicFor(const QString &id)
     if (id.startsWith(QLatin1String("system-")))
         return QStringLiteral("cpu");
     return QStringLiteral("system");
+}
+
+// Some findings sit on more than one page. The Bluetooth volume is a fact about
+// the headphones that are connected and a fact about the audio policy alike,
+// and a reader will go looking for it under either heading. The first entry is
+// the finding's home; the rest are the pages that also show it.
+static QStringList topicsFor(const QString &id)
+{
+    if (id == QLatin1String("audio-bt-volume"))
+        return QStringList() << QStringLiteral("bluetooth") << QStringLiteral("audio");
+    return QStringList() << topicFor(id);
 }
 
 QVariantList Diagnostics::run(double cpuPct, double load1) const
@@ -117,6 +131,7 @@ QVariantList Diagnostics::run(double cpuPct, double load1) const
     checkLoadVsCpu(out, cpuPct, load1);
     checkMtkHotplug(out);
     checkMicGain(out);
+    checkBtAbsoluteVolume(out);
     checkBtAdapters(out);
     checkWlanRadio(out);
     checkGpuDriverRelease(out);
@@ -124,7 +139,9 @@ QVariantList Diagnostics::run(double cpuPct, double load1) const
     checkSecurityPatchAge(out);
     for (int i = 0; i < out.size(); ++i) {
         QVariantMap m = out[i].toMap();
-        m.insert(QStringLiteral("topic"), topicFor(m.value(QStringLiteral("id")).toString()));
+        const QStringList t = topicsFor(m.value(QStringLiteral("id")).toString());
+        m.insert(QStringLiteral("topic"), t.first());
+        m.insert(QStringLiteral("topics"), t);
         out[i] = m;
     }
     return out;
@@ -632,6 +649,103 @@ void Diagnostics::checkMtkHotplug(QVariantList &out) const
 // Hybris BT ports (bluebinder) sometimes end up with a second, dead hci
 // adapter and a soft-blocked rfkill switch next to the live one. Harmless
 // for pairing but confusing for apps that pick the wrong adapter.
+// Bluetooth playback: who is actually holding the volume.
+//
+// module-bluez5-device can be told to hand PulseAudio's sink volume to the
+// headphones over AVRCP instead of applying it here. Sailfish does exactly
+// that (avrcp_absolute_volume=1), and the sink then sits at full scale: the
+// phone has taken the headphones' own volume control and opened it all the
+// way. Everything that makes the sound quieter now happens in the stream
+// alone -- and a route that has never been used starts from a fixed figure in
+// /etc/pulse/x-maemo-route.table, 25 dB below unity for media and 15 dB for
+// calls. Ten decibels louder for a call than for music, on headphones that are
+// already wide open.
+//
+// This is not a fault, it is a consequence, and the reader cannot see it
+// anywhere: the sink reads 100 % and sounds like it. So it is stated, with the
+// value that can be lowered and the file it lives in.
+void Diagnostics::checkBtAbsoluteVolume(QVariantList &out) const
+{
+    auto pactl = [](const QString &what) -> QString {
+        QProcess p;
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+        env.insert(QStringLiteral("LC_ALL"), QStringLiteral("C"));
+        env.remove(QStringLiteral("LANGUAGE"));
+        p.setProcessEnvironment(env);
+        p.start(QStringLiteral("pactl"), QStringList() << QStringLiteral("list") << what);
+        if (!p.waitForFinished(2500)) {
+            p.kill();
+            p.waitForFinished(300);
+            return QString();
+        }
+        return QString::fromUtf8(p.readAllStandardOutput());
+    };
+
+    const QString mods = pactl(QStringLiteral("modules"));
+    if (mods.isEmpty())
+        return;
+    const bool absolute = mods.contains(QStringLiteral("avrcp_absolute_volume=1"));
+
+    // Only worth saying while a Bluetooth sink is actually there.
+    QString sink, volume;
+    bool inBluez = false;
+    for (const QString &raw : pactl(QStringLiteral("sinks")).split(QLatin1Char('\n'))) {
+        const QString l = raw.trimmed();
+        if (l.startsWith(QStringLiteral("Sink #"))) {
+            if (inBluez && !volume.isEmpty())
+                break;
+            inBluez = false;
+            volume.clear();
+        } else if (l.startsWith(QStringLiteral("Name:"))) {
+            const QString n = l.mid(5).trimmed();
+            inBluez = n.contains(QStringLiteral("bluez_sink"));
+            if (inBluez)
+                sink = n;
+        } else if (inBluez && volume.isEmpty() && l.startsWith(QStringLiteral("Volume:"))) {
+            const int pc = l.indexOf(QLatin1Char('%'));
+            if (pc > 0) {
+                int st = pc - 1;
+                while (st > 0 && (l.at(st).isDigit() || l.at(st) == QLatin1Char(' ')))
+                    --st;
+                volume = l.mid(st + 1, pc - st - 1).trimmed();
+            }
+        }
+    }
+    if (sink.isEmpty() || !absolute)
+        return;
+
+    // The figure a fresh route starts from, read rather than assumed.
+    QString mediaDb, phoneDb;
+    QFile rt(QStringLiteral("/etc/pulse/x-maemo-route.table"));
+    if (rt.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        for (const QByteArray &line : rt.readAll().split('\n')) {
+            const QString l = QString::fromUtf8(line).trimmed();
+            if (l.startsWith(QStringLiteral("sink-input-by-media-role:x-maemo")))
+                mediaDb = l.section(QLatin1Char(' '), -1);
+            else if (l.startsWith(QStringLiteral("sink-input-by-media-role:phone")))
+                phoneDb = l.section(QLatin1Char(' '), -1);
+        }
+    }
+
+    QVariantList det;
+    det.append(detail(tr("Output"), sink));
+    det.append(detail(tr("Its volume"), volume + QStringLiteral(" %"),
+                      volume.toInt() >= 100 ? QStringLiteral("warn") : QString()));
+    det.append(detail(tr("Applied by"), tr("the headphones, over AVRCP")));
+    det.append(detail(tr("Module argument"), QStringLiteral("avrcp_absolute_volume=1")));
+    if (!mediaDb.isEmpty())
+        det.append(detail(tr("First-use level, media"), mediaDb + QStringLiteral(" dB")));
+    if (!phoneDb.isEmpty())
+        det.append(detail(tr("First-use level, calls"), phoneDb + QStringLiteral(" dB")));
+
+    out.append(finding(QStringLiteral("audio-bt-volume"),
+        tr("The headphones are held at full volume"), 1,
+        tr("PulseAudio does not apply this output's volume itself: it hands the figure to the headphones over AVRCP, and the figure is %1 %. Their own volume control is therefore wide open, and only the per-stream level below it makes anything quieter.").arg(volume),
+        det,
+        tr("A route that has never played before starts from the platform's own table (/etc/pulse/x-maemo-route.table), not from anything measured for these headphones — and calls start ten decibels louder than music. What can be lowered is the stored volume for this route, sink-input-by-media-role:<kind>:bta2dp, which lives in your own home directory and survives a system update. The volume keys write the same value; Speaker Gain sets it directly and shows what is stored."),
+        tr("Speaker Gain (GitHub)"), kSpeakerGainUrl));
+}
+
 void Diagnostics::checkBtAdapters(QVariantList &out) const
 {
     const QDir d(QStringLiteral("/sys/class/bluetooth"));

@@ -25,6 +25,24 @@ function folded(list) {
     return list
 }
 
+// PRETTY_NAME from /etc/os-release carries name, release and codename in one
+// string ("Sailfish OS 5.2.0.17 (Finlayson)") while the release stands in its
+// own row right below. Shown here is the codename alone; where a device names
+// none, the version is taken out of the string, and only if that leaves
+// nothing but the product name does the full string stay.
+function osShortName(d) {
+    var p = ("" + (d.os || "")).trim()
+    if (!p) return "Sailfish OS"
+    var m = p.match(/\(([^()]+)\)\s*$/)
+    if (m) return m[1]
+    var v = ("" + (d.osVersion || "")).trim()
+    if (v && p.indexOf(v) >= 0) {
+        var rest = p.split(v).join(" ").replace(/\s+/g, " ").trim()
+        if (rest && rest.toLowerCase() !== "sailfish os") return rest
+    }
+    return p
+}
+
 // A run of sections of the same kind — one directory per power-supply stage,
 // one per sound card, one per raw node — is a list, not a chapter each. From
 // four of them on they go under a single header and open together; three or
@@ -264,7 +282,7 @@ function cpu() {
                  rows: socRows })
     }
     s.push({ title: qsTr("Operating system"), rows: [
-        row("Sailfish OS", d.os),
+        row("Sailfish OS", osShortName(d)),
         row(qsTr("Release"), d.osVersion),
         row(qsTr("HW adaptation"), d.hwVersion),
         row(qsTr("Kernel"), d.kernel, {mono:true}),
@@ -376,9 +394,14 @@ function cpu() {
 
     // Copy-ready device block for bug reports. Deliberately English literals:
     // reports go to international trackers.
+    // PRETTY_NAME already carries the release ("Sailfish OS 5.1.0.11 (Pispala)"),
+    // so VERSION_ID only gets appended where it is missing from it.
+    var osLine = d.os || "Sailfish OS"
+    if (d.osVersion && osLine.indexOf(d.osVersion) < 0)
+        osLine += " " + d.osVersion
     var rep = "Date: " + Qt.formatDateTime(new Date(), "yyyy-MM-dd hh:mm") + "\n"
         + "Device: " + (d.deviceName || "?") + (d.deviceModel ? " (" + d.deviceModel + ")" : "") + "\n"
-        + "OS: " + (d.os || "Sailfish OS") + " " + (d.osVersion || "") + "\n"
+        + "OS: " + osLine + "\n"
         + "HW adaptation: " + (d.hwVersion || "?") + "\n"
         + "Kernel: " + (d.kernel || "?") + "\n"
         + (d.kernelVersion ? "Kernel build: " + d.kernelVersion + "\n" : "")
@@ -507,6 +530,151 @@ function cpu() {
     return { title: qsTr("System & CPU"), helpTopics: ["cpu","diagnosis","monitoring","raw","firmware"], sections: s.concat(tail), diagTopic: "cpu", report: rep }
 }
 
+// The display — its own chapter under Graphics, because the panel is a part in
+// its own right and not an attribute of the GPU.
+//
+// Which panel is fitted is the one question a device tree cannot answer on its
+// own: a model built across several production runs lists every panel it was
+// ever built with, all of them alternatives under the same DSI host. The one
+// behind this glass is the one the host bound a driver to; the rest sit unbound
+// with nothing behind them. That driver's name is the most specific identity
+// available without root — it carries the panel controller, how it is wired,
+// which mode it runs in, and on a MediaTek adaptation the rate it was built
+// for and the glass maker.
+function displaySections() {
+    var d = {}
+    try { d = sysmon.displayDetail() } catch (e) { d = {} }
+    var out = []
+
+    // --- the panel -------------------------------------------------------
+    var panels = d.panels || []
+    var bound = null
+    for (var p = 0; p < panels.length; ++p)
+        if (panels[p].bound) { bound = panels[p]; break }
+
+    var pr = []
+    var ratesKnown = false
+    if (bound) {
+        pr.push(row(qsTr("Panel driver"), bound.driver, { mono: true }))
+        pr.push(row(qsTr("Named in the device tree as"), bound.compatible, { mono: true }))
+        // A rate in the driver's own name is evidence, not arithmetic — but it
+        // is what the driver was built for, not what the panel is doing now.
+        var hz = /(^|[^0-9])([0-9]{2,3})hz/i.exec(bound.driver || "")
+        if (hz) {
+            pr.push(row(qsTr("Rate the panel driver is built for"),
+                        qsTr("%1 Hz").arg(hz[2])))
+            ratesKnown = true
+        }
+        pr.push(row(qsTr("Panels this board can carry"),
+                    panels.length > 1
+                        ? qsTr("%1 in the device tree, this one fitted").arg(panels.length)
+                        : qsTr("one, and it is this one"),
+                    { active: panels.length > 1 ? undefined : false }))
+    } else if (panels.length) {
+        pr.push(row(qsTr("Panel"),
+                    qsTr("%1 candidates in the device tree, none of them bound")
+                        .arg(panels.length), { active: false }))
+    }
+
+    var hosts = d.dsiHosts || []
+    for (var h = 0; h < hosts.length; ++h) {
+        if (hosts[h].status === "disabled")
+            continue
+        pr.push(row(qsTr("Display interface"), hosts[h].compatible, { mono: true }))
+        if (hosts[h].phy)
+            pr.push(row(qsTr("PHY"), hosts[h].phy, { mono: true }))
+        // A property of the wiring, not a reading of what is on screen now:
+        // the highest rate the host is set up to switch the panel to.
+        if (hosts[h].switchFps) {
+            pr.push(row(qsTr("Host is wired to switch up to"),
+                        qsTr("%1 Hz").arg(hosts[h].switchFps)))
+            ratesKnown = true
+        }
+        break
+    }
+    if (pr.length)
+        out.push({ title: qsTr("Panel"), rows: pr,
+                   note: ratesKnown
+                       ? qsTr("Neither rate is a reading. One is the rate the panel driver was built for, the other the ceiling the display host is wired to switch to, and they need not agree. What the panel is refreshing at this second is not readable without root on either platform this app has been checked on.")
+                       : undefined })
+
+    // --- the connector ---------------------------------------------------
+    var conns = d.connectors || []
+    for (var c = 0; c < conns.length; ++c) {
+        var cn = conns[c]
+        var cr = []
+        cr.push(row(qsTr("Status"), cn.status,
+                    { color: cn.status === "connected" ? "green" : undefined }))
+        // dpms is what the kernel did to the panel; mce is what the system
+        // asked for. They are two different statements and stay apart.
+        if (cn.dpms)
+            cr.push(row(qsTr("Power state (kernel)"), cn.dpms))
+        if (d.mceDisplay)
+            cr.push(row(qsTr("Display state (system)"), d.mceDisplay))
+        cr.push(row(qsTr("Driver has it enabled"), cn.enabled))
+        if (cn.bitsPerPixel)
+            cr.push(row(qsTr("Colour depth"), qsTr("%1 bits per pixel").arg(cn.bitsPerPixel)))
+        var modes = cn.modes || []
+        cr.push(row(qsTr("Resolution"), modes.length ? modes[0] : qsTr("no mode listed"),
+                    { active: modes.length ? undefined : false }))
+        if (modes.length > 1)
+            cr.push(row(qsTr("Further modes"), modes.slice(1).join("  ·  "), { mono: true }))
+        if (cn.connectorId)
+            cr.push(row(qsTr("Connector"), cn.name + "  ·  " + qsTr("id %1").arg(cn.connectorId),
+                        { mono: true }))
+        else
+            cr.push(row(qsTr("Connector"), cn.name + (cn.fbName ? "  ·  " + cn.fbName : ""),
+                        { mono: true }))
+        // An internal panel has no EDID to read; an external one does. Saying
+        // which is the case beats an empty row. A framebuffer has no place to
+        // put one at all, which is a different statement.
+        if (!cn.framebuffer)
+            cr.push(row(qsTr("EDID"), cn.edidBytes > 0
+                            ? qsTr("%1 bytes").arg(cn.edidBytes)
+                            : qsTr("none — a built-in panel does not carry one"),
+                        { active: cn.edidBytes > 0 ? undefined : false }))
+        out.push({ title: conns.length > 1
+                        ? qsTr("Connector %1").arg(cn.name) : qsTr("Connector"),
+                   rows: cr,
+                   note: cn.framebuffer
+                       ? qsTr("This kernel drives the panel through the old framebuffer interface and registers no DRM connector, so these figures come from fb0 rather than from a connector.")
+                       : undefined })
+    }
+    if (!conns.length)
+        out.push({ title: qsTr("Connector"), rows: [],
+                   note: qsTr("The kernel exposes no DRM connector for this display.") })
+
+    // --- backlight -------------------------------------------------------
+    var bl = d.backlight || {}
+    if (bl.max) {
+        var br = []
+        var cur = (bl.actual !== undefined) ? bl.actual : bl.brightness
+        var pct = (cur !== undefined && bl.max > 0)
+                    ? Math.round(cur * 1000 / bl.max) / 10 : undefined
+        br.push(row(qsTr("Brightness"),
+                    (cur === undefined) ? "—"
+                        : qsTr("%1 of %2 steps").arg(cur).arg(bl.max)
+                          + (pct !== undefined ? "  ·  " + pct + " %" : "")))
+        if (bl.brightness !== undefined && bl.actual !== undefined && bl.brightness !== bl.actual)
+            br.push(row(qsTr("Last value asked for"), bl.brightness))
+        // MediaTek keeps the last value the hardware was really driven to; it
+        // survives the panel being blanked to zero and is the only figure left
+        // to read while the screen is off.
+        if (bl.lastHw !== undefined && cur === 0)
+            br.push(row(qsTr("Last value the hardware ran at"),
+                        qsTr("%1 of %2 steps").arg(bl.lastHw).arg(bl.max)))
+        if (bl.min !== undefined)
+            br.push(row(qsTr("Lowest step the driver allows"), bl.min))
+        if (bl.type)
+            br.push(row(qsTr("Type"), bl.type))
+        br.push(row(qsTr("Kernel node"),
+                    (bl["class"] === "leds" ? "leds/" : "backlight/") + bl.node, { mono: true }))
+        out.push({ title: qsTr("Backlight"), rows: br,
+                   note: qsTr("The step count is the driver's own scale, not a physical unit — it is shown against its own maximum and converted to nothing. Nits are not readable from software on this device. While the panel is off the current step is zero because the panel is off, not because the setting was turned down.") })
+    }
+    return out
+}
+
 function gfx() {
     var d = sysmon.graphicsDetail()
     var s = []
@@ -520,20 +688,9 @@ function gfx() {
         row(qsTr("Clock"), (d.gpuCurMhz ? d.gpuCurMhz + " MHz" : "—") + (d.gpuMaxMhz ? " / " + d.gpuMaxMhz + " MHz" : "")),
         row(qsTr("Busy"), d.gpuBusy !== undefined ? d.gpuBusy + " %" : "—")
     ]})
-    var disp = d.displays || []
-    if (disp.length) {
-        var dr = []
-        for (var i = 0; i < disp.length; ++i) {
-            dr.push(row(qsTr("Connector"), disp[i].connector))
-            dr.push(row(qsTr("Resolution"), disp[i].resolution))
-            dr.push(row(qsTr("Status"), disp[i].status))
-        }
-        s.push({ title: qsTr("Display"), rows: dr })
-    } else {
-        s.push({ title: qsTr("Display"), note: qsTr("No connected DRM connector exposed by the kernel."), rows: [] })
-    }
+    s = s.concat(displaySections())
     s.push(diagnosisHere())
-    return { title: qsTr("Graphics"), helpTopics: ["raw","firmware"], sections: s.concat(catSections("display")).concat(fwModules(["mali","gpufreq","ged","drm","kgsl","disp"])).concat(dtSections("gpu mali display dsi panel drm", qsTr("Device tree — graphics"))).concat(rawSections("gfx")), diagTopic: "gpu" }
+    return { title: qsTr("Graphics & display"), helpTopics: ["display","raw","firmware"], sections: s.concat(catSections("display")).concat(fwModules(["mali","gpufreq","ged","drm","kgsl","disp"])).concat(dtSections("gpu mali display dsi panel drm", qsTr("Device tree — graphics"))).concat(rawSections("gfx")), diagTopic: "gpu" }
 }
 
 function mem() {
@@ -752,6 +909,23 @@ function storage() {
                          : mn.pct > 90 ? "#ff5a52" : mn.pct > 75 ? "#ffb44a" : "#31e0a0" })
     }
     s.push({ title: qsTr("Partitions"), bars: bars, rows: [] })
+
+    // A read test needs something to read. The card if one is in, otherwise the
+    // partition the user's files live on — the same measurement either way, and
+    // the label says which medium was under it.
+    var probe = null
+    for (var pm = 0; pm < mounts.length; ++pm) {
+        var mm = mounts[pm]
+        if (("" + mm.device).indexOf("mmcblk") >= 0) {
+            probe = { mount: mm.mount, label: qsTr("microSD card") }
+            break
+        }
+        if (mm.mount === "/home" || ("" + mm.mount).indexOf("/home/") === 0)
+            probe = { mount: mm.mount, label: qsTr("internal storage") }
+    }
+    if (probe)
+        s.push({ readTest: probe })
+
     return { title: qsTr("Storage"), helpTopics: ["storage","raw","firmware"], sections: s.concat(catSections("storage")).concat(fwStorage()).concat(fwModules(["ufs","mmc","blocktag","scsi"])).concat(dtSections("ufs mmc sdhci storage", qsTr("Device tree — storage"))).concat(rawSections("storage")) }
 }
 
@@ -1479,8 +1653,75 @@ function bluetooth() {
                     note: qsTr("On most ports BT shares the WLAN combo chip; the device-tree node names it."),
                     rows: br })
     }
+    // --- what a connected headset is actually played at ---------------------
+    // The loudness of a Bluetooth headset is not one number. PulseAudio can be
+    // told to hand its own volume to the headphones over AVRCP instead of
+    // applying it, and Sailfish does exactly that — so the figure below is the
+    // headphones' own control, opened by the phone, and everything that makes
+    // the sound quieter happens in the per-route volume underneath it.
+    var bap = sysmon.audioPolicy()
+    var bvol = bap.bluetooth || {}
+    if (bvol.present) {
+        var bRows = [
+            row(qsTr("Output"), bvol.sink, { mono: true }),
+            row(qsTr("Its volume"), bvol.percent + "\u00a0%",
+                { color: bvol.percent >= 100 ? "#ffd166" : undefined }),
+            row(qsTr("Applied by"), bvol.avrcpAbsolute
+                    ? qsTr("the headphones, over AVRCP")
+                    : qsTr("PulseAudio itself"))
+        ]
+        var bpr = bap.perRoute || []
+        for (var bi = 0; bi < bpr.length; ++bi) {
+            var rt = bpr[bi].route
+            if (rt !== "bta2dp" && String(rt).indexOf("btmono") !== 0)
+                continue
+            bRows.push(row(audioRoleName(bpr[bi].role) + " · " + audioRouteName(rt),
+                           bpr[bi].percent.toFixed(1) + "\u00a0%"))
+        }
+        var bfb = bap.fallbacks || []
+        for (var bj = 0; bj < bfb.length; ++bj)
+            bRows.push(row(qsTr("First use, %1")
+                            .arg(audioRoleName(String(bfb[bj].entry).replace("sink-input-by-media-role:", ""))),
+                           bfb[bj].db + "\u00a0dB"))
+
+        s.push({ title: qsTr("How loud this headset is played"),
+                 note: bvol.avrcpAbsolute
+                     ? qsTr("The phone does not turn this output down itself: it hands the figure to the headphones over AVRCP and holds their own control wide open. Only the per-route volumes below it make anything quieter, and a route that has never played before starts from the platform's table rather than from anything measured for these headphones — calls ten decibels louder than music.\n\nWhat can be changed is the stored volume of the route, which lives in your own home directory and survives a system update. The volume keys write it while the headset is connected; this page only reads it.")
+                     : qsTr("PulseAudio applies this output's volume itself, so the figure above is what the headphones receive."),
+                 rows: bRows })
+    }
+
     s.push(diagnosisHere())
     return { title: qsTr("Bluetooth"), helpTopics: ["raw","firmware"], sections: s.concat(fwModules(["bluetooth","btmtk","bt_drv","hci","rfkill"])).concat(dtSections("bluetooth btif consys connfem", qsTr("Device tree — Bluetooth"))).concat(rawSections("bt")), diagTopic: "bluetooth" }
+}
+
+// Role and route names as the audio policy spells them, with what they carry.
+function audioRoleName(r) {
+    if (r === "x-maemo") return qsTr("Media")
+    if (r === "phone") return qsTr("Calls")
+    if (r === "voip") return qsTr("VoIP")
+    return r
+}
+
+function audioRouteName(r) {
+    if (r === "ihf") return qsTr("Speaker")
+    if (r === "hp") return qsTr("Wired headphones")
+    if (r === "hs") return qsTr("Wired headset")
+    if (r === "bta2dp") return qsTr("Bluetooth, music")
+    if (r === "lineout") return qsTr("Line out")
+    if (r === "usbaudio") return qsTr("USB audio")
+    if (r && r.indexOf("btmono") === 0) return qsTr("Bluetooth, calls")
+    return r
+}
+
+// What a system update does to the file a value lives in. Derived at runtime
+// from the package database, not from a table in here.
+function fateText(f) {
+    if (f === "user") return qsTr("stays — your own file, no package owns it")
+    if (f === "config") return qsTr("stays — marked as configuration")
+    if (f === "replaced") return qsTr("replaced without notice")
+    if (f === "unowned") return qsTr("no package claims it")
+    return qsTr("unknown")
 }
 
 function audio() {
@@ -1536,8 +1777,146 @@ function audio() {
         s.push({ title: qsTr("Inputs (sources)"),
             note: qsTr("PulseAudio capture devices. The microphone gain is the primary input's volume — reflects the harbour-mic-gain fix."), rows: qrows })
 
+    // The microphones themselves are ports behind one capture device, not
+    // devices of their own: a phone with two of them shows one source and two
+    // ports. Listing only the source hides the second microphone entirely.
+    function portRows(list) {
+        var out = []
+        for (var pi = 0; pi < list.length; ++pi) {
+            var d = list[pi]
+            var ports = d.ports || []
+            for (var pj = 0; pj < ports.length; ++pj) {
+                var p = ports[pj]
+                var isActive = d.activePort !== undefined && d.activePort === p.name
+                out.push(row(p.description || p.name,
+                             (p.available ? qsTr("present") : qsTr("not present"))
+                             + (isActive ? "  ·  " + qsTr("in use") : "")
+                             + (p.priority !== undefined ? "  ·  " + qsTr("priority %1").arg(p.priority) : ""),
+                             { active: isActive,
+                               right: p.name,
+                               color: p.available ? undefined : Theme.secondaryColor }))
+            }
+        }
+        return out
+    }
+
+    var inPorts = portRows(sources)
+    if (inPorts.length)
+        s.push({ title: qsTr("Microphones and other inputs"),
+            note: qsTr("What sits behind the capture device. Each entry is a port the card can switch to, not a device of its own — which is why two microphones show up here and only one device above. \"Present\" means the hardware is there, not that it is recording.\n\nExactly one port can be the one in use, because that is what the audio policy selected. That is not the same as \"the others are idle\": noise suppression happens a layer below, where the vendor's audio driver opens several microphones itself and passes one finished channel upwards. A second microphone working on that channel never appears as the one in use, however busy it is."),
+            rows: inPorts })
+
+    var outPorts = portRows(sinks)
+    if (outPorts.length)
+        s.push({ title: qsTr("Speakers and other outputs"), collapsed: true,
+            note: qsTr("The same for playback: earpiece, loudspeaker and the sockets are ports behind one device."),
+            rows: outPorts })
+
+    // ---- where the volumes on this device come from ----------------------
+    // Four places hold them and none of them is the settings page: the feedback
+    // daemon names an entry per event, binds it to a stored setting or pins it
+    // outright, profiled keeps the setting, and PulseAudio keeps what was last
+    // applied - per kind of sound and per output route.
+    var ap = sysmon.audioPolicy()
+
+    var pr = ap.perRoute || []
+    if (pr.length) {
+        var prRows = []
+        for (var pi = 0; pi < pr.length; ++pi)
+            prRows.push(row(audioRoleName(pr[pi].role) + " · " + audioRouteName(pr[pi].route),
+                            pr[pi].percent.toFixed(1) + "\u00a0%"))
+        s.push({ title: qsTr("Volume per output"),
+                 note: qsTr("Every output carries a volume of its own, per kind of sound, and the system restores it when the output changes. An entry appears the first time that output plays something. These are read from PulseAudio's own database in your home directory; the volume keys write the same values.")
+                     + "\n\n" + (ap.files && ap.files.length > 6 ? ap.files[6].path : ""),
+                 rows: prRows })
+    }
+
+    var nm = ap.named || []
+    if (nm.length) {
+        var nmRows = []
+        for (var ni = 0; ni < nm.length; ++ni) {
+            var e = nm[ni]
+            nmRows.push(row(e.entry, e.percent.toFixed(1) + "\u00a0%",
+                            { mono: true,
+                              right: e.key ? e.key : undefined }))
+        }
+        s.push({ title: qsTr("Alert and signal volumes"),
+                 note: qsTr("One entry per named volume the feedback daemon manages. Where a row names a setting on the right, that setting is what feeds it — and the scope matters: the ringtone follows the profile you are in, the alarm always reads the general one."),
+                 rows: nmRows })
+    }
+
+    var al = ap.alarm || {}
+    if (al.entry) {
+        var alRows = [
+            row(qsTr("Volume entry"), al.entry, { mono: true }),
+            row(qsTr("Stream role"), al.mediaRole, { mono: true }),
+            row(qsTr("Fed from"), al.key, { mono: true }),
+            row(qsTr("Which profile"), al.scope === "general"
+                    ? qsTr("general — always, whichever profile is active")
+                    : al.scope,
+                { color: al.scope === "general" ? "#ffd166" : undefined }),
+            row(qsTr("Its value"), al.value ? al.value + "\u00a0%" : qsTr("not readable")),
+            row(qsTr("Ringtone, for comparison"), al.ringValue ? al.ringValue + "\u00a0%" : qsTr("not readable")),
+            row(qsTr("Fade-in"), al.fadeIn, { mono: true })
+        ]
+        s.push({ title: qsTr("Where the alarm volume comes from"),
+                 note: qsTr("The alarm has a volume of its own and it is bound to the general profile, not to the one you are in — so switching to Silent leaves it untouched, which is deliberate. What follows from it is not: the ringtone slider does not reach it, the volume keys do not either, and the platform ships the setting at 100 with nothing in the interface to change it. The value is a stored setting like any other and can be set; this page only reads it."),
+                 rows: alRows })
+    }
+
+    var fb = ap.fallbacks || []
+    if (fb.length) {
+        var fbRows = []
+        for (var fi = 0; fi < fb.length; ++fi)
+            fbRows.push(row(audioRoleName(String(fb[fi].entry).replace("sink-input-by-media-role:", "")),
+                            fb[fi].db + "\u00a0dB"))
+        s.push({ title: qsTr("What a new output starts at"),
+                 note: qsTr("An output that has never played before has no stored volume yet, so the system takes these figures instead. They are the platform's, not a measurement of the device attached — which is why a first connection can be far louder or quieter than expected."),
+                 rows: fbRows })
+    }
+
     s.push(diagnosisHere())
-    return { title: qsTr("Audio"), helpTopics: ["raw","firmware"], sections: s.concat(catSections("audio")).concat(fwModules(["snd","spk","amp","audio","accdet"])).concat(dtSections("audio codec amp speaker snd accdet", qsTr("Device tree — audio"))).concat(rawSections("audio")), diagTopic: "audio" }
+
+    // Detail at the end, folded: the step tables the volume keys walk and the
+    // files every figure above was read from.
+    var tail2 = []
+    var tb = ap.tables || []
+    if (tb.length) {
+        var tbSections = []
+        for (var ti = 0; ti < tb.length; ++ti) {
+            var t = tb[ti], tRows = []
+            var kinds = [["call", qsTr("Calls")], ["voip", qsTr("VoIP")], ["media", qsTr("Everything else")]]
+            for (var ki = 0; ki < kinds.length; ++ki) {
+                var c = t.curves ? t.curves[kinds[ki][0]] : undefined
+                if (!c || !c.count) continue
+                tRows.push(row(kinds[ki][1],
+                    qsTr("%1 steps, down to %2\u00a0dB, biggest jump %3\u00a0dB")
+                        .arg(c.count).arg(c.lowDb.toFixed(1)).arg(c.gapDb.toFixed(1))))
+            }
+            if (t.warnStep !== undefined)
+                tRows.push(row(qsTr("Loudness warning above step"), t.warnStep))
+            if (t.modes && t.modes.length)
+                tRows.push(row(qsTr("Used by"), t.modes.join(", ")))
+            if (tRows.length)
+                tbSections.push({ title: t.name, rows: tRows })
+        }
+        if (tbSections.length)
+            tail2 = tail2.concat(group(tbSections, "volsteps", qsTr("Volume steps per output"),
+                qsTr("The volume keys do not move a percentage, they walk a list of fixed levels, and each output has lists of its own. A short list means coarse steps; the biggest jump is the widest gap between two neighbouring levels, which is what one press costs at its worst point. These tables belong to a package and an update replaces them.")))
+    }
+
+    var fl = ap.files || []
+    if (fl.length) {
+        var flRows = []
+        for (var li = 0; li < fl.length; ++li)
+            flRows.push(row(fl[li].path, fateText(fl[li].fate),
+                            { mono: true, right: fl[li].owner ? fl[li].owner : undefined }))
+        tail2.push({ title: qsTr("Files behind these figures"), collapsed: true,
+                     note: qsTr("Every file the figures above were read from, with the package that owns it and what a system update does to it. A value in your own home directory is kept; a package file marked as configuration is kept with the update's version beside it; a package file that is not so marked is overwritten without a backup and without a notice."),
+                     rows: flRows })
+    }
+
+    return { title: qsTr("Audio"), helpTopics: ["raw","firmware"], sections: s.concat(tail2).concat(catSections("audio")).concat(fwModules(["snd","spk","amp","audio","accdet"])).concat(dtSections("audio codec amp speaker snd accdet", qsTr("Device tree — audio"))).concat(rawSections("audio")), diagTopic: "audio" }
 }
 
 function camera() {

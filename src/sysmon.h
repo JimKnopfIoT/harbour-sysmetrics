@@ -198,8 +198,15 @@ public:
     Q_INVOKABLE QVariantMap sinceBootDetail() const;
     Q_INVOKABLE QVariantMap cpuDetail() const;
     Q_INVOKABLE QVariantMap graphicsDetail() const;
+    Q_INVOKABLE QVariantMap displayDetail() const;
     Q_INVOKABLE QVariantMap audioDetail() const;
     Q_INVOKABLE QVariantMap audioStreams() const;
+    // Where the volumes on this device come from: the bindings ngfd declares,
+    // the settings profiled holds, what PulseAudio last applied per role and
+    // per output route, the step tables the volume keys walk, and for every
+    // value the file it lives in and what an update does to that file.
+    Q_INVOKABLE QVariantMap audioPolicy() const;
+    Q_INVOKABLE QString currentProfile() const;
     Q_INVOKABLE QVariantMap cameraDetail() const;
     Q_INVOKABLE QVariantMap modemDetail() const;
     Q_INVOKABLE QVariantMap usbDetail() const;

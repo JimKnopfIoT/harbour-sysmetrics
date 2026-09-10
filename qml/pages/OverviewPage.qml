@@ -53,7 +53,9 @@ Page {
         var all = diagnostics.run(sysmon.cpuPercent, sysmon.load1)
         var lv = {}
         for (var i = 0; i < all.length; ++i)
-            if (all[i].level > (lv[all[i].topic] || 0)) lv[all[i].topic] = all[i].level
+            var tp = all[i].topics !== undefined ? all[i].topics : [all[i].topic]
+            for (var t = 0; t < tp.length; ++t)
+                if (all[i].level > (lv[tp[t]] || 0)) lv[tp[t]] = all[i].level
         diagLevels = lv
     }
     Component.onDestruction: sysmon.thermalWanted = false
@@ -276,17 +278,95 @@ Page {
             MetricCard {
                 width: page.width - 2 * Theme.horizontalPageMargin
                 x: Theme.horizontalPageMargin
-                title: qsTr("Graphics")
+                title: qsTr("Graphics & display")
                 accent: Diag.violet
                 drilldown: true
                 diagLevel: page.diagLevels["gpu"] || 0
                 onClicked: page.openDetail(HwInfo.gfx())
                 Label {
                     width: parent.width
-                    text: qsTr("GPU, display — tap for details")
+                    text: qsTr("GPU, panel, connector, backlight — tap for details")
                     font.pixelSize: Theme.fontSizeExtraSmall
                     color: Theme.secondaryColor
                     wrapMode: Text.Wrap
+                }
+            }
+
+            // ---- Zubehör-Anschluss (noch nicht scharf) -------------------
+            // The pogo contacts on the back. Nothing in the system describes
+            // them: no device-tree node names them, the GPIO state is behind
+            // debugfs and root, and which of the six empty I2C buses is wired
+            // to them is not written down anywhere. What identifies them is
+            // attaching something and watching what appears — so the card is a
+            // placeholder until there is a cover to attach and verify against.
+            MetricCard {
+                width: page.width - 2 * Theme.horizontalPageMargin
+                x: Theme.horizontalPageMargin
+                title: qsTr("Pogo pins (coming soon)")
+                accent: Theme.secondaryColor
+                drilldown: false
+                opacity: 0.45
+
+                // One Column, not three loose items: MetricCard's slot is a
+                // plain Item that positions nothing, so anything put in it
+                // lands at the same spot. Every other card gets away with a
+                // single label; this one has three pieces and drew them on top
+                // of each other.
+                Column {
+                    width: parent.width
+                    spacing: Theme.paddingMedium
+
+                    Label {
+                        width: parent.width
+                        text: qsTr("The spring contacts on the back. A log of what appears and disappears when something is attached — that is what identifies which bus sits behind them, because nothing in the system says so.")
+                        font.pixelSize: Theme.fontSizeExtraSmall
+                        color: Theme.secondaryColor
+                        wrapMode: Text.Wrap
+                    }
+
+                    // The pad layout as it is on the back of the device: four
+                    // above, three below, the lower right position empty.
+                    // Counted by eye, not read from anywhere — which is why the
+                    // numbers are positions and not functions. Two of them
+                    // carry ground and supply; which two is not established,
+                    // and guessing at a pinout is how people short a supply
+                    // into a data line.
+                    Column {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: Theme.paddingSmall
+
+                        Repeater {
+                            model: [[1, 2, 3, 4], [5, 6, 7]]
+                            Row {
+                                spacing: Theme.paddingSmall
+                                Repeater {
+                                    model: modelData
+                                    Rectangle {
+                                        width: Theme.itemSizeExtraSmall / 1.6
+                                        height: width
+                                        radius: width / 2
+                                        color: "transparent"
+                                        border.color: Theme.secondaryColor
+                                        border.width: 2
+                                        Label {
+                                            anchors.centerIn: parent
+                                            text: modelData
+                                            font.pixelSize: Theme.fontSizeExtraSmall
+                                            color: Theme.secondaryColor
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Label {
+                        width: parent.width
+                        text: qsTr("Seven pads, four over three, the lower right position unused — counted on the device. One of them is ground and one is the supply; which ones is not established. The numbers are positions, nothing more.")
+                        font.pixelSize: Theme.fontSizeTiny
+                        color: Theme.secondaryColor
+                        wrapMode: Text.Wrap
+                    }
                 }
             }
 
@@ -318,7 +398,7 @@ Page {
                 onClicked: pageStack.push(Qt.resolvedUrl("SensorsPage.qml"))
                 Label {
                     width: parent.width
-                    text: qsTr("Gyro, compass, light, GPS — tap for live values")
+                    text: qsTr("Gyro, compass, light, GPS, buttons, fingerprint — tap for live values")
                     font.pixelSize: Theme.fontSizeExtraSmall
                     color: Theme.secondaryColor
                     wrapMode: Text.Wrap

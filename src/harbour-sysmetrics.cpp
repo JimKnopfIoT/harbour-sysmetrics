@@ -18,8 +18,11 @@
 #ifdef SYSMETRICS_ULTIMATE
 #include "cvelookup.h"
 #endif
+#include "fpmon.h"
 #include "graphitem.h"
 #include "sysmetrics_version.h"
+#include "keymon.h"
+#include "readtest.h"
 #include "netmon.h"
 #include "procmodel.h"
 #include "recorder.h"
@@ -140,6 +143,9 @@ int main(int argc, char *argv[])
     BtInfo bt;
     NetMonitor netmon;
     Diagnostics diagnostics;
+    KeyMon keymon;
+    FpMon fpmon;
+    ReadTest readtest;
 
     // First: rows are attributed against the frequencies of their own sample,
     // and the sampler emits the system snapshot before the process list.
@@ -200,6 +206,9 @@ int main(int argc, char *argv[])
     view->rootContext()->setContextProperty(QStringLiteral("bt"), &bt);
     view->rootContext()->setContextProperty(QStringLiteral("netmon"), &netmon);
     view->rootContext()->setContextProperty(QStringLiteral("diagnostics"), &diagnostics);
+    view->rootContext()->setContextProperty(QStringLiteral("keymon"), &keymon);
+    view->rootContext()->setContextProperty(QStringLiteral("fpmon"), &fpmon);
+    view->rootContext()->setContextProperty(QStringLiteral("readtest"), &readtest);
 #ifdef SYSMETRICS_ULTIMATE
     // Ultimate only: the "cve" context property is the QML-side feature gate.
     CveLookup cvelookup;
