@@ -37,6 +37,16 @@ recognise documented device issues and explain their fixes.
   registered Android HAL services via binder.
 - Android base under System & CPU: Android version, security patch level,
   vendor build and fingerprint of the HAL layer.
+- Accessory connector (TOH) on the Jolla Phone (2026): the state of the
+  interrupt line, the voltage at the identify contact and the 5 V output,
+  read live from the pogo-pin controller and drawn onto the connector —
+  grey is what a contact is for, orange what the device reports right now.
+  The memory chip in an attached cover is read over I²C and taken apart:
+  vendor and product, the CBOR payload naming the cover, the checksum
+  recomputed, the chip's size and address width measured on the bus, the
+  raw block byte for byte. The block is fingerprinted against the official
+  covers, whose content is rebuilt from the sources the maker publishes.
+  Read-only throughout — the 5 V output is never switched.
 - Bug reports page: copy-ready device summary (with a fill-in skeleton for
   the reporter's part) and a log-info generator — name a component and get
   its exact package versions, running processes and, with root mode,
@@ -77,6 +87,12 @@ app never talks to the network.
 <td align="center"><a href="screenshots/15_Bugrepo1.png"><img src="screenshots/15_Bugrepo1.png" width="200"></a><br><sub><b>14</b> · Bug reports</sub></td>
 <td align="center"><a href="screenshots/16_Bugrepo2.png"><img src="screenshots/16_Bugrepo2.png" width="200"></a><br><sub><b>15</b> · Device summary &amp; log info</sub></td>
 <td align="center"><a href="screenshots/17_Ram1.png"><img src="screenshots/17_Ram1.png" width="200"></a><br><sub><b>16</b> · RAM</sub></td>
+</tr>
+<tr>
+<td align="center"><a href="screenshots/19_TOH1.png"><img src="screenshots/19_TOH1.png" width="200"></a><br><sub><b>17</b> · Pogo pins — cover on</sub></td>
+<td align="center"><a href="screenshots/20_TOH2.png"><img src="screenshots/20_TOH2.png" width="200"></a><br><sub><b>18</b> · Pogo pins — cover off</sub></td>
+<td></td>
+<td></td>
 </tr>
 </table>
 
