@@ -9,6 +9,7 @@
 #include "roothelper.h"
 
 #include "chargerlog.h"
+#include "tohmon.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -243,6 +244,18 @@ QByteArray cmdLogGrep(const QByteArray &term)
     return out;
 }
 
+// The memory chip of an attached cover, read on the bus the contacts sit on.
+// Read-only by construction: TohI2c::read never writes anything but the
+// address byte a memory needs to answer at all.
+QByteArray cmdTohMemory()
+{
+    const TohI2c::Reading r = TohI2c::read(256);
+    if (r.data.isEmpty())
+        return QByteArray();
+    return r.bus.toLatin1() + ' ' + QByteArray::number(r.blocks) + ' '
+           + QByteArray::number(r.eightBit ? 8 : 16) + '\n' + r.data;
+}
+
 // The two write operations. Restricted to what the process detail page can
 // actually ask for: one existing process (never init, never a process group
 // or "all processes" via pid <= 0) and the four signals behind its buttons.
@@ -315,6 +328,8 @@ void serve(QLocalSocket *sock)
                 payload = cmdLogGrep(arg);
             else if (cmd == "K")
                 payload = cmdSignal(arg);
+            else if (cmd == "T")
+                payload = cmdTohMemory();
             else if (cmd == "N")
                 payload = cmdNice(arg);
             else

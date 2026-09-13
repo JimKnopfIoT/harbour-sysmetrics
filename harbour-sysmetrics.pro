@@ -46,6 +46,7 @@ HEADERS += \
     src/diagnostics.h \
     src/keymon.h \
     src/readtest.h \
+    src/tohmon.h \
     src/fpmon.h \
     src/btinfo.h \
     src/netmon.h \
@@ -61,6 +62,7 @@ SOURCES += \
     src/sysmon.cpp \
     src/audiopolicy.cpp \
     src/readtest.cpp \
+    src/tohmon.cpp \
     src/procmodel.cpp \
     src/netinfo.cpp \
     src/deviceinfo.cpp \
@@ -123,4 +125,5 @@ DISTFILES += \
     qml/pages/SensorsPage.qml \
     qml/pages/SensorContent.qml \
     qml/pages/ButtonTestPage.qml \
-    qml/pages/FingerprintPage.qml
+    qml/pages/FingerprintPage.qml \
+    qml/components/PogoPinsBlock.qml

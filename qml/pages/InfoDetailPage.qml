@@ -282,7 +282,9 @@ Page {
                     Loader {
                         width: page.width
                         active: sec.pogoPins === true
-                        sourceComponent: Component { PogoPinsBlock { width: page.width } }
+                        sourceComponent: Component {
+                            PogoPinsBlock { width: page.width; mem: sec.mem }
+                        }
                     }
 
                     // ---- a measurement the page offers to run ---------------

@@ -1724,39 +1724,243 @@ function fateText(f) {
     return qsTr("unknown")
 }
 
-// The spring contacts on the back, for a cover that carries electronics.
+// The spring contacts on the back, and the cover that sits on them.
 //
-// Nothing on the device describes them: no node names them, and the state of
-// the lines is behind debugfs and root. What exists is the maker's published
-// specification, and that is what this page carries - marked as published
-// rather than measured, because none of it was read off this phone.
+// Three kinds of statement share this page and are kept apart everywhere on
+// it. The maker's published specification describes what a contact is for and
+// was read off no device. The pogo-pin controller's three values and the bus
+// probe are measured on this phone. And the fingerprint comparison is neither
+// — it holds what the chip answered against an image rebuilt from the
+// maker's published sources.
+//
+// Two hex digits, and a two-byte word as the maker writes offsets.
+function hex2(n) { var h = n.toString(16); return h.length < 2 ? "0" + h : h }
+function hex4(n) { var h = n.toString(16); while (h.length < 4) h = "0" + h; return h }
+function hex8(n) { var h = (n >>> 0).toString(16); while (h.length < 8) h = "0" + h; return h }
+
+// The published meaning of a payload key. A key this build does not know is
+// still shown — the maker says the table may grow, and an unnamed key is a
+// fact about the cover even when its name is not in our copy of the table.
+function tohKeyName(k) {
+    switch (k) {
+    case "SC": return qsTr("Schema version")
+    case "SN": return qsTr("Serial number")
+    case "VN": return qsTr("Vendor name")
+    case "PN": return qsTr("Product name")
+    case "VS": return qsTr("Vendor website")
+    case "PS": return qsTr("Product website")
+    case "PO": return qsTr("Leave 5 V on after reading")
+    case "PI": return qsTr("Cover can charge the phone")
+    default:   return qsTr("not in the published table")
+    }
+}
+
 function pogoPins() {
+    var live = tohmon.readPins()
+    var mem = tohmon.readMemory()
     var s = []
-    s.push({ pogoPins: true })
+    s.push({ pogoPins: true, mem: mem })
+
+    // ---- what the device says about its own contacts --------------------
+    if (live.supported === true) {
+        var pr = []
+        pr.push(row(qsTr("Interrupt line (INT)"),
+                    live.intState === 0 ? qsTr("low") : qsTr("high"),
+                    { right: qsTr("pin 4"), active: live.intState === 0 }))
+        pr.push(row(qsTr("A cover is attached"),
+                    live.intState === 0 ? qsTr("yes") : qsTr("no"),
+                    { right: qsTr("read from INT") }))
+        pr.push(row(qsTr("Identify contact (ID)"), live.idMillivolt + " mV",
+                    { right: qsTr("pin 3") }))
+        pr.push(row(qsTr("5 V output"),
+                    live.powerOut ? qsTr("switched on") : qsTr("switched off"),
+                    { right: qsTr("pin 7"), active: live.powerOut === 1 }))
+        if (live.interrupts >= 0)
+            pr.push(row(qsTr("Interrupts since boot"), live.interrupts,
+                        { right: live.irq >= 0 ? qsTr("IRQ %1").arg(live.irq) : "" }))
+        s.push({ title: qsTr("What the contacts report right now"),
+            note: qsTr("Measured by the phone's own pogo-pin controller. The maker's rule is that a cover ties INT to ground and releasing the line is how detaching is noticed, so “a cover is attached” is a reading of INT and not a contact of its own. What the voltage at ID means in ohms cannot be worked out here: the pull-up inside the phone is not published."),
+            rows: pr })
+    } else {
+        s.push({ title: qsTr("What the contacts report right now"),
+            note: qsTr("This device has no pogo-pin controller — nothing here can be measured. The figures further down describe the connector of the Jolla Phone (2026) and were read from no device."),
+            rows: [] })
+    }
+
+    // ---- the cover itself, in words -------------------------------------
+    // The heading the reader is looking for. A cover is not a memory chip:
+    // the chip only lets it say who it is. What it does beyond that — charge
+    // the phone, light up, carry a sensor — is its own business, and the two
+    // flags below are the only part of it the chip states.
+    var pl = (mem.ok === true && mem.payload) ? mem.payload : null
+    var tr_ = []
+    if (live.supported === true)
+        tr_.push(row(qsTr("On the contacts"),
+                     live.intState === 0 ? qsTr("a cover") : qsTr("nothing"),
+                     { active: live.intState === 0 }))
+    if (pl) {
+        if (pl.PN !== undefined) tr_.push(row(qsTr("Calls itself"), pl.PN))
+        if (pl.VN !== undefined) tr_.push(row(qsTr("Made by"), pl.VN))
+        if (pl.SN !== undefined) tr_.push(row(qsTr("Serial number"), pl.SN, { mono: true }))
+        tr_.push(row(qsTr("Vendor ID"), "0x" + hex4(mem.vendorId),
+                     { right: mem.vendorName }))
+        tr_.push(row(qsTr("Product ID"), "0x" + hex4(mem.productId)))
+        if (pl.SC !== undefined) tr_.push(row(qsTr("Schema version"), pl.SC))
+        if (pl.PI !== undefined)
+            tr_.push(row(qsTr("Can charge the phone"), pl.PI ? qsTr("yes") : qsTr("no"),
+                         { active: pl.PI === true }))
+        if (pl.PO !== undefined)
+            tr_.push(row(qsTr("Keeps 5 V after being read"), pl.PO ? qsTr("yes") : qsTr("no"),
+                         { active: pl.PO === true }))
+        if (pl.VS !== undefined) tr_.push(row(qsTr("Vendor website"), pl.VS, { mono: true }))
+        if (pl.PS !== undefined) tr_.push(row(qsTr("Product website"), pl.PS, { mono: true }))
+        tr_.push(row(qsTr("Content"),
+                     mem.crcOk ? qsTr("checksum matches") : qsTr("checksum differs"),
+                     { active: mem.crcOk === true }))
+        // Consistent with itself is not the same as being what the maker
+        // published, and only a fingerprint tells the two apart.
+        if (mem.officialName !== undefined)
+            tr_.push(row(qsTr("Against the published original"),
+                         mem.officialMatch ? qsTr("identical")
+                                           : qsTr("differs"),
+                         { right: mem.officialName, active: mem.officialMatch === true }))
+        else if (mem.blockSha256 !== undefined)
+            tr_.push(row(qsTr("Against the published original"),
+                         qsTr("no published original for this ID")))
+    } else if (mem.ok === true) {
+        tr_.push(row(qsTr("Content"), qsTr("read, but not readable as a cover")))
+    }
+    s.push({ title: qsTr("TOH"),
+        note: pl
+              ? qsTr("What the cover says about itself. Every entry is optional, so a cover is as talkative as its maker wrote it — and the chip says nothing about what the cover actually does. A cover may carry far more than a memory chip: the bus, the interrupt line and both power contacts are there for it, and only the two flags above hint at any of that.")
+              : (live.supported === true
+                 ? qsTr("No cover has named itself. The phone powers the contacts only while it detects one, the bus belongs to root alone, and a cover without electronics has nothing to say — all three look the same from here.")
+                 : qsTr("A cover for the Jolla Phone (2026) identifies itself over these contacts. This device has none of them.")),
+        rows: tr_ })
+
+    // ---- the bus, and the bytes as they came off it ----------------------
+    if (mem.ok === true) {
+        var ir = []
+        ir.push(row(qsTr("Memory chip"), qsTr("answers"), { active: true }))
+        ir.push(row(qsTr("Target address"), "0x" + hex2(mem.address)))
+        if (mem.bus) ir.push(row(qsTr("Bus"), mem.bus, { mono: true }))
+        if (mem.addressing !== undefined)
+            ir.push(row(qsTr("Address width"), qsTr("%1 bit").arg(mem.addressing)))
+        if (mem.blocks !== undefined) {
+            ir.push(row(qsTr("Blocks answering"), mem.blocks,
+                        { right: "0x" + hex2(mem.address) + "–0x" + hex2(mem.address + mem.blocks - 1) }))
+            ir.push(row(qsTr("Chip holds"), (mem.chipBytes / 1024) + " KiB"))
+        }
+        ir.push(row(qsTr("Bytes read"), mem.bytes))
+        ir.push(row(qsTr("Read through"),
+                    mem.source === "direct" ? qsTr("the bus itself")
+                  : mem.source === "helper" ? qsTr("the root helper")
+                  : qsTr("the system's own cover reader")))
+        s.push({ title: qsTr("I²C data"),
+            note: qsTr("The chip carries no type number a bus can ask for, so its size is measured instead: an 8-bit addressed memory spreads over consecutive target addresses, and counting which of them answer gives the number of 256-byte blocks. Only reads happen here — the address byte a memory needs to answer at all is the one thing written."),
+            rows: ir })
+
+        var raw = mem.raw
+        var used = 16 + (mem.payloadSize || 0)
+        var total = mem.bytes
+        var dump = []
+        for (var off = 0; off < used && off < total; off += 8) {
+            var line = ""
+            for (var b = 0; b < 8 && (off + b) < total; ++b)
+                line += (b ? " " : "") + raw.substr((off + b) * 2, 2)
+            dump.push(row("0x" + hex4(off), line, { mono: true }))
+        }
+        // Everything past the payload. An erased chip reads 0xff; anything
+        // else is content the cover keeps for itself and is named, not shown,
+        // because the maker does not publish what it is.
+        var restErased = true
+        for (var i = used; i < total; ++i)
+            if (raw.substr(i * 2, 2) !== "ff") { restErased = false; break }
+        if (used < total)
+            dump.push(row("0x" + hex4(used) + "–0x" + hex4(total - 1),
+                          restErased ? qsTr("erased (ff)") : qsTr("further content of the cover"),
+                          { mono: true }))
+        s.push({ title: qsTr("Raw content of the memory chip"),
+            note: qsTr("As it came off the chip, from the first byte to the end of the payload."),
+            collapsed: true, rows: dump })
+
+        var mr = []
+        mr.push(row("0x0000 · " + qsTr("Magic"), mem.magic,
+                    { right: mem.magicOk ? qsTr("as published") : qsTr("wrong"),
+                      active: mem.magicOk === true }))
+        mr.push(row("0x0004 · " + qsTr("Checksum"), "0x" + hex8(mem.crcStated),
+                    { right: mem.crcOk ? qsTr("recomputed, matches") : qsTr("recomputed, differs"),
+                      active: mem.crcOk === true, mono: true }))
+        mr.push(row("0x0008 · " + qsTr("Vendor ID"), "0x" + hex4(mem.vendorId),
+                    { right: mem.vendorName }))
+        mr.push(row("0x000a · " + qsTr("Product ID"), "0x" + hex4(mem.productId)))
+        mr.push(row("0x000c · " + qsTr("Reserved"), "0x" + hex4(mem.reserved),
+                    { right: mem.reserved === 0 ? qsTr("zero, as it must be") : qsTr("not zero") }))
+        mr.push(row("0x000e · " + qsTr("Payload size"), mem.payloadSize + " " + qsTr("bytes")))
+        mr.push(row("0x0010 · " + qsTr("Payload"),
+                    mem.payloadOk ? qsTr("CBOR map, read in full") : qsTr("CBOR, not readable")))
+        if (pl) {
+            var keys = [], k
+            for (k in pl) keys.push(k)
+            keys.sort()
+            for (var j = 0; j < keys.length; ++j) {
+                k = keys[j]
+                var v = pl[k]
+                if (v === true) v = qsTr("yes")
+                else if (v === false) v = qsTr("no")
+                mr.push(row("  " + k + " · " + tohKeyName(k), v))
+            }
+        }
+        if (mem.blockSha256 !== undefined) {
+            mr.push(row(qsTr("SHA-256 of the block"), mem.blockSha256,
+                        { mono: true, right: qsTr("%1 bytes").arg(mem.blockBytes) }))
+            if (mem.officialSha256 !== undefined)
+                mr.push(row(qsTr("SHA-256 published for %1").arg(mem.officialName),
+                            mem.officialSha256, { mono: true }))
+        }
+        s.push({ title: qsTr("What those bytes mean"),
+            note: qsTr("The layout is the maker's. The checksum was recomputed here over everything from the vendor ID to the end of the payload and held against the one the chip carries; the indented lines are the CBOR keys of the payload. The fingerprint covers header and payload, not the erased rest of the chip. The maker publishes the sources of the official covers' content, not the images — github.com/sailfishos/toh-content — so the image is rebuilt from those four values the way the layout prescribes, and the rebuilt Orange is byte for byte what an Orange cover answers with."),
+            collapsed: true, rows: mr })
+    } else if (mem.error) {
+        s.push({ title: qsTr("I²C data"),
+            note: live.supported === true
+                  ? qsTr("Nothing answered at 0x50 on any bus that has no driver of its own.")
+                  : qsTr("Without the controller there is no bus to ask."),
+            rows: [row(qsTr("Result"), mem.error)] })
+    }
 
     s.push({ title: qsTr("What each contact carries"),
         note: qsTr("Published by the maker for covers with electronics of their own. None of this was read from the device — it describes the connector, not the state of anything."),
         rows: [
-            row(qsTr("Power in"), qsTr("5–9\u00a0V, up to 1\u00a0A — a cover can charge the phone")),
+            row(qsTr("Power in"), qsTr("5–9 V, up to 1 A — a cover can charge the phone")),
             row("GND", qsTr("ground")),
-            row("ID", qsTr("3,3\u00a0V — a resistor in the cover identifies it")),
-            row("INT", qsTr("up to 1,8\u00a0V — the cover interrupts the phone")),
-            row("SCL", qsTr("3,3\u00a0V — clock of the I²C/I3C bus")),
-            row("SDA", qsTr("3,3\u00a0V — data of the same bus")),
-            row(qsTr("Power out"), qsTr("5\u00a0V, up to 1\u00a0A — the phone powers the cover"))
+            row("ID", qsTr("3,3 V — a resistor in the cover identifies it")),
+            row("INT", qsTr("up to 1,8 V — the cover interrupts the phone")),
+            row("SCL", qsTr("3,3 V — clock of the I²C/I3C bus")),
+            row("SDA", qsTr("3,3 V — data of the same bus")),
+            row(qsTr("Power out"), qsTr("5 V, up to 1 A — the phone powers the cover"))
         ]})
 
     s.push({ title: qsTr("Rules for a cover"),
-        note: qsTr("The phone is the controller of that bus, so a cover must not put its own pull-ups on SCL and SDA. ID and INT belong on neither 3,3\u00a0V nor 5\u00a0V. Power out is supplied while the phone reads the cover's memory chip, and after that on request until the cover is detached."),
+        note: qsTr("The phone is the controller of that bus, so a cover must not put its own pull-ups on SCL and SDA. ID and INT belong on neither 3,3 V nor 5 V. Power out is supplied while the phone reads the cover's memory chip, and after that on request until the cover is detached."),
         rows: [
-            row(qsTr("Pitch"), "2,90\u00a0mm"),
+            row(qsTr("Pitch"), "2,90 mm"),
             row(qsTr("Where"), qsTr("lower right on the back")),
+            row(qsTr("Memory chip at"), "0x50"),
             row(qsTr("Documentation"), "docs.sailfishos.org/Develop/Hardware/JP2601-TOH/", { mono: true })
         ]})
 
-    s.push({ title: qsTr("Still to come"),
-        note: qsTr("What is missing is the part this app could measure: a log of what appears and disappears when a cover is attached. The cover announces itself on the I²C bus, so an entry showing up on one of the empty buses is what identifies which bus sits behind these contacts — the device says nothing about that either. It needs a cover to build against, and there is none here yet."),
-        rows: [] })
+    if (live.supported === true) {
+        var cr = []
+        if (live.compatible) cr.push(row(qsTr("Compatible"), live.compatible, { mono: true }))
+        if (live.intGpio !== undefined) cr.push(row(qsTr("INT on GPIO"), live.intGpio))
+        if (live.powerGpio !== undefined) cr.push(row(qsTr("5 V output on GPIO"), live.powerGpio))
+        if (live.adcChannel !== undefined) cr.push(row(qsTr("ID on ADC channel"), live.adcChannel))
+        if (live.irq >= 0) cr.push(row(qsTr("Interrupt"), live.irq))
+        s.push({ title: qsTr("The controller in the device tree"),
+            note: qsTr("Where the three measured values come from: the node the kernel binds for these contacts, and the lines it names."),
+            collapsed: true, rows: cr })
+    }
 
     return { title: qsTr("Pogo pins"), helpTopics: [], sections: s }
 }
