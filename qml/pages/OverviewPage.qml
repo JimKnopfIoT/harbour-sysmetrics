@@ -62,6 +62,11 @@ Page {
 
     // bt.refresh() blocks the GUI thread on a system-bus round trip; off this
     // page nothing shows the result, so the timer stops with it.
+    // The three pogo-pin values are three small sysfs reads; the card that
+    // shows them is on this page, so this page is what keeps them current.
+    Timer { interval: 2000; running: page.status === PageStatus.Active
+            repeat: true; onTriggered: tohmon.readPins() }
+
     Timer { interval: 5000; running: page.status === PageStatus.Active
             repeat: true; onTriggered: bt.refresh() }
 
@@ -292,24 +297,36 @@ Page {
                 }
             }
 
-            // ---- Zubehör-Anschluss (noch nicht scharf) -------------------
-            // The pogo contacts on the back. Nothing in the system describes
-            // them: no device-tree node names them, the GPIO state is behind
-            // debugfs and root, and which of the six empty I2C buses is wired
-            // to them is not written down anywhere. What identifies them is
-            // attaching something and watching what appears — so the card is a
-            // placeholder until there is a cover to attach and verify against.
+            // ---- Zubehör-Anschluss --------------------------------------
+            // The pogo contacts on the back. The device tree names a node for
+            // them (yft_pogo_pin) and its driver publishes three values, so
+            // the card shows the state of the line that says whether a cover
+            // sits on the contacts. The memory chip in the cover is not read
+            // here: that is a transfer on the bus and belongs behind a tap,
+            // not in a card that redraws every five seconds.
             MetricCard {
                 width: page.width - 2 * Theme.horizontalPageMargin
                 x: Theme.horizontalPageMargin
                 title: qsTr("Pogo pins (TOH)")
-                accent: Diag.amber
+                accent: tohmon.pins.supported !== true ? Diag.amber
+                        : tohmon.pins.attached ? Diag.teal : Diag.cyan
                 drilldown: true
-                // Dimmed, and still open: the page behind it is worth reading
-                // and the feature it describes does not exist yet. Grey says
-                // the second part without taking the first away.
-                opacity: 0.45
+                // Without the controller the page is still worth reading, and
+                // still describes something this device does not have. Grey
+                // says the second part without taking the first away.
+                opacity: tohmon.pins.supported === true ? 1.0 : 0.45
                 onClicked: page.openDetail(HwInfo.pogoPins())
+                Label {
+                    width: parent.width
+                    text: tohmon.pins.supported !== true
+                          ? qsTr("not on this device — tap for what the connector is")
+                          : tohmon.pins.attached
+                            ? qsTr("a cover is on the contacts — tap to read its chip")
+                            : qsTr("no cover on the contacts — tap for details")
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    color: Theme.secondaryColor
+                    wrapMode: Text.Wrap
+                }
             }
 
             // ---- Audio -------------------------------------------------

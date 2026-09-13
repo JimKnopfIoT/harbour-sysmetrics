@@ -7,6 +7,8 @@
 #include <QStringList>
 #include <QTimer>
 
+namespace TohI2c { struct Reading; }
+
 class RootClient : public QObject
 {
     Q_OBJECT
@@ -25,6 +27,11 @@ public:
     Q_INVOKABLE QString logGrep(const QString &term);
 
     QByteArray readFile(const QString &path);
+    // The memory chip of an attached cover. Goes through the helper because
+    // the i2c character devices belong to root alone; the bus probe travels
+    // back with the bytes, since only the side that held the bus open can
+    // say how many blocks answered.
+    bool tohMemory(TohI2c::Reading *out);
     QStringList fdDump(int pid);        // "fd|target|flags|pos" per line
     QStringList watcherScan(int pid);   // "pid|comm|paths" per line
     QStringList sockMap();              // "inode|pid|comm" per socket fd, system-wide

@@ -30,6 +30,7 @@
 #include "roothelper.h"
 #include "sampler.h"
 #include "sysmon.h"
+#include "tohmon.h"
 
 #include <QDateTime>
 #include <QDir>
@@ -136,6 +137,7 @@ int main(int argc, char *argv[])
     QObject::connect(&workerThread, &QThread::finished, sampler, &QObject::deleteLater);
 
     SysMon sysmon;
+    TohMon tohmon;
     ProcModel model;
     ProcProxy proxy;
     proxy.setSourceModel(&model);
@@ -209,6 +211,7 @@ int main(int argc, char *argv[])
     view->rootContext()->setContextProperty(QStringLiteral("keymon"), &keymon);
     view->rootContext()->setContextProperty(QStringLiteral("fpmon"), &fpmon);
     view->rootContext()->setContextProperty(QStringLiteral("readtest"), &readtest);
+    view->rootContext()->setContextProperty(QStringLiteral("tohmon"), &tohmon);
 #ifdef SYSMETRICS_ULTIMATE
     // Ultimate only: the "cve" context property is the QML-side feature gate.
     CveLookup cvelookup;

@@ -1,5 +1,7 @@
 #include "rootclient.h"
 
+#include "tohmon.h"
+
 #include <QDBusConnection>
 #include <QDBusMessage>
 
@@ -86,6 +88,23 @@ QByteArray RootClient::request(const QByteArray &line, int timeoutMs)
 QByteArray RootClient::readFile(const QString &path)
 {
     return request("R " + path.toLocal8Bit());
+}
+
+bool RootClient::tohMemory(TohI2c::Reading *out)
+{
+    // "i2c-0 8 1\n" followed by the bytes themselves.
+    const QByteArray r = request("T", 3000);
+    const int nl = r.indexOf('\n');
+    if (nl < 0)
+        return false;
+    const QList<QByteArray> head = r.left(nl).split(' ');
+    if (head.size() < 3)
+        return false;
+    out->bus = QString::fromLatin1(head.at(0));
+    out->blocks = head.at(1).toInt();
+    out->eightBit = head.at(2).toInt() == 8;
+    out->data = r.mid(nl + 1);
+    return !out->data.isEmpty();
 }
 
 QStringList RootClient::fdDump(int pid)
