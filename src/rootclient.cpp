@@ -90,6 +90,13 @@ QByteArray RootClient::readFile(const QString &path)
     return request("R " + path.toLocal8Bit());
 }
 
+QByteArray RootClient::binderLog(const QString &name)
+{
+    // The state file runs to a few hundred KB on a busy device, so this gets
+    // more time than an ordinary sysfs read.
+    return request("L " + name.toLocal8Bit(), 3000);
+}
+
 bool RootClient::tohMemory(TohI2c::Reading *out)
 {
     // "i2c-0 8 1\n" followed by the bytes themselves.

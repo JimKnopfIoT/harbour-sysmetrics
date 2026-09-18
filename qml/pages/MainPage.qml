@@ -87,6 +87,13 @@ Page {
                 onClicked: pageStack.push(Qt.resolvedUrl("ConnectionsPage.qml"))
             }
             MenuItem {
+                // Only where the kernel keeps the binder logs; a port built
+                // without them has nothing to show and gets no dead entry.
+                text: qsTr("Binder")
+                visible: binder.available
+                onClicked: pageStack.push(Qt.resolvedUrl("BinderPage.qml"))
+            }
+            MenuItem {
                 text: qsTr("System overview")
                 onClicked: pageStack.push(Qt.resolvedUrl("OverviewPage.qml"))
             }

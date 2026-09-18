@@ -12,6 +12,7 @@
 #include <sailfishapp.h>
 
 #include "applang.h"
+#include "bindermon.h"
 #include "btinfo.h"
 #include "detailmon.h"
 #include "diagnostics.h"
@@ -148,6 +149,7 @@ int main(int argc, char *argv[])
     KeyMon keymon;
     FpMon fpmon;
     ReadTest readtest;
+    BinderMon binder;
 
     // First: rows are attributed against the frequencies of their own sample,
     // and the sampler emits the system snapshot before the process list.
@@ -212,6 +214,7 @@ int main(int argc, char *argv[])
     view->rootContext()->setContextProperty(QStringLiteral("fpmon"), &fpmon);
     view->rootContext()->setContextProperty(QStringLiteral("readtest"), &readtest);
     view->rootContext()->setContextProperty(QStringLiteral("tohmon"), &tohmon);
+    view->rootContext()->setContextProperty(QStringLiteral("binder"), &binder);
 #ifdef SYSMETRICS_ULTIMATE
     // Ultimate only: the "cve" context property is the QML-side feature gate.
     CveLookup cvelookup;

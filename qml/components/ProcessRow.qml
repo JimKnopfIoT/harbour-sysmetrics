@@ -8,6 +8,13 @@ ListItem {
     property int rank: -1
     contentHeight: Theme.itemSizeSmall
 
+    // The binder service this process was proven to serve, if any. Bound to
+    // pid, so it is worked out once per row and again only when the delegate
+    // is reused for another process. Empty until the services have been
+    // identified on the binder page -- an unidentified process shows nothing
+    // rather than a name nobody checked.
+    property string binderService: binder.serviceLabel(pid)
+
     // load bar behind the row
     Rectangle {
         anchors {
@@ -50,6 +57,7 @@ ListItem {
             Label {
                 width: parent.width
                 text: "PID " + pid + " · " + user + (isKernel ? " · " + qsTr("kernel") : "")
+                      + (row.binderService.length ? " · " + row.binderService : "")
                 truncationMode: TruncationMode.Fade
                 font.pixelSize: Theme.fontSizeTiny
                 color: Theme.secondaryColor

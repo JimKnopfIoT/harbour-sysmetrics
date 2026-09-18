@@ -37,6 +37,19 @@ recognise documented device issues and explain their fixes.
   registered Android HAL services via binder.
 - Android base under System & CPU: Android version, security patch level,
   vendor build and fingerprint of the HAL layer.
+- Binder traffic (the IPC the Android side of the system runs on), read from
+  the kernel's own counters: calls and replies per process and per domain,
+  the domains with the configuration file that declares each one, failing
+  calls with the driver's answer decoded (BR_DEAD_REPLY and the errno behind
+  it), thread pools with nothing left to answer with, one-way buffers running
+  out, and calls that have not come back between two readings. Which process
+  serves a registered service is established by the liveness ping every binder
+  service must answer, read back out of the kernel's transaction log — never
+  guessed from a name; a spinning `binder:<pid>_<n>` thread resolves to the
+  process that owns the pool. Orphaned nodes name the processes that still
+  hold a reference to them, and the driver's last 32 log lines stand there
+  verbatim. Every figure is the kernel's, every threshold that turns one into
+  a verdict is named beside it.
 - Accessory connector (TOH) on the Jolla Phone (2026): the state of the
   interrupt line, the voltage at the identify contact and the 5 V output,
   read live from the pogo-pin controller and drawn onto the connector —

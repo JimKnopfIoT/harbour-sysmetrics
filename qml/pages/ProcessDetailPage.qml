@@ -8,7 +8,7 @@ Page {
     allowedOrientations: Orientation.All
 
     property bool _helpAttached: false
-    property var helpTopics: ["cpu","procstate","sched","mem","ioenergy","procid","devices","conn","access","battery"]
+    property var helpTopics: ["cpu","procstate","sched","mem","ioenergy","procid","devices","conn","access","battery","binder"]
     function _attachHelp() {
         if (_helpAttached) return
         if (helpTopics && helpTopics.length === 0) { _helpAttached = true; return }
@@ -26,6 +26,25 @@ Page {
     property bool fileExpanded: false
     property bool threadExpanded: false
     readonly property int listCap: 10
+
+    // What the binder driver has counted for this process. Empty for a process
+    // that holds no binder connection, and then nothing below is drawn and
+    // nothing is sampled -- only a process that actually talks binder pays for
+    // the readings.
+    property var bnd: ({})
+    Connections {
+        target: binder
+        onUpdated: page.bnd = binder.processDetail(page.pid)
+    }
+    // Twice on entry, the second reading only if this process talks binder at
+    // all -- the rates are the difference between the two. Then still, like the
+    // binder page itself.
+    Component.onCompleted: { binder.refresh(); binderSecond.start() }
+    Timer {
+        id: binderSecond
+        interval: 2000; repeat: false
+        onTriggered: if (page.bnd.pid !== undefined) binder.refresh()
+    }
 
     ProcessDetail {
         id: d
@@ -403,18 +422,39 @@ Page {
                             Row {
                                 x: Theme.horizontalPageMargin
                                 width: page.width - 2 * Theme.horizontalPageMargin
-                                height: Theme.itemSizeExtraSmall * 0.8
+                                // Grows when the binder caption takes a second
+                                // line; a Row does not size itself to its tallest
+                                // child unless it is told to.
+                                height: Math.max(Theme.itemSizeExtraSmall * 0.8,
+                                                 childrenRect.height)
                                 Label {
                                     width: parent.width * 0.2
                                     text: modelData.tid
                                     font.pixelSize: Theme.fontSizeTiny
                                     color: Theme.secondaryColor
                                 }
-                                Label {
+                                // A thread called binder:<pid>_<n> belongs to
+                                // the binder pool of the process with that pid.
+                                // Usually this one -- but a fork inherits the
+                                // name, and then the pid in it is the parent's.
+                                // The line underneath says whose pool it is
+                                // instead of leaving the reader to guess.
+                                Column {
                                     width: parent.width * 0.5
-                                    text: modelData.name
-                                    font.pixelSize: Theme.fontSizeTiny
-                                    truncationMode: TruncationMode.Fade
+                                    Label {
+                                        width: parent.width
+                                        text: modelData.name
+                                        font.pixelSize: Theme.fontSizeTiny
+                                        truncationMode: TruncationMode.Fade
+                                    }
+                                    Label {
+                                        width: parent.width
+                                        visible: text.length > 0
+                                        text: binder.threadOwner(modelData.name)
+                                        font.pixelSize: Theme.fontSizeTiny
+                                        truncationMode: TruncationMode.Fade
+                                        color: Theme.secondaryColor
+                                    }
                                 }
                                 Label {
                                     width: parent.width * 0.15
@@ -437,6 +477,84 @@ Page {
                             onToggle: page.threadExpanded = !page.threadExpanded
                         }
                     } }
+                }
+            }
+
+            // ---- Binder ------------------------------------------------
+            // Only for a process the driver knows. Every figure is the
+            // kernel's own counter; the page that explains them is Binder.
+            SectionHeader {
+                text: qsTr("Binder")
+                visible: page.bnd.pid !== undefined
+            }
+            Column {
+                x: Theme.horizontalPageMargin
+                width: page.width - 2 * Theme.horizontalPageMargin
+                spacing: Theme.paddingSmall / 2
+                visible: page.bnd.pid !== undefined
+
+                KeyValue {
+                    label: qsTr("Domain")
+                    mono: true
+                    value: (page.bnd.context || "").length ? page.bnd.context
+                                                           : qsTr("not reported by this kernel")
+                }
+                KeyValue {
+                    label: qsTr("Calls out")
+                    mono: true
+                    value: ((page.bnd.callRate || -1) < 0 ? "—"
+                            : page.bnd.callRate.toFixed(1) + qsTr("/s"))
+                           + "  ·  " + qsTr("%1 since boot").arg(page.bnd.calls || 0)
+                }
+                KeyValue {
+                    label: qsTr("Calls in")
+                    mono: true
+                    value: ((page.bnd.incomingRate || -1) < 0 ? "—"
+                            : page.bnd.incomingRate.toFixed(1) + qsTr("/s"))
+                           + "  ·  " + qsTr("%1 since boot").arg(page.bnd.incoming || 0)
+                }
+                KeyValue {
+                    label: qsTr("Binder threads")
+                    value: qsTr("%1 running, at most %2, %3 ready")
+                           .arg(page.bnd.threads || 0).arg(page.bnd.maxThreads || 0)
+                           .arg((page.bnd.readyThreads || -1) < 0 ? "?" : page.bnd.readyThreads)
+                    valueColor: (page.bnd.readyThreads === 0
+                                 && page.bnd.threads >= page.bnd.maxThreads)
+                                ? Diag.amber : Theme.primaryColor
+                }
+                KeyValue {
+                    label: qsTr("Queued transactions")
+                    value: (page.bnd.pending || 0) + ""
+                    valueColor: (page.bnd.pending || 0) > 0 ? Diag.amber : Theme.primaryColor
+                }
+                KeyValue {
+                    label: qsTr("Nodes / references")
+                    value: (page.bnd.nodes || 0) + " / " + (page.bnd.refs || 0)
+                }
+                KeyValue {
+                    label: qsTr("One-way buffer left")
+                    visible: (page.bnd.freeAsync || -1) >= 0
+                    value: sysmon.fmtBytes(page.bnd.freeAsync || 0)
+                }
+                Repeater {
+                    model: page.bnd.services !== undefined ? page.bnd.services : []
+                    KeyValue {
+                        label: qsTr("Serves")
+                        mono: true
+                        value: modelData.name
+                        valueColor: Diag.teal
+                    }
+                }
+                BackgroundItem {
+                    width: parent.width
+                    height: Theme.itemSizeExtraSmall
+                    onClicked: pageStack.push(Qt.resolvedUrl("BinderPage.qml"))
+                    Label {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("All binder traffic") + "  \u203a"
+                        font.pixelSize: Theme.fontSizeExtraSmall
+                        color: Diag.cyan
+                    }
                 }
             }
 

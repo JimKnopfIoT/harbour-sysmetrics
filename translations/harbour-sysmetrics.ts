@@ -32,6 +32,768 @@ github.com/JimKnopfIoT/harbour-sysmetrics</source>
     </message>
 </context>
 <context>
+    <name>BinderMon</name>
+    <message>
+        <location filename="../src/bindermon.cpp" line="68"/>
+        <source>the target was gone or the handle was invalid — the call never reached a service</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="70"/>
+        <source>the driver refused the transaction before delivering it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="72"/>
+        <source>the target process is frozen and did not take the call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="74"/>
+        <source>the driver flagged the sender for flooding a service with one-way calls</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="76"/>
+        <source>the call is held back because the target process is frozen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="81"/>
+        <source>the driver reported an error before delivery</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="134"/>
+        <source>This device has no binder logs — the kernel was built without them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="144"/>
+        <source>%1 exists but cannot be read. On this port the logs belong to root; the helper in Settings reads them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="715"/>
+        <source>Source: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="729"/>
+        <source>Caller</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="732"/>
+        <source>Command line</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="733"/>
+        <location filename="../src/bindermon.cpp" line="895"/>
+        <source>Domain</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="735"/>
+        <source>Target service</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="741"/>
+        <location filename="../src/bindermon.cpp" line="743"/>
+        <source>Target</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="741"/>
+        <source>the service manager of this domain (handle 0)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="743"/>
+        <source>node %1, handle %2 — not identified; the service list can name it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="748"/>
+        <source>Driver answer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="750"/>
+        <source>unknown code</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="757"/>
+        <source>What that means</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="759"/>
+        <source>Rate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="761"/>
+        <source>at least %1 per second</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="762"/>
+        <source>%1 per second</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="763"/>
+        <source>In the kernel ring</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="763"/>
+        <source>%1 of %2 entries</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="766"/>
+        <source>Threshold: every failing caller in the ring is reported; the level is raised when one caller holds half of its %1 entries. The ring is a snapshot, so a rate taken from it is a lower bound.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="770"/>
+        <source>Failing binder calls</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="771"/>
+        <source>%1 calls into the %2 domain and the driver answers %3.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="774"/>
+        <source>with an error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="788"/>
+        <location filename="../src/bindermon.cpp" line="825"/>
+        <location filename="../src/bindermon.cpp" line="841"/>
+        <source>Process</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="789"/>
+        <location filename="../src/bindermon.cpp" line="843"/>
+        <source>Binder threads</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="789"/>
+        <source>%1 running, at most %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="791"/>
+        <source>Ready for a call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="791"/>
+        <location filename="../src/bindermon.cpp" line="871"/>
+        <source>not reported</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="794"/>
+        <source>Requested, not started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="795"/>
+        <location filename="../src/bindermon.cpp" line="842"/>
+        <source>Queued transactions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="797"/>
+        <source>Binder thread pool exhausted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="798"/>
+        <source>%1 runs every binder thread it is allowed and none is free to take a call.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="801"/>
+        <source>Threshold: running threads at the maximum the process registered and ready threads at zero — both are the kernel&apos;s own counters.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="807"/>
+        <source>Binder thread requested</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="808"/>
+        <source>The driver has asked %1 for another binder thread, has not got it yet, and meanwhile no thread of the pool is free.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="811"/>
+        <source>Threshold: the kernel&apos;s &quot;requested threads&quot; counter above zero and no ready thread at the same time. The counter alone says nothing — on an idle device several processes carry one while a thread is free.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="826"/>
+        <source>One-way buffer left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="826"/>
+        <source>%1 bytes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="828"/>
+        <source>Buffers held</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="829"/>
+        <source>One-way buffer nearly full</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="830"/>
+        <source>%1 has little room left for one-way calls; when it runs out, the driver rejects them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="833"/>
+        <source>Threshold: below 64 KiB free. That threshold is SysMetrics&apos;, not the kernel&apos;s — the kernel reports the figure and sets no limit of its own here.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="843"/>
+        <source>%1 running, %2 ready</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="845"/>
+        <source>Binder work waiting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="846"/>
+        <source>%1 has work queued that it has not taken yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="848"/>
+        <source>The kernel&apos;s &quot;pending transactions&quot; counter, reported from one upward.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="861"/>
+        <source>Waiting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="863"/>
+        <source>Waiting for</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="867"/>
+        <location filename="../src/bindermon.cpp" line="894"/>
+        <source>Service</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="868"/>
+        <source>Transaction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="869"/>
+        <source>Method code</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="872"/>
+        <source>Waiting since</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="872"/>
+        <source>%1 s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="875"/>
+        <source>Binder call not returning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="876"/>
+        <source>%1 has been waiting for %2 to answer.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="880"/>
+        <source>Reported when the same transaction is still in flight on the next refresh. A binder call normally finishes in microseconds; the figure is the time between the two readings, so it is a lower bound.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="896"/>
+        <source>Answer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="896"/>
+        <source>none within 2 s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="897"/>
+        <source>Service does not answer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="898"/>
+        <source>%1 is registered but did not answer a ping.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="900"/>
+        <source>A ping is the liveness check every binder service must answer; it performs no action inside the service. Timeout: 2 s, set by SysMetrics.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="952"/>
+        <source>%1 +%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../src/bindermon.cpp" line="1000"/>
+        <source>%1 · %n service(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>BinderPage</name>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="67"/>
+        <source>/s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="83"/>
+        <source>proven by ping</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="84"/>
+        <source>from the node owner</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="85"/>
+        <source>no answer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="86"/>
+        <source>node gone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="87"/>
+        <source>not established</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="107"/>
+        <source>Stop identifying</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="107"/>
+        <location filename="../qml/pages/BinderPage.qml" line="668"/>
+        <source>Identify services</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="119"/>
+        <source>Binder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="121"/>
+        <source>%1 processes · %2 calls/s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="124"/>
+        <source>not readable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="134"/>
+        <source>Source</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="136"/>
+        <source>none found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="139"/>
+        <source>Read as</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="140"/>
+        <source>root helper</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="140"/>
+        <source>ordinary user</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="144"/>
+        <source>Sampling interval</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="163"/>
+        <source>What binder is, and what stands here</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="175"/>
+        <source>What it is</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="184"/>
+        <source>The IPC the Android side of this device is built on — what D-Bus is to the Sailfish side. Same purpose, different build: D-Bus relays through a daemon and copies every message twice, binder is a driver in the kernel that copies it once, straight into memory the receiver has mapped, and wakes one of its threads. Fast enough for every camera frame and every sensor reading — and the driver, sitting in the middle, counts all of it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="194"/>
+        <source>What runs over it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="203"/>
+        <source>Two things. The hardware: camera, GPS, sensors, radio, lights and bluetooth are Android services from the device maker, and Sailfish reaches them through the gbinder library — without binder a port has no camera. And App Support, which brings domains of its own and carries the traffic of every Android app in them. Everything else on the phone runs on D-Bus and does not appear here.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="212"/>
+        <source>What this page shows</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="221"/>
+        <source>Findings first — a failing caller, a thread pool with nothing free, a call that has not come back. Then the counters for the whole device, the domains and who declared them, the processes ranked by how much they call, and the failures grouped by caller and error code. Services can be identified on request; folded at the end are the orphaned nodes and the driver&apos;s own log lines.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="233"/>
+        <source>Every figure here is the kernel&apos;s own; wherever one is turned into a verdict, the threshold that did it stands beside it. Nothing on this page changes anything — it reads, it does not repair. Anything that leads to a process can be tapped.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="243"/>
+        <source>The glossary beside this page (swipe left) explains node, handle, service manager, thread pool and the error codes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="251"/>
+        <source>No binder log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="252"/>
+        <source>The kernel keeps these figures only when it is built with the binder logs enabled.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="258"/>
+        <source>Findings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="265"/>
+        <source>Nothing to report: no failing call in the kernel&apos;s ring, no exhausted thread pool, no call left unanswered between two readings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="295"/>
+        <source>Across the whole device</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="305"/>
+        <source>Calls</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="308"/>
+        <location filename="../qml/pages/BinderPage.qml" line="314"/>
+        <location filename="../qml/pages/BinderPage.qml" line="320"/>
+        <location filename="../qml/pages/BinderPage.qml" line="328"/>
+        <source>%1 since boot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="311"/>
+        <source>Replies</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="317"/>
+        <source>Dead replies</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="325"/>
+        <source>Refused transactions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="333"/>
+        <source>Processes / threads</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="339"/>
+        <source>Nodes / references</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="345"/>
+        <source>In flight now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="350"/>
+        <source>Death notifications</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="359"/>
+        <source>Domains</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="372"/>
+        <source>A binder domain is one driver device with its own service registry; processes on different domains cannot reach each other. Which domain belongs to what is not read off its name but taken from the configuration file that declares it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="402"/>
+        <source>Device</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="405"/>
+        <source>not present in /dev</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="408"/>
+        <source>Protocol</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="410"/>
+        <source>not declared</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="413"/>
+        <source>Declared by</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="417"/>
+        <source>no configuration file names it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="420"/>
+        <source>Processes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="422"/>
+        <source>%1 services identified</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="426"/>
+        <source>Calls since boot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="437"/>
+        <source>Busiest processes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="444"/>
+        <source>Rates appear with the second reading, a moment from now.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="489"/>
+        <source>%1 of %2 threads</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="510"/>
+        <source>incoming %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="527"/>
+        <source>Failing calls</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="537"/>
+        <source>The driver keeps the last 32 failed transactions. What stands here is that ring, grouped by caller and error code — a rate taken from it is a lower bound, never a total.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="573"/>
+        <source>service manager</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="574"/>
+        <location filename="../qml/pages/BinderPage.qml" line="708"/>
+        <location filename="../qml/pages/BinderPage.qml" line="779"/>
+        <source>node %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="583"/>
+        <source>code %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="593"/>
+        <source>PID %1 · %2 of %3 ring entries</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="598"/>
+        <source>at least %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="617"/>
+        <source>Services</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="628"/>
+        <source>Which process serves which name is not guessed from the name. SysMetrics sends each service the ping every binder service must answer — a liveness check that performs no action inside it — and then reads back the kernel&apos;s own transaction log to see who answered. That log entry is the proof. It costs one ping per service and takes a moment.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="641"/>
+        <source>Not possible here: binder-list and binder-ping from the gbinder tools are not installed. The traffic figures above do not need them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="650"/>
+        <source>%1 of %2 · %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="668"/>
+        <source>Stop</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="705"/>
+        <source>owner unknown</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="727"/>
+        <source>Orphaned nodes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="744"/>
+        <source>A node whose owning process is gone while somebody still holds a reference to it. The processes listed under it are the ones that still believe they have that service: their next call over that reference comes back as a dead reply. Tap one to see it. Read on request only — the file this comes from dumps every node and every reference of every process and takes the driver&apos;s locks while doing it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="787"/>
+        <source>The state file names no holder for it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="811"/>
+        <source>process has ended</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="819"/>
+        <source>still holds a reference</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="758"/>
+        <source>The state file could not be read.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="103"/>
+        <source>Measure again</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="146"/>
+        <source>%1 s between the two readings the rates rest on — pull down to measure again</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="766"/>
+        <source>None — every node has a living owner.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="833"/>
+        <source>read from %1/state, %2 bytes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="844"/>
+        <source>Kernel ring, verbatim</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="862"/>
+        <source>The last 32 transactions and the last 32 failures, exactly as the driver prints them. Everything above was counted from these lines and from the counter file beside them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>BugReportPage</name>
     <message>
         <location filename="../qml/pages/BugReportPage.qml" line="32"/>
@@ -1328,6 +2090,14 @@ github.com/JimKnopfIoT/harbour-sysmetrics</source>
     </message>
 </context>
 <context>
+    <name>FindingItem</name>
+    <message>
+        <location filename="../qml/components/FindingItem.qml" line="115"/>
+        <source>Show process %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FingerprintPage</name>
     <message>
         <location filename="../qml/pages/FingerprintPage.qml" line="56"/>
@@ -1787,6 +2557,7 @@ github.com/JimKnopfIoT/harbour-sysmetrics</source>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="95"/>
+        <location filename="../qml/pages/HelpPage.qml" line="186"/>
         <source>Node</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2359,7 +3130,7 @@ On the Jolla Phone it does not. Its MediaTek battery-manager driver hands out 37
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="174"/>
-        <location filename="../qml/pages/HelpPage.qml" line="305"/>
+        <location filename="../qml/pages/HelpPage.qml" line="328"/>
         <source>USB Power Delivery (PD)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2400,1052 +3171,1197 @@ On the Jolla Phone it does not. Its MediaTek battery-manager driver hands out 37
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="181"/>
-        <source>Kernel surface</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="183"/>
-        <source>Raw nodes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="183"/>
-        <source>Everything a subsystem exports in sysfs or procfs, listed attribute by attribute exactly as the kernel wrote it. The sections above them are curated — each row there is a value whose meaning was established first. This is the remainder: the vendor additions nobody wrote a label for. Nothing in it is converted or interpreted.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="184"/>
-        <source>Units are not uniform</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="184"/>
-        <source>The same attribute name can carry different units on different nodes of the same device. On the Jolla Phone (2026) the battery reports its current in microamps while the charger driver&apos;s ADC beside it reports milliamps — a factor of a thousand, with nothing in sysfs to announce it. That is why raw values are shown raw: a converted figure would have to guess, and a wrong unit is worse than none.</source>
+        <source>Binder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="185"/>
-        <source>On vendor charger nodes -1 usually means unset, not minus one. A driver that holds no override writes -1 rather than leaving the file empty.</source>
+        <source>Domain (context)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="185"/>
+        <source>One binder device with a registry of its own. Processes on different domains cannot reach each other. The usual three are binder (framework), vndbinder (vendor) and hwbinder (hardware layers); App Support installs its own. Which domain is whose is read from the configuration files in /etc/gbinder.conf and /etc/gbinder.d — never guessed from the name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="186"/>
-        <source>Device tree</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="186"/>
-        <source>The table the bootloader hands the kernel to describe the board. Every chip that gets a driver appears in it as a node with a compatible string — the vendor&apos;s own name for the part — which makes it the phone&apos;s parts list, and the only place some hardware is named at all: amplifiers on I2C, the fingerprint reader on SPI, the regulators inside each PMIC. Nodes marked disabled are silicon the SoC has and this device does not wire up.</source>
+        <source>A service object inside the process that owns it. The number is handed out by the driver and holds only until the next boot. It is the honest key to who serves what: the kernel prints every node in the section of its owner, so a node that moved to another process cannot keep an old claim.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="187"/>
-        <source>Module version</source>
+        <source>Handle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="187"/>
-        <source>A kernel module may carry a version string of its own. For the Mali graphics driver it is the only place an ordinary process can read the driver release — the GPU device directory has no version node, and the call that would answer needs the GPU opened. That release name is what the GPU vendor&apos;s security advisories are written against.</source>
+        <source>The number by which a caller addresses somebody else&apos;s node. The same service has a different handle in every process that holds it — which is why a handle alone never names a service.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="188"/>
-        <source>Catalogue figures</source>
+        <source>Service manager (handle 0)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="188"/>
-        <source>Specifications published by the chip vendor for the part, carried inside this app because the kernel does not hold them: the device tree names the SoC and stops. They are not measurements of this device, and every row says who published it. Where the vendor published nothing, the row says so instead of borrowing a number from a spec database.</source>
+        <source>The phone book of a domain, always reachable at handle 0. A service registers its name there; a caller asks for a name and gets back a handle. It is the one address every process knows in advance, which is what makes the rest work. A dead reply on handle 0 therefore does not mean one service is missing — it means nothing is answering for the whole domain.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="189"/>
+        <source>Reference</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="189"/>
+        <source>A hold one process keeps on another process&apos;s node. The driver counts them and keeps the node alive as long as one is left. The nodes/references figure is that tally for the whole device: how many service objects exist, and how many holds there are on them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="190"/>
+        <source>Transaction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="190"/>
+        <source>One call, or its reply. Normally it is finished in microseconds. A call that is still in flight on the next reading is reported as not returning — the time given for it is the gap between the two readings and therefore a lower bound.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="191"/>
+        <source>One-way call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="191"/>
+        <source>A call the sender does not wait for. The driver parks it in a fixed buffer belonging to the receiver; when that buffer fills, further one-way calls are refused. The remaining space is the kernel&apos;s own figure, the point at which this app calls it tight (64 KiB) is not.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="192"/>
-        <source>Firmware &amp; risk</source>
+        <source>Thread pool</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="192"/>
+        <source>Every process that answers binder calls keeps a pool of threads for them and tells the driver how large it may grow. Threads at that maximum with none ready means the next caller waits. The threads are named binder:&lt;pid&gt;_&lt;n&gt; after the process that owns the pool — that pid is what turns a spinning nameless thread into a process with a name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="193"/>
+        <source>Death notification</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="193"/>
+        <source>A standing request to the driver: tell me when the process behind this handle dies. It is how a client learns that the service it holds is gone, instead of finding out at its next call. The counter says how many such requests are in force right now.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="194"/>
-        <source>There is no one firmware version</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="194"/>
-        <source>A phone is a dozen computers. The kernel has a version, every kernel module may have one, every radio loads a blob of its own, and the storage, the charger, each USB device and the modem each run software inside their own controller with a release nobody else knows about. That is why these figures sit beside the hardware they belong to instead of on one page: the version of the Wi-Fi firmware is a fact about the Wi-Fi.</source>
+        <source>The driver&apos;s answer when the target was gone or the handle was invalid: the call never reached a service. One of these now and then is ordinary; a steady rate of them is a caller talking to something that no longer exists.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="195"/>
-        <source>Driver version and build hash</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="195"/>
-        <source>A kernel module may state a release name, or only the hash of the source it was built from, or neither. The hash is worth showing: it cannot be read as a version, but it tells two builds apart, which is exactly the question when a vendor ships an update without renaming anything.</source>
+        <source>The driver refused the transaction before delivering it — a bad reference in the payload, a size the receiver would not take, a security check. The negative number beside it is the errno (-22 = EINVAL).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="196"/>
-        <source>Out of tree, unsigned</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="196"/>
-        <source>What the kernel records about where a module came from. Out-of-tree means it is not part of the Linux source; unsigned means the kernel did not verify a signature on it. On a vendor phone kernel almost every driver is both, because that is how such kernels are built — it is the normal case here, not a fault, and it is shown because the kernel bothers to track it.</source>
+        <source>The target process is frozen, so the call was not taken. Expected while an App Support container sleeps.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="197"/>
-        <source>USB release number</source>
+        <source>Transaction ring</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="197"/>
-        <source>Every USB device reports a release number of its own, and it is the closest thing such a device has to a firmware version. It is the manufacturer&apos;s own numbering, not a date, so it means something only against another unit of the same product.</source>
+        <source>The driver remembers the last 32 transactions and the last 32 failures, and nothing older. Every rate taken from it is therefore a lower bound, and this app says so wherever it prints one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="198"/>
-        <source>Controller firmware</source>
+        <source>Ping</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="198"/>
-        <source>Storage is a small computer. A UFS or eMMC part runs firmware inside the chip and reports a revision for it, which is separate from the health of the flash memory it manages — a controller update does not make worn cells young.</source>
+        <source>The liveness check every binder service must answer. It runs no code of the service beyond the answer, changes nothing, and is what makes it possible to say which process serves a name: the kernel logs the transaction, and the log entry — not the name — is the proof.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="199"/>
-        <source>Firmware files on disk</source>
+        <source>Orphaned node</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="199"/>
-        <source>The images the kernel would load into a radio, a signal processor or a sensor when it starts them. The names carry the chip family and the dates say when the vendor last touched them. Their presence says what is available to load; it is not proof that any of it was loaded.</source>
+        <source>A node whose owning process has ended while another process still holds a reference to it. The next call on that reference gets a dead reply. Read on request only: it comes out of the driver state dump, which prints every node of every process and takes the driver locks while doing it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="200"/>
-        <source>Security patch level</source>
+        <source>Where the figures come from</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="200"/>
-        <source>The month of fixes the Android base under this system was built with. It matters because chipset advisories — the baseband and driver fixes a phone receives — land in that base and not in the system on top of it, and nothing on the device reports them one by one. Its age is shown rather than a verdict: a port is frozen at the base its maker built against, and a fix can be backported without moving the date.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="201"/>
-        <source>How exposed the kernel is</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="201"/>
-        <source>A handful of switches that each decide whether a whole class of local attack is available at all: whether kernel addresses are hidden, whether the kernel log can be read, whether one process may debug another, whether the address space is randomised. A phone distribution deliberately relaxes several of them so that ordinary tools keep working, so a value in amber means worth knowing, not broken. The safer setting is named beside each one.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="202"/>
-        <source>World-writable control node</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="202"/>
-        <source>A file in sysfs that any process on the device may write, where the rest of its directory belongs to root. This app never writes any of them; it reports them because a control over charging or power that anything can reach is worth knowing about, and the permission is a fact that can be read without touching anything.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="203"/>
-        <source>A version is not a verdict</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="203"/>
-        <source>Where this app places a driver release inside a published advisory range, it is saying exactly that and nothing more. Vendors fork drivers and backport fixes without renaming the release, so the name places the driver in the range while only the vendor&apos;s changelog can say whether the fix is in. The advisory, the range and the release are shown side by side so the reader can draw the conclusion.</source>
+        <source>/dev/binderfs/binder_logs on a current port, where the files are world readable and no privilege is needed; /sys/kernel/debug/binder on older ones, where they usually belong to root and the helper reads them. Both carry the same figures, printed differently — a kernel from before binderfs names no domain and counts no pages.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="204"/>
-        <source>Reads that are not reads</source>
+        <source>Kernel surface</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="204"/>
-        <source>A few vendor files do work when they are read. One starts a memory test, one sleeps inside the kernel, one clears the fault latches of the camera flash controller — that last is how the chip is re-armed after it shuts itself off. An exhaustive dump has to know where to stop, so this app keeps a list of files it will never open, no matter what its permissions say.</source>
+        <location filename="../qml/pages/HelpPage.qml" line="206"/>
+        <source>Raw nodes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="206"/>
+        <source>Everything a subsystem exports in sysfs or procfs, listed attribute by attribute exactly as the kernel wrote it. The sections above them are curated — each row there is a value whose meaning was established first. This is the remainder: the vendor additions nobody wrote a label for. Nothing in it is converted or interpreted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="207"/>
+        <source>Units are not uniform</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="207"/>
+        <source>The same attribute name can carry different units on different nodes of the same device. On the Jolla Phone (2026) the battery reports its current in microamps while the charger driver&apos;s ADC beside it reports milliamps — a factor of a thousand, with nothing in sysfs to announce it. That is why raw values are shown raw: a converted figure would have to guess, and a wrong unit is worse than none.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="208"/>
-        <source>Diagnosis</source>
+        <source>On vendor charger nodes -1 usually means unset, not minus one. A driver that holds no override writes -1 rather than leaving the file empty.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="209"/>
+        <source>Device tree</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="209"/>
+        <source>The table the bootloader hands the kernel to describe the board. Every chip that gets a driver appears in it as a node with a compatible string — the vendor&apos;s own name for the part — which makes it the phone&apos;s parts list, and the only place some hardware is named at all: amplifiers on I2C, the fingerprint reader on SPI, the regulators inside each PMIC. Nodes marked disabled are silicon the SoC has and this device does not wire up.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="210"/>
-        <source>Mitigation vs. Vulnerable</source>
+        <source>Module version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="210"/>
-        <source>The kernel reports each speculative-execution issue per CPU: &apos;Mitigation: …&apos; names the active countermeasure (fix in place, shown green), &apos;Vulnerable&apos; means this kernel build carries no fix (red), &apos;Not affected&apos; means the CPU&apos;s microarchitecture cannot express the attack at all — such entries are not listed on the diagnosis card.</source>
+        <source>A kernel module may carry a version string of its own. For the Mali graphics driver it is the only place an ordinary process can read the driver release — the GPU device directory has no version node, and the call that would answer needs the GPU opened. That release name is what the GPU vendor&apos;s security advisories are written against.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="211"/>
-        <source>Speculative execution runs code past unresolved branches and leaves traces in the caches. v1 (bounds-check bypass) tricks speculation past an array bounds check; v2 (branch target injection) poisons the branch predictor to steer speculation into attacker-chosen code. Both affect out-of-order ARM cores (A72, A76, A77 …); mitigations are pointer sanitization (v1) and predictor hardening/CSV2+BHB (v2).</source>
+        <source>Catalogue figures</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="212"/>
-        <source>Spectre-BHB</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="212"/>
-        <source>A v2 refinement: the branch *history* buffer is poisoned instead of the target buffer, bypassing the first round of v2 hardware fixes. Affects newer ARM cores (Cortex-A77 and later); mitigated with history-clearing loop sequences in the kernel.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="213"/>
-        <source>Speculative Store Bypass (v4)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="213"/>
-        <source>The CPU speculatively lets a load run before an older store to the same address is resolved, briefly exposing stale data. Mitigated per process (prctl/SSBS) rather than globally, because the global fix is expensive.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="214"/>
-        <source>Rogue data cache load: on affected CPUs, a user-space access to kernel memory is only faulted *after* speculation already fetched the data into the cache. Broadly an Intel issue; among ARM cores essentially only Cortex-A75. In-order cores (A53, A55) and post-A75 designs (A76, A77 …) fault before the fetch — they are structurally not affected.</source>
+        <location filename="../qml/pages/HelpPage.qml" line="211"/>
+        <source>Specifications published by the chip vendor for the part, carried inside this app because the kernel does not hold them: the device tree names the SoC and stops. They are not measurements of this device, and every row says who published it. Where the vendor published nothing, the row says so instead of borrowing a number from a spec database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="215"/>
-        <source>x86-only classes (MDS, L1TF, TAA, SRBDS …)</source>
+        <source>Firmware &amp; risk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="215"/>
-        <source>Several listed classes exploit Intel-specific microarchitecture and cannot occur on ARM SoCs: MDS/TAA sample stale data from fill/store buffers shared between hyper-threads (these SoCs have no SMT); L1TF abuses Intel&apos;s handling of not-present page-table entries; TAA needs the TSX transactional-memory extension (ARM has none); SRBDS leaks the on-chip RNG through a shared microcode buffer; iTLB multihit and MMIO stale data target Intel TLB and chipset behavior. The kernel prints &apos;Not affected&apos; for them; the diagnosis card therefore omits them.</source>
+        <location filename="../qml/pages/HelpPage.qml" line="217"/>
+        <source>There is no one firmware version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="217"/>
+        <source>A phone is a dozen computers. The kernel has a version, every kernel module may have one, every radio loads a blob of its own, and the storage, the charger, each USB device and the modem each run software inside their own controller with a release nobody else knows about. That is why these figures sit beside the hardware they belong to instead of on one page: the version of the Wi-Fi firmware is a fact about the Wi-Fi.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="218"/>
+        <source>Driver version and build hash</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="218"/>
+        <source>A kernel module may state a release name, or only the hash of the source it was built from, or neither. The hash is worth showing: it cannot be read as a version, but it tells two builds apart, which is exactly the question when a vendor ships an update without renaming anything.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="219"/>
-        <source>Monitoring</source>
+        <source>Out of tree, unsigned</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="219"/>
+        <source>What the kernel records about where a module came from. Out-of-tree means it is not part of the Linux source; unsigned means the kernel did not verify a signature on it. On a vendor phone kernel almost every driver is both, because that is how such kernels are built — it is the normal case here, not a fault, and it is shown because the kernel bothers to track it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="220"/>
+        <source>USB release number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="220"/>
+        <source>Every USB device reports a release number of its own, and it is the closest thing such a device has to a firmware version. It is the manufacturer&apos;s own numbering, not a date, so it means something only against another unit of the same product.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="221"/>
-        <source>Sampling interval</source>
+        <source>Controller firmware</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="221"/>
-        <source>How often the app re-reads /proc and /sys. Shorter is more responsive but uses more CPU.</source>
+        <source>Storage is a small computer. A UFS or eMMC part runs firmware inside the chip and reports a revision for it, which is separate from the health of the flash memory it manages — a controller update does not make worn cells young.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="222"/>
-        <source>Record mode</source>
+        <source>Firmware files on disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="222"/>
-        <source>Accumulates CPU time per process over a session and ranks the consumers, catching short-lived processes an instant view misses.</source>
+        <source>The images the kernel would load into a radio, a signal processor or a sensor when it starts them. The names carry the chip family and the dates say when the vendor last touched them. Their presence says what is available to load; it is not proof that any of it was loaded.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="223"/>
-        <source>Root mode</source>
+        <source>Security patch level</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="223"/>
-        <source>An optional root helper that lets the app inspect processes of other users (system daemons) fully, read the kernel charger log and pull journal excerpts for a bug report. Reading is limited to a fixed list of files; signals and renice reach one named process, the same ones the process detail page offers without root.</source>
+        <source>The month of fixes the Android base under this system was built with. It matters because chipset advisories — the baseband and driver fixes a phone receives — land in that base and not in the system on top of it, and nothing on the device reports them one by one. Its age is shown rather than a verdict: a port is frozen at the base its maker built against, and a fix can be backported without moving the date.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="224"/>
-        <source>Colour scale</source>
+        <source>How exposed the kernel is</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="224"/>
-        <source>Green, amber and red are this app&apos;s grading, not a signal from the device. Processor load turns amber at 50 % and red at 80 %. A filesystem turns amber above 75 % and red above 90 %. Battery charge turns red below 20 %. State of health turns amber below 80 % and red below 65 %. Where a colour stands next to a figure, the figure is the evidence and the colour only the opinion about it.</source>
+        <source>A handful of switches that each decide whether a whole class of local attack is available at all: whether kernel addresses are hidden, whether the kernel log can be read, whether one process may debug another, whether the address space is randomised. A phone distribution deliberately relaxes several of them so that ordinary tools keep working, so a value in amber means worth knowing, not broken. The safer setting is named beside each one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="228"/>
-        <source>Display</source>
+        <location filename="../qml/pages/HelpPage.qml" line="225"/>
+        <source>World-writable control node</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="230"/>
-        <source>Panel</source>
+        <location filename="../qml/pages/HelpPage.qml" line="225"/>
+        <source>A file in sysfs that any process on the device may write, where the rest of its directory belongs to root. This app never writes any of them; it reports them because a control over charging or power that anything can reach is worth knowing about, and the permission is a fact that can be read without touching anything.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="230"/>
-        <source>The glass and its controller — an OLED or LCD module bought as a part, with a controller chip whose name (e.g. VTDR6126, NT36672E) is what identifies it. A phone model is often built with panels from more than one supplier, which is why the device tree lists several and only one of them is fitted.</source>
+        <location filename="../qml/pages/HelpPage.qml" line="226"/>
+        <source>A version is not a verdict</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="226"/>
+        <source>Where this app places a driver release inside a published advisory range, it is saying exactly that and nothing more. Vendors fork drivers and backport fixes without renaming the release, so the name places the driver in the range while only the vendor&apos;s changelog can say whether the fix is in. The advisory, the range and the release are shown side by side so the reader can draw the conclusion.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="227"/>
+        <source>Reads that are not reads</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="227"/>
+        <source>A few vendor files do work when they are read. One starts a memory test, one sleeps inside the kernel, one clears the fault latches of the camera flash controller — that last is how the chip is re-armed after it shuts itself off. An exhaustive dump has to know where to stop, so this app keeps a list of files it will never open, no matter what its permissions say.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="231"/>
-        <source>Panel driver</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="231"/>
-        <source>The kernel driver the DSI host bound to the panel actually fitted. Its name is the most specific identity software can reach without root, and on a MediaTek adaptation it carries more than the part: how the panel is wired, the mode it runs in, the rate it was built for and often the glass maker.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="232"/>
-        <source>Display Serial Interface — the short, fast serial link from the SoC to the panel. Video mode (vdo) streams every frame continuously; command mode (cmd) writes into the panel&apos;s own memory and lets the link idle. D-PHY and C-PHY are the two physical layers it can run over.</source>
+        <source>Diagnosis</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="233"/>
-        <source>connector</source>
+        <source>Mitigation vs. Vulnerable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="233"/>
-        <source>The kernel&apos;s handle on one display output. Its status says whether anything is attached, its modes are the timings the driver will accept, and dpms says whether the output is powered right now.</source>
+        <source>The kernel reports each speculative-execution issue per CPU: &apos;Mitigation: …&apos; names the active countermeasure (fix in place, shown green), &apos;Vulnerable&apos; means this kernel build carries no fix (red), &apos;Not affected&apos; means the CPU&apos;s microarchitecture cannot express the attack at all — such entries are not listed on the diagnosis card.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="234"/>
+        <source>Speculative execution runs code past unresolved branches and leaves traces in the caches. v1 (bounds-check bypass) tricks speculation past an array bounds check; v2 (branch target injection) poisons the branch predictor to steer speculation into attacker-chosen code. Both affect out-of-order ARM cores (A72, A76, A77 …); mitigations are pointer sanitization (v1) and predictor hardening/CSV2+BHB (v2).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="235"/>
+        <source>Spectre-BHB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="235"/>
+        <source>A v2 refinement: the branch *history* buffer is poisoned instead of the target buffer, bypassing the first round of v2 hardware fixes. Affects newer ARM cores (Cortex-A77 and later); mitigated with history-clearing loop sequences in the kernel.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="236"/>
+        <source>Speculative Store Bypass (v4)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="236"/>
+        <source>The CPU speculatively lets a load run before an older store to the same address is resolved, briefly exposing stale data. Mitigated per process (prctl/SSBS) rather than globally, because the global fix is expensive.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="237"/>
+        <source>Rogue data cache load: on affected CPUs, a user-space access to kernel memory is only faulted *after* speculation already fetched the data into the cache. Broadly an Intel issue; among ARM cores essentially only Cortex-A75. In-order cores (A53, A55) and post-A75 designs (A76, A77 …) fault before the fetch — they are structurally not affected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="238"/>
+        <source>x86-only classes (MDS, L1TF, TAA, SRBDS …)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="238"/>
+        <source>Several listed classes exploit Intel-specific microarchitecture and cannot occur on ARM SoCs: MDS/TAA sample stale data from fill/store buffers shared between hyper-threads (these SoCs have no SMT); L1TF abuses Intel&apos;s handling of not-present page-table entries; TAA needs the TSX transactional-memory extension (ARM has none); SRBDS leaks the on-chip RNG through a shared microcode buffer; iTLB multihit and MMIO stale data target Intel TLB and chipset behavior. The kernel prints &apos;Not affected&apos; for them; the diagnosis card therefore omits them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="242"/>
+        <source>Monitoring</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="244"/>
+        <source>Sampling interval</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="244"/>
+        <source>How often the app re-reads /proc and /sys. Shorter is more responsive but uses more CPU.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="245"/>
+        <source>Record mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="245"/>
+        <source>Accumulates CPU time per process over a session and ranks the consumers, catching short-lived processes an instant view misses.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="246"/>
+        <source>Root mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="246"/>
+        <source>An optional root helper that lets the app inspect processes of other users (system daemons) fully, read the kernel charger log and pull journal excerpts for a bug report. Reading is limited to a fixed list of files; signals and renice reach one named process, the same ones the process detail page offers without root.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="247"/>
+        <source>Colour scale</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="247"/>
+        <source>Green, amber and red are this app&apos;s grading, not a signal from the device. Processor load turns amber at 50 % and red at 80 %. A filesystem turns amber above 75 % and red above 90 %. Battery charge turns red below 20 %. State of health turns amber below 80 % and red below 65 %. Where a colour stands next to a figure, the figure is the evidence and the colour only the opinion about it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="251"/>
+        <source>Display</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="253"/>
+        <source>Panel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="253"/>
+        <source>The glass and its controller — an OLED or LCD module bought as a part, with a controller chip whose name (e.g. VTDR6126, NT36672E) is what identifies it. A phone model is often built with panels from more than one supplier, which is why the device tree lists several and only one of them is fitted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="254"/>
+        <source>Panel driver</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="254"/>
+        <source>The kernel driver the DSI host bound to the panel actually fitted. Its name is the most specific identity software can reach without root, and on a MediaTek adaptation it carries more than the part: how the panel is wired, the mode it runs in, the rate it was built for and often the glass maker.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="255"/>
+        <source>Display Serial Interface — the short, fast serial link from the SoC to the panel. Video mode (vdo) streams every frame continuously; command mode (cmd) writes into the panel&apos;s own memory and lets the link idle. D-PHY and C-PHY are the two physical layers it can run over.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="256"/>
+        <source>connector</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="256"/>
+        <source>The kernel&apos;s handle on one display output. Its status says whether anything is attached, its modes are the timings the driver will accept, and dpms says whether the output is powered right now.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="257"/>
         <source>The identification block an external monitor sends over its cable — maker, model, supported timings. A built-in phone panel has no cable and no EDID; its properties come from the device tree instead. An empty EDID here is normal, not a fault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="235"/>
+        <location filename="../qml/pages/HelpPage.qml" line="258"/>
         <source>Backlight steps</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="235"/>
+        <location filename="../qml/pages/HelpPage.qml" line="258"/>
         <source>The brightness figure is a step on the driver&apos;s own scale, and the scale differs per device — 2047 steps on one, 255 on another. It is shown against its own maximum. Nits are not readable from software: nothing in the kernel knows how much light the panel actually emits.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="236"/>
+        <location filename="../qml/pages/HelpPage.qml" line="259"/>
         <source>Refresh rate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="236"/>
+        <location filename="../qml/pages/HelpPage.qml" line="259"/>
         <source>How often the panel is redrawn per second. What the panel is doing at this moment is not exposed to an unprivileged process on either platform here — the figure shown is what the display host is configured to be able to switch to, which is a property of the wiring and says nothing about the rate on screen now.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="240"/>
+        <location filename="../qml/pages/HelpPage.qml" line="263"/>
         <source>Buttons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="242"/>
+        <location filename="../qml/pages/HelpPage.qml" line="265"/>
         <source>Input device</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="242"/>
+        <location filename="../qml/pages/HelpPage.qml" line="265"/>
         <source>Every button, switch and touch surface reaches the system as an input device with a name the driver chose. Buttons wired straight to a GPIO pin appear as one device, buttons on the power-management chip as another, and the fingerprint reader registers a third for its own gestures.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="243"/>
+        <location filename="../qml/pages/HelpPage.qml" line="266"/>
         <source>Key code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="243"/>
+        <location filename="../qml/pages/HelpPage.qml" line="266"/>
         <source>The number the kernel puts on the wire when a button is pressed, and the name it carries in the kernel&apos;s own list — 116 is POWER, 115 VOLUMEUP, 114 VOLUMEDOWN. What the system then does with it is a separate decision made further up.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="244"/>
+        <location filename="../qml/pages/HelpPage.qml" line="267"/>
         <source>Declared, not fitted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="244"/>
+        <location filename="../qml/pages/HelpPage.qml" line="267"/>
         <source>A driver registers every key code it could ever send, and a keypad driver registers its whole matrix. So a code listed here means the driver would send it — not that there is a button on this phone that does. Only a press proves a button exists; a code that stays unlit was not pressed, which is not the same as missing.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="245"/>
+        <location filename="../qml/pages/HelpPage.qml" line="268"/>
         <source>Switch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="245"/>
+        <location filename="../qml/pages/HelpPage.qml" line="268"/>
         <source>A state rather than an event: a lid open or shut, a headphone plug in or out, a cover closed. The kernel keeps the current position and reports every change, so its value can be read out at any time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="246"/>
+        <location filename="../qml/pages/HelpPage.qml" line="269"/>
         <source>Reading without taking</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="246"/>
+        <location filename="../qml/pages/HelpPage.qml" line="269"/>
         <source>The test opens the event nodes read-only and never grabs them, so every press still reaches the system as usual — volume still changes, the power key still blanks the screen. That is deliberate: the test proves the button reached the kernel, it does not take the button away.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="250"/>
+        <location filename="../qml/pages/HelpPage.qml" line="273"/>
         <source>Fingerprint</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="252"/>
+        <location filename="../qml/pages/HelpPage.qml" line="275"/>
         <source>Reader</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="252"/>
+        <location filename="../qml/pages/HelpPage.qml" line="275"/>
         <source>A capacitive or optical sensor on its own SPI bus, named in the device tree by its maker (Goodix, FPC, Egis and others). The image never leaves it in the clear: matching happens inside the secure environment, and the system only learns yes or no.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="253"/>
+        <location filename="../qml/pages/HelpPage.qml" line="276"/>
         <source>Fingerprint daemon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="253"/>
+        <location filename="../qml/pages/HelpPage.qml" line="276"/>
         <source>sailfish-fpd owns the reader and is the only way to it. Any application may ask it to identify a finger — that much its bus policy allows — but enrolling, removing and everything to do with the device lock stay out of reach.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="254"/>
+        <location filename="../qml/pages/HelpPage.qml" line="277"/>
         <source>Identify</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="254"/>
+        <location filename="../qml/pages/HelpPage.qml" line="277"/>
         <source>Ask the reader whether the finger on it is one of the enrolled ones. The answer is a name or a no; nothing about the fingerprint itself is handed out, and nothing is unlocked by it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="255"/>
+        <location filename="../qml/pages/HelpPage.qml" line="278"/>
         <source>Enrolled fingers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="255"/>
+        <location filename="../qml/pages/HelpPage.qml" line="278"/>
         <source>The templates stored for this user. They are listed here by the names the daemon keeps them under. This page never adds one and never deletes one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="256"/>
+        <location filename="../qml/pages/HelpPage.qml" line="279"/>
         <source>Already identifying</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="256"/>
+        <location filename="../qml/pages/HelpPage.qml" line="279"/>
         <source>When the lock screen is armed, the daemon is already identifying for it and answers a second request with a refusal. That refusal is itself proof the reader and the daemon are alive — but the finger goes to the lock screen, not to this test.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="260"/>
+        <location filename="../qml/pages/HelpPage.qml" line="283"/>
         <source>Sensors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="262"/>
+        <location filename="../qml/pages/HelpPage.qml" line="285"/>
         <source>Accelerometer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="262"/>
+        <location filename="../qml/pages/HelpPage.qml" line="285"/>
         <source>Measures linear acceleration on three axes (m/s²), including gravity — how the device is tilted and moved.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="263"/>
+        <location filename="../qml/pages/HelpPage.qml" line="286"/>
         <source>Gyroscope</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="263"/>
+        <location filename="../qml/pages/HelpPage.qml" line="286"/>
         <source>Measures angular velocity (°/s) — how fast the device is rotating around each axis.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="264"/>
+        <location filename="../qml/pages/HelpPage.qml" line="287"/>
         <source>Magnetometer / Compass</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="264"/>
+        <location filename="../qml/pages/HelpPage.qml" line="287"/>
         <source>Measures the magnetic field (µT); combined with the accelerometer it yields the compass heading (azimuth).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="265"/>
+        <location filename="../qml/pages/HelpPage.qml" line="288"/>
         <source>Proximity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="265"/>
+        <location filename="../qml/pages/HelpPage.qml" line="288"/>
         <source>A short-range sensor near the earpiece; reports near/far, used to blank the screen during calls.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="266"/>
+        <location filename="../qml/pages/HelpPage.qml" line="289"/>
         <source>Ambient light</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="266"/>
+        <location filename="../qml/pages/HelpPage.qml" line="289"/>
         <source>Measures surrounding brightness; drives automatic display brightness.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="267"/>
+        <location filename="../qml/pages/HelpPage.qml" line="290"/>
         <source>GPS fix / TTFF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="267"/>
+        <location filename="../qml/pages/HelpPage.qml" line="290"/>
         <source>A fix is a computed position from enough satellites. TTFF (time to first fix) is how long the receiver needed from cold start — seconds with a clear sky, longer indoors.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="268"/>
+        <location filename="../qml/pages/HelpPage.qml" line="291"/>
         <source>Accuracy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="268"/>
+        <location filename="../qml/pages/HelpPage.qml" line="291"/>
         <source>The estimated horizontal error radius of the position, in metres — smaller is better.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="272"/>
+        <location filename="../qml/pages/HelpPage.qml" line="295"/>
         <source>Camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="274"/>
+        <location filename="../qml/pages/HelpPage.qml" line="297"/>
         <source>Image sensor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="274"/>
+        <location filename="../qml/pages/HelpPage.qml" line="297"/>
         <source>The photodiode array that converts light to charge. Identified here by part number (e.g. Sony IMX486) read from the vendor camera modules.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="275"/>
+        <location filename="../qml/pages/HelpPage.qml" line="298"/>
         <source>Bayer CFA (RGGB)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="275"/>
+        <location filename="../qml/pages/HelpPage.qml" line="298"/>
         <source>Colour-filter array over the pixels: a repeating 2×2 of red, two greens, one blue. Each pixel captures one primary; the ISP interpolates the rest (demosaicing). Three primaries → full RGB.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="276"/>
+        <location filename="../qml/pages/HelpPage.qml" line="299"/>
         <source>Bit depth</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="276"/>
+        <location filename="../qml/pages/HelpPage.qml" line="299"/>
         <source>Bits per pixel in the raw readout, typically 10-bit (1024 levels per channel) on mobile sensors, before tone-mapping to 8-bit output.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="277"/>
+        <location filename="../qml/pages/HelpPage.qml" line="300"/>
         <source>Optical format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="277"/>
+        <location filename="../qml/pages/HelpPage.qml" line="300"/>
         <source>The sensor&apos;s diagonal size as a fraction of an inch (e.g. 1/2.9&quot;). With the pixel count it gives the pixel pitch. A datasheet spec of the part — not queryable from the device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="278"/>
+        <location filename="../qml/pages/HelpPage.qml" line="301"/>
         <source>ISP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="278"/>
+        <location filename="../qml/pages/HelpPage.qml" line="301"/>
         <source>Image Signal Processor — the SoC block that demosaics, denoises, white-balances and encodes the sensor stream.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="279"/>
+        <location filename="../qml/pages/HelpPage.qml" line="302"/>
         <source>CAMSS / cam-req-mgr</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="280"/>
+        <location filename="../qml/pages/HelpPage.qml" line="303"/>
         <source>EEPROM (calibration)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="280"/>
+        <location filename="../qml/pages/HelpPage.qml" line="303"/>
         <source>A small memory beside each module holding per-unit factory calibration: lens shading, autofocus range, colour.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="281"/>
+        <location filename="../qml/pages/HelpPage.qml" line="304"/>
         <source>Capture mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="281"/>
+        <location filename="../qml/pages/HelpPage.qml" line="304"/>
         <source>A sensor output configuration (resolution + frame rate + binning). Modes live in the HAL and are enumerable only on a running camera, not via V4L2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="282"/>
+        <location filename="../qml/pages/HelpPage.qml" line="305"/>
         <source>Camera provider crash (Xperia 10 III)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="282"/>
+        <location filename="../qml/pages/HelpPage.qml" line="305"/>
         <source>Defect: stopping a video recording crashes the Android camera service — CamX dlopens libswregistrationalgo.so from /odm/lib64, which the Sailfish port does not ship (sonyxperiadev bug #761, known since 2022). Fix — extract the proprietary library from the device&apos;s own Android firmware, then one of two ways: (1) copy it straight into /odm/lib64 (remount rw; simple, but gone after a reflash of odm), or (2) keep it in /data and bind-mount it over /odm/lib64 via a boot unit (survives OS updates). Both are system-wide, every camera app benefits. Step-by-step details in the README (GitHub only):
 github.com/JimKnopfIoT/harbour-advanced-camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="286"/>
+        <location filename="../qml/pages/HelpPage.qml" line="309"/>
         <source>Modem / SIM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="288"/>
+        <location filename="../qml/pages/HelpPage.qml" line="311"/>
         <source>IMEI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="288"/>
+        <location filename="../qml/pages/HelpPage.qml" line="311"/>
         <source>International Mobile Equipment Identity — the modem&apos;s unique 15-digit hardware serial. Identifies the device on the network, independent of the SIM.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="289"/>
+        <location filename="../qml/pages/HelpPage.qml" line="312"/>
         <source>IMSI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="289"/>
+        <location filename="../qml/pages/HelpPage.qml" line="312"/>
         <source>International Mobile Subscriber Identity — the subscriber ID stored on the SIM. Begins with the MCC+MNC of the home network.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="290"/>
+        <location filename="../qml/pages/HelpPage.qml" line="313"/>
         <source>ICCID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="290"/>
+        <location filename="../qml/pages/HelpPage.qml" line="313"/>
         <source>The SIM card&apos;s own serial number, printed on the card. Identifies the physical SIM, not the subscriber.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="291"/>
+        <location filename="../qml/pages/HelpPage.qml" line="314"/>
         <source>MCC / MNC</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="291"/>
+        <location filename="../qml/pages/HelpPage.qml" line="314"/>
         <source>Mobile Country Code + Mobile Network Code — together they name the operator (e.g. 262/01 = Germany, Telekom). Present both on the SIM (home) and from the network (serving).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="292"/>
+        <location filename="../qml/pages/HelpPage.qml" line="315"/>
         <source>APN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="292"/>
+        <location filename="../qml/pages/HelpPage.qml" line="315"/>
         <source>Access Point Name — the gateway name the modem uses to open a mobile-data (packet) connection to the operator.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="293"/>
+        <location filename="../qml/pages/HelpPage.qml" line="316"/>
         <source>Radio technology</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="293"/>
+        <location filename="../qml/pages/HelpPage.qml" line="316"/>
         <source>The active air interface: GSM (2G), UMTS (3G), LTE (4G), NR (5G). Determines throughput and latency.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="294"/>
+        <location filename="../qml/pages/HelpPage.qml" line="317"/>
         <source>Cell ID / LAC / TAC</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="294"/>
+        <location filename="../qml/pages/HelpPage.qml" line="317"/>
         <source>The identifier of the serving base station cell, and the Location/Tracking Area it belongs to. Used for paging and, roughly, for locating the device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="295"/>
+        <location filename="../qml/pages/HelpPage.qml" line="318"/>
         <source>Signal strength</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="295"/>
+        <location filename="../qml/pages/HelpPage.qml" line="318"/>
         <source>The received signal quality as a percentage from ofono. Underlying metric is RSRP/RSSI in dBm depending on technology.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="296"/>
+        <location filename="../qml/pages/HelpPage.qml" line="319"/>
         <source>PIN / PUK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="296"/>
+        <location filename="../qml/pages/HelpPage.qml" line="319"/>
         <source>PIN locks the SIM at power-on; after three wrong PINs the SIM blocks and needs the longer PUK to unlock.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="297"/>
+        <location filename="../qml/pages/HelpPage.qml" line="320"/>
         <source>ofono</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="297"/>
+        <location filename="../qml/pages/HelpPage.qml" line="320"/>
         <source>The telephony daemon on Sailfish OS. It talks to the modem over RIL and exposes modem, SIM, network and data state on D-Bus — the source of everything on this page.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="301"/>
+        <location filename="../qml/pages/HelpPage.qml" line="324"/>
         <source>USB &amp; charging</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="303"/>
+        <location filename="../qml/pages/HelpPage.qml" line="326"/>
         <source>USB-C / CC</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="303"/>
+        <location filename="../qml/pages/HelpPage.qml" line="326"/>
         <source>The Configuration Channel pins on a USB-C plug. They detect attach, cable orientation and the advertised current, and carry the Power Delivery messages.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="304"/>
+        <location filename="../qml/pages/HelpPage.qml" line="327"/>
         <source>Type-C current advertisement</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="304"/>
+        <location filename="../qml/pages/HelpPage.qml" line="327"/>
         <source>Before any negotiation, a resistor (Rp) on CC signals how much the port offers: 500 mA (default USB), 1.5 A or 3.0 A. Purely analog — no protocol.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="305"/>
+        <location filename="../qml/pages/HelpPage.qml" line="328"/>
         <source>A negotiation protocol over CC: source and sink agree on a voltage/current contract (5–48 V, up to 240 W in PD 3.1). Governs fast charging on modern devices.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="306"/>
+        <location filename="../qml/pages/HelpPage.qml" line="329"/>
         <source>Explicit / implicit contract</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="306"/>
+        <location filename="../qml/pages/HelpPage.qml" line="329"/>
         <source>The specification&apos;s word for the agreed supply — shown here as &quot;Negotiated&quot;, because that is what it says. Implicit: not a single PD message has been exchanged, 5 V applies from the CC resistors alone. Explicit: the source offered its objects, the sink requested one, the source accepted. Both sides are bound from then on — the source to deliver that voltage, the sink not to draw more than it asked for.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="307"/>
+        <location filename="../qml/pages/HelpPage.qml" line="330"/>
         <source>Quick Charge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="307"/>
+        <location filename="../qml/pages/HelpPage.qml" line="330"/>
         <source>Qualcomm&apos;s proprietary fast-charge scheme. Older versions signal on the D+/D− data lines; QC4+ rides on PD. Negotiated between charger and PMIC.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="308"/>
+        <location filename="../qml/pages/HelpPage.qml" line="331"/>
         <source>Data role (DFP/UFP/DRP)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="308"/>
+        <location filename="../qml/pages/HelpPage.qml" line="331"/>
         <source>DFP = host (downstream-facing), UFP = device (upstream-facing), DRP = dual-role that can be either. A phone is usually UFP to a PC and DFP to a stick.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="309"/>
+        <location filename="../qml/pages/HelpPage.qml" line="332"/>
         <source>VCONN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="309"/>
+        <location filename="../qml/pages/HelpPage.qml" line="332"/>
         <source>Power (on the unused CC2 pin) that feeds the active chip inside an electronically-marked cable, so it can answer identity queries.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="310"/>
+        <location filename="../qml/pages/HelpPage.qml" line="333"/>
         <source>e-marker</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="310"/>
+        <location filename="../qml/pages/HelpPage.qml" line="333"/>
         <source>A chip built into higher-rated USB-C cables that declares the cable&apos;s current rating, data speed and a coarse length. Read over PD, not from the wires.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="311"/>
+        <location filename="../qml/pages/HelpPage.qml" line="334"/>
         <source>SOP / SOP′ / SOP″</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="311"/>
+        <location filename="../qml/pages/HelpPage.qml" line="334"/>
         <source>PD packet targets: SOP addresses the device at the far end, SOP′/SOP″ address the cable&apos;s plugs (the e-markers). Discover Identity on SOP′ reads the cable.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="312"/>
+        <location filename="../qml/pages/HelpPage.qml" line="335"/>
         <source>TDR</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="312"/>
+        <location filename="../qml/pages/HelpPage.qml" line="335"/>
         <source>Time-Domain Reflectometry: send a fast edge and time its reflection to compute cable length and locate faults. Needs PHY support; phone USB PHYs expose none, so length is not measurable here.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="313"/>
+        <location filename="../qml/pages/HelpPage.qml" line="336"/>
         <source>Cable data on this device</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="314"/>
+        <location filename="../qml/pages/HelpPage.qml" line="337"/>
         <source>Open-ended cable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="314"/>
+        <location filename="../qml/pages/HelpPage.qml" line="337"/>
         <source>USB-C detects an attachment from the far end&apos;s CC resistors. A cable with nothing plugged into its other end is electrically invisible — the port reports no partner.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="315"/>
+        <location filename="../qml/pages/HelpPage.qml" line="338"/>
         <source>Readable PD/Type-C state</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="315"/>
+        <location filename="../qml/pages/HelpPage.qml" line="338"/>
         <source>What this device does expose — the CC current advertisement, PD/Type-C revision and VCONN — appears under Battery → Charging when a charger is attached.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="319"/>
+        <location filename="../qml/pages/HelpPage.qml" line="342"/>
         <source>Storage</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="321"/>
+        <location filename="../qml/pages/HelpPage.qml" line="344"/>
         <source>UFS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="321"/>
+        <location filename="../qml/pages/HelpPage.qml" line="344"/>
         <source>Universal Flash Storage — the current phone storage standard. Full-duplex serial link, command queueing; faster than the older eMMC.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="322"/>
+        <location filename="../qml/pages/HelpPage.qml" line="345"/>
         <source>SCSI / LUN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="322"/>
+        <location filename="../qml/pages/HelpPage.qml" line="345"/>
         <source>UFS speaks the SCSI command set. The chip presents several Logical Units (LUNs): one large user area plus small boot and RPMB units. The capacity shown is the user LUN.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="323"/>
+        <location filename="../qml/pages/HelpPage.qml" line="346"/>
         <source>Raw vs usable capacity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="323"/>
+        <location filename="../qml/pages/HelpPage.qml" line="346"/>
         <source>Marketing capacity counts raw NAND in powers of ten (64 GB = 64·10⁹). The OS counts usable space in powers of two (GiB) after over-provisioning and metadata, so 64 GB shows as ~59.6 GiB.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="324"/>
+        <location filename="../qml/pages/HelpPage.qml" line="347"/>
         <source>Over-provisioning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="324"/>
+        <location filename="../qml/pages/HelpPage.qml" line="347"/>
         <source>Spare NAND the controller keeps hidden for wear-levelling and bad-block replacement — part of why raw and usable differ.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="325"/>
+        <location filename="../qml/pages/HelpPage.qml" line="348"/>
         <source>Wear / lifetime</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="325"/>
+        <location filename="../qml/pages/HelpPage.qml" line="348"/>
         <source>UFS and eMMC report a health estimate (bDeviceLifeTimeEst) from the program/erase cycles used — not a percentage, but a step: 0x01 is 0–10 % used, 0x0A is 90–100 %, and 0x0B means the estimated lifetime is exceeded, with no upper figure attached. The percentage shown is the lower edge of the reported band; the exceeded step is named instead of converted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="326"/>
+        <location filename="../qml/pages/HelpPage.qml" line="349"/>
         <source>Spare blocks (pre-EOL)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="326"/>
+        <location filename="../qml/pages/HelpPage.qml" line="349"/>
         <source>A second, independent register: the controller keeps reserve blocks to replace worn ones, and reports whether under 80 %, 80 % or 90 % of them are consumed. It is the more telling of the two — if the lifetime estimate claims to be exhausted while the spare blocks still read normal, the chip contradicts itself and the estimate should not be trusted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="327"/>
+        <location filename="../qml/pages/HelpPage.qml" line="350"/>
         <source>Assessment — our reading</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="327"/>
+        <location filename="../qml/pages/HelpPage.qml" line="350"/>
         <source>Not a value the chip reports but this app&apos;s summary of the two registers above. Urgent when the chip calls its lifetime exceeded or 90 % of the spare blocks consumed; warning at 80 % of spare blocks or from wear step 8 of 11, which is 70 % of the estimated endurance; good below that. The two registers are the better evidence — this line only saves reading them.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="328"/>
+        <location filename="../qml/pages/HelpPage.qml" line="351"/>
         <source>Block / erase block</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="328"/>
+        <location filename="../qml/pages/HelpPage.qml" line="351"/>
         <source>NAND is read/written in pages but erased in larger blocks. Logical blocks (sectors, usually 4 KiB) are the unit the filesystem addresses.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="329"/>
+        <location filename="../qml/pages/HelpPage.qml" line="352"/>
         <source>RPMB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="329"/>
+        <location filename="../qml/pages/HelpPage.qml" line="352"/>
         <source>Replay-Protected Memory Block — a small authenticated LUN for anti-rollback and secure counters, not general storage.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="330"/>
+        <location filename="../qml/pages/HelpPage.qml" line="353"/>
         <source>Data moved</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="330"/>
+        <location filename="../qml/pages/HelpPage.qml" line="353"/>
         <source>Bytes read from and written to a storage device, counted by the kernel from the moment it registered that device — not from the start of the phone. For built-in storage the two are seconds apart; a memory card counts from when it was inserted, and starts again if it is taken out and put back. Only requests that reached the device are counted: anything served from the cache never appears, so the figure is lower than what programs asked for.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="331"/>
+        <location filename="../qml/pages/HelpPage.qml" line="354"/>
         <source>Backup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="331"/>
+        <location filename="../qml/pages/HelpPage.qml" line="354"/>
         <source>Better to have it and not need it than to need it and not have it. A regular backup — a copy of your data on a second medium — protects you from losing what matters when storage fails, the phone goes missing or something is deleted by mistake. Flash gives no warning before it goes; the copy has to exist beforehand.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="335"/>
+        <location filename="../qml/pages/HelpPage.qml" line="358"/>
         <source>Since boot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="337"/>
+        <location filename="../qml/pages/HelpPage.qml" line="360"/>
         <source>Uptime</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="337"/>
+        <location filename="../qml/pages/HelpPage.qml" line="360"/>
         <source>Time since the last start, deep sleep included — the phone counts it even while suspended.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="338"/>
+        <location filename="../qml/pages/HelpPage.qml" line="361"/>
         <source>Awake</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="338"/>
+        <location filename="../qml/pages/HelpPage.qml" line="361"/>
         <source>The part of the uptime the system was really running. Two kernel clocks make it visible: one stops during suspend, the other keeps going, and the gap between them is sleep.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="339"/>
+        <location filename="../qml/pages/HelpPage.qml" line="362"/>
         <source>Deep sleep</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="340"/>
+        <location filename="../qml/pages/HelpPage.qml" line="363"/>
         <source>Screen-on time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="340"/>
+        <location filename="../qml/pages/HelpPage.qml" line="363"/>
         <source>How long the display was up since the last start. MCE, the Sailfish power daemon, holds a wakelock for exactly that period and the kernel sums it — so the figure exists without anything recording it. It runs a few seconds over per switch-off, because the lock is released after the display is already dark.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="341"/>
+        <location filename="../qml/pages/HelpPage.qml" line="364"/>
         <source>Wakelock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="341"/>
+        <location filename="../qml/pages/HelpPage.qml" line="364"/>
         <source>A request that keeps the system from suspending, held by a driver or a program for as long as it needs the phone awake. The kernel counts how often each one was taken and how long it was held.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="342"/>
+        <location filename="../qml/pages/HelpPage.qml" line="365"/>
         <source>Wake source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="342"/>
+        <location filename="../qml/pages/HelpPage.qml" line="365"/>
         <source>Hardware or a driver that can end deep sleep: an incoming packet, the modem, a timer, a key. The count says how often it did, not whether it was justified.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="343"/>
+        <location filename="../qml/pages/HelpPage.qml" line="366"/>
         <source>Suspend attempt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="343"/>
+        <location filename="../qml/pages/HelpPage.qml" line="366"/>
         <source>The kernel tries to go down whenever nothing holds it awake. Each try either succeeds or is abandoned — a wakeup arriving mid-attempt is enough to abort it, which is why failed attempts are ordinary and not a defect in themselves.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="344"/>
+        <location filename="../qml/pages/HelpPage.qml" line="367"/>
         <source>Freezing tasks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="344"/>
+        <location filename="../qml/pages/HelpPage.qml" line="367"/>
         <source>First step of a suspend: all processes are halted at a safe point. If one refuses or a driver is still busy, the attempt stops right there and the step is recorded.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="345"/>
+        <location filename="../qml/pages/HelpPage.qml" line="368"/>
         <source>EBUSY (-16)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="345"/>
+        <location filename="../qml/pages/HelpPage.qml" line="368"/>
         <source>The error a driver returns when it cannot be put to sleep at that moment because it is still working. It names the device that blocked the attempt.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3515,27 +4431,42 @@ github.com/JimKnopfIoT/harbour-advanced-camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="279"/>
+        <location filename="../qml/pages/HelpPage.qml" line="183"/>
+        <source>The IPC the Android side of the system is built on — what D-Bus is to the Sailfish side. Same purpose, different build. D-Bus relays through a daemon in user space and copies every message twice; binder is a driver in the kernel. The caller makes one ioctl, the driver copies the message once, straight into a memory region the receiver mapped when it opened the device, and wakes one thread of its pool. That is why Android sends every camera frame and every sensor reading across it — and why the driver, sitting in the middle, can count every single call and hand the tally out for free. This page reads that tally and nothing else.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="184"/>
+        <source>What runs over it here</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="184"/>
+        <source>Two things that have nothing to do with each other. First the hardware: camera, GPS, sensors, radio, lights and bluetooth are Android services from the device maker, and Sailfish talks to them through the gbinder library — without binder a port has no camera. Second App Support, which brings binder domains of its own and carries the traffic of every Android app in them. Everything else on the phone — ofono, mce, the fingerprint daemon — runs on D-Bus and does not appear here at all.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="302"/>
         <source>Qualcomm&apos;s camera subsystem in the kernel. It exposes control nodes (cam-req-mgr, cam_sync), not per-camera capture devices — capture runs through the userspace HAL (camx). Other chipsets name their nodes differently (MediaTek: camera-isp, camera-dip); the rule that the kernel shows control nodes and not cameras is the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="313"/>
+        <location filename="../qml/pages/HelpPage.qml" line="336"/>
         <source>Where the charger stack exposes no cable node — the Qualcomm PMIC&apos;s qpnp-pdphy does not — an e-marker&apos;s rating, length and speed cannot be read, because Discover Identity/SOP′ is not surfaced. A kernel with the mainline tcpm driver has the typec class and shows what it knows; even there the cable directory is only present if the port driver populates it. For real cable data, a dedicated USB-C PD analyzer / cable tester reads the e-marker independently of the phone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="339"/>
+        <location filename="../qml/pages/HelpPage.qml" line="362"/>
         <source>The part of the uptime that passed with the system suspended. Which kind of suspend depends on the phone, and /sys/power/mem_sleep names it: with suspend-to-RAM (S3) the CPU is off and only a wakeup source brings it back; with suspend-to-idle (s2idle) the CPU stays powered in its deepest idle state while everything else is frozen. Both stop the clock this figure is measured with, the second saves less energy. Either way this is where a phone spends most of its day.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="361"/>
+        <location filename="../qml/pages/HelpPage.qml" line="384"/>
         <source>Glossary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="369"/>
+        <location filename="../qml/pages/HelpPage.qml" line="392"/>
         <source>Every figure the app shows, explained. Tap a term to reveal its details.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7830,7 +8761,7 @@ Exactly one port can be the one in use, because that is what the audio policy se
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="90"/>
+        <location filename="../qml/pages/MainPage.qml" line="97"/>
         <source>System overview</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7840,128 +8771,133 @@ Exactly one port can be the one in use, because that is what the audio policy se
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="100"/>
+        <location filename="../qml/pages/MainPage.qml" line="92"/>
+        <source>Binder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="107"/>
         <source>SysMetrics</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="101"/>
+        <location filename="../qml/pages/MainPage.qml" line="108"/>
         <source>%1 processes · %2 threads</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="131"/>
-        <location filename="../qml/pages/MainPage.qml" line="233"/>
+        <location filename="../qml/pages/MainPage.qml" line="138"/>
+        <location filename="../qml/pages/MainPage.qml" line="240"/>
         <source>CPU</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="146"/>
+        <location filename="../qml/pages/MainPage.qml" line="153"/>
         <source>load %1  ·  %2 of %3 cores</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="149"/>
+        <location filename="../qml/pages/MainPage.qml" line="156"/>
         <source>load %1  ·  %2 cores</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="177"/>
+        <location filename="../qml/pages/MainPage.qml" line="184"/>
         <source>Cores</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="183"/>
+        <location filename="../qml/pages/MainPage.qml" line="190"/>
         <source>avg %1%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="204"/>
+        <location filename="../qml/pages/MainPage.qml" line="211"/>
         <source>c%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="205"/>
+        <location filename="../qml/pages/MainPage.qml" line="212"/>
         <source>offline</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="217"/>
+        <location filename="../qml/pages/MainPage.qml" line="224"/>
         <source>Filter by name, cmdline or PID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="234"/>
+        <location filename="../qml/pages/MainPage.qml" line="241"/>
         <source>Memory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="235"/>
+        <location filename="../qml/pages/MainPage.qml" line="242"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="236"/>
+        <location filename="../qml/pages/MainPage.qml" line="243"/>
         <source>PID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="237"/>
+        <location filename="../qml/pages/MainPage.qml" line="244"/>
         <source>Threads</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="261"/>
+        <location filename="../qml/pages/MainPage.qml" line="268"/>
         <source>Apps only</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="266"/>
+        <location filename="../qml/pages/MainPage.qml" line="273"/>
         <source>Kernel threads</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="278"/>
+        <location filename="../qml/pages/MainPage.qml" line="285"/>
         <source>All processes (%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="279"/>
+        <location filename="../qml/pages/MainPage.qml" line="286"/>
         <source>Top consumers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="326"/>
+        <location filename="../qml/pages/MainPage.qml" line="333"/>
         <source>Collapse</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="327"/>
+        <location filename="../qml/pages/MainPage.qml" line="334"/>
         <source>Show all %1 processes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="347"/>
+        <location filename="../qml/pages/MainPage.qml" line="354"/>
         <source>Since boot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="349"/>
+        <location filename="../qml/pages/MainPage.qml" line="356"/>
         <source>uptime</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="363"/>
+        <location filename="../qml/pages/MainPage.qml" line="370"/>
         <source>Deep sleep</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="373"/>
+        <location filename="../qml/pages/MainPage.qml" line="380"/>
         <source>Screen on</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="384"/>
+        <location filename="../qml/pages/MainPage.qml" line="391"/>
         <source>Awake, screen off</source>
         <translation type="unfinished"></translation>
     </message>
@@ -8387,328 +9323,400 @@ Exactly one port can be the one in use, because that is what the audio policy se
 <context>
     <name>ProcessDetailPage</name>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="46"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="65"/>
         <source>Send SIGKILL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="48"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="67"/>
         <source>Killing %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="52"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="71"/>
         <source>Send SIGTERM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="54"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="73"/>
         <source>Terminating %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="58"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="77"/>
         <source>Continue (SIGCONT)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="58"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="77"/>
         <source>Stop (SIGSTOP)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="71"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="90"/>
         <source>PID %1 · %2 · %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="78"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="97"/>
         <source>Process has exited</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="113"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="132"/>
         <source>CPU</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="116"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="135"/>
         <source>%1 of %2 cores</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="140"/>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="421"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="159"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="461"/>
         <source>c%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="152"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="171"/>
         <source>Share of busy CPU</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="154"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="173"/>
         <source>CPU time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="156"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="175"/>
         <source>Context switches/s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="157"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="176"/>
         <source>%1 vol · %2 invol</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="159"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="178"/>
         <source>Wakeups/s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="161"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="180"/>
         <source>Page faults/s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="162"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="181"/>
         <source>%1 minor · %2 major</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="164"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="183"/>
         <source>CPU affinity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="165"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="184"/>
         <source>Nice / priority</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="174"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="193"/>
         <source>Memory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="180"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="199"/>
         <source>RSS (resident)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="182"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="201"/>
         <source>USS (private)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="183"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="202"/>
         <source>Swapped</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="185"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="204"/>
         <source>Virtual</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="193"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="212"/>
         <source>I/O &amp; energy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="198"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="217"/>
         <source>Disk read/write</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="200"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="219"/>
         <source>Total read/write</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="206"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="225"/>
         <source>Access monitor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="212"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="231"/>
         <source>Traced by</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="214"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="233"/>
         <source>no</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="220"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="239"/>
         <source>Full access-monitor coverage needs root mode.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="236"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="255"/>
         <source>No other process holds handles into this process.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="246"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="265"/>
         <source>Devices (%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="261"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="280"/>
         <source>Node</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="262"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="281"/>
         <source>Subsystem</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="263"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="282"/>
         <source>Driver</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="264"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="283"/>
         <source>Vendor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="265"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="284"/>
         <source>Serial</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="267"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="286"/>
         <source>Size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="278"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="297"/>
         <source>No device nodes open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="290"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="309"/>
         <source>Network (%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="327"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="346"/>
         <source>local </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="342"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="361"/>
         <source>No sockets open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="354"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="373"/>
         <source>Open files (%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="369"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="388"/>
         <source>(deleted)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="386"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="405"/>
         <source>No regular files open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="398"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="417"/>
         <source>Threads (%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="444"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="487"/>
+        <source>Binder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="497"/>
+        <source>Domain</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="500"/>
+        <source>not reported by this kernel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="503"/>
+        <source>Calls out</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="506"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="513"/>
+        <source>/s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="507"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="514"/>
+        <source>%1 since boot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="510"/>
+        <source>Calls in</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="517"/>
+        <source>Binder threads</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="518"/>
+        <source>%1 running, at most %2, %3 ready</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="526"/>
+        <source>Queued transactions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="531"/>
+        <source>Nodes / references</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="535"/>
+        <source>One-way buffer left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="542"/>
+        <source>Serves</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="554"/>
+        <source>All binder traffic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="562"/>
         <source>Process</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="449"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="567"/>
         <source>Command line</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="450"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="568"/>
         <source>Executable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="451"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="569"/>
         <source>Working dir</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="452"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="570"/>
         <source>Parent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="454"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="572"/>
         <source>cgroup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="455"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="573"/>
         <source>Threads / fds</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="457"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="575"/>
         <source>Timer fds</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="458"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="576"/>
         <source>OOM score</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="459"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="577"/>
         <source>Age</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="460"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="578"/>
         <source>Data source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="461"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="579"/>
         <source>root helper</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="462"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="580"/>
         <source>direct</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="463"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="581"/>
         <source>restricted — sandboxed, enable root mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="464"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="582"/>
         <source>limited (foreign user)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="469"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="587"/>
         <source>Priority</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="476"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="594"/>
         <source>nice (lower = more CPU; needs privilege to lower)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -8716,7 +9724,7 @@ Exactly one port can be the one in use, because that is what the audio policy se
 <context>
     <name>ProcessRow</name>
     <message>
-        <location filename="../qml/components/ProcessRow.qml" line="52"/>
+        <location filename="../qml/components/ProcessRow.qml" line="59"/>
         <source>kernel</source>
         <translation type="unfinished"></translation>
     </message>

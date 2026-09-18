@@ -42,6 +42,49 @@ const char *const ALLOWED_READS[] = {
     "/sys/kernel/debug/wakeup_sources",
 };
 
+// The kernel's binder logs. binderfs carries them world readable and the app
+// never gets here; the older debugfs location belongs to root on most ports,
+// and that is what this is for. The client sends a file name, never a path:
+// the directory is decided here, and the name must be one the kernel creates.
+QByteArray cmdBinderLog(const QByteArray &name)
+{
+    static const char *const FILES[] = {
+        "stats", "state", "state_hashed", "transactions", "transactions_hashed",
+        "transaction_log", "failed_transaction_log",
+    };
+    bool ok = false;
+    for (const char *f : FILES)
+        if (name == f)
+            ok = true;
+    // "proc/<pid>" is the per-process dump; digits only, nothing else.
+    if (!ok && name.startsWith("proc/")) {
+        const QByteArray pid = name.mid(5);
+        ok = !pid.isEmpty();
+        for (char c : pid)
+            if (c < '0' || c > '9')
+                ok = false;
+    }
+    if (!ok)
+        return QByteArray();
+
+    const QString binderfs = QStringLiteral("/dev/binderfs/binder_logs/");
+    const QString debugfs = QStringLiteral("/sys/kernel/debug/binder/");
+    const QString dir = QDir(binderfs).exists() ? binderfs : debugfs;
+    QFile f(dir + QString::fromLatin1(name));
+    if (!f.open(QIODevice::ReadOnly))
+        return QByteArray();
+    // seq_files report size 0 and answer in chunks, so read until the end.
+    QByteArray out;
+    char buf[64 * 1024];
+    qint64 n;
+    while ((n = f.read(buf, sizeof(buf))) > 0) {
+        out.append(buf, int(n));
+        if (out.size() >= 4 * 1024 * 1024)
+            break;
+    }
+    return out;
+}
+
 bool pathAllowed(const QString &p)
 {
     for (const char *a : ALLOWED_READS)
@@ -332,6 +375,8 @@ void serve(QLocalSocket *sock)
                 payload = cmdTohMemory();
             else if (cmd == "N")
                 payload = cmdNice(arg);
+            else if (cmd == "L")
+                payload = cmdBinderLog(arg);
             else
                 ok = false;
             if (ok)

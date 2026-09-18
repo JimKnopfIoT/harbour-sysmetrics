@@ -27,6 +27,10 @@ public:
     Q_INVOKABLE QString logGrep(const QString &term);
 
     QByteArray readFile(const QString &path);
+    // One of the kernel's binder log files, for ports where they sit in a
+    // debugfs that belongs to root. The helper resolves the directory itself
+    // and takes only the file name, so no path travels over the socket.
+    QByteArray binderLog(const QString &name);
     // The memory chip of an attached cover. Goes through the helper because
     // the i2c character devices belong to root alone; the bus probe travels
     // back with the bytes, since only the side that held the bus open can

@@ -49,6 +49,7 @@ HEADERS += \
     src/tohmon.h \
     src/fpmon.h \
     src/btinfo.h \
+    src/bindermon.h \
     src/netmon.h \
     src/recorder.h \
     src/graphitem.h \
@@ -71,6 +72,7 @@ SOURCES += \
     src/keymon.cpp \
     src/fpmon.cpp \
     src/btinfo.cpp \
+    src/bindermon.cpp \
     src/netmon.cpp \
     src/recorder.cpp \
     src/graphitem.cpp \
@@ -126,4 +128,5 @@ DISTFILES += \
     qml/pages/SensorContent.qml \
     qml/pages/ButtonTestPage.qml \
     qml/pages/FingerprintPage.qml \
+    qml/pages/BinderPage.qml \
     qml/components/PogoPinsBlock.qml
