@@ -34,6 +34,769 @@ github.com/JimKnopfIoT/harbour-sysmetrics</translation>
     </message>
 </context>
 <context>
+    <name>BinderMon</name>
+    <message>
+        <location filename="../src/bindermon.cpp" line="68"/>
+        <source>the target was gone or the handle was invalid — the call never reached a service</source>
+        <translation>das Ziel war fort oder der Handle ungültig — der Aufruf hat nie einen Dienst erreicht</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="70"/>
+        <source>the driver refused the transaction before delivering it</source>
+        <translation>der Treiber hat die Transaktion abgewiesen, bevor er sie zugestellt hat</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="72"/>
+        <source>the target process is frozen and did not take the call</source>
+        <translation>der Zielprozess ist eingefroren und hat den Aufruf nicht angenommen</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="74"/>
+        <source>the driver flagged the sender for flooding a service with one-way calls</source>
+        <translation>der Treiber hat den Absender markiert, weil er einen Dienst mit Einwegaufrufen überflutet</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="76"/>
+        <source>the call is held back because the target process is frozen</source>
+        <translation>der Aufruf wird zurückgehalten, weil der Zielprozess eingefroren ist</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="81"/>
+        <source>the driver reported an error before delivery</source>
+        <translation>der Treiber meldete einen Fehler noch vor der Zustellung</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="134"/>
+        <source>This device has no binder logs — the kernel was built without them.</source>
+        <translation>Dieses Gerät hat keine Binder-Protokolle — der Kernel wurde ohne sie gebaut.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="144"/>
+        <source>%1 exists but cannot be read. On this port the logs belong to root; the helper in Settings reads them.</source>
+        <translation>%1 ist vorhanden, aber nicht lesbar. Auf dieser Portierung gehören die Protokolle root; der Helfer in den Einstellungen liest sie.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="715"/>
+        <source>Source: %1</source>
+        <translation>Quelle: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="729"/>
+        <source>Caller</source>
+        <translation>Aufrufer</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="732"/>
+        <source>Command line</source>
+        <translation>Kommandozeile</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="733"/>
+        <location filename="../src/bindermon.cpp" line="895"/>
+        <source>Domain</source>
+        <translation>Domäne</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="735"/>
+        <source>Target service</source>
+        <translation>Zieldienst</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="741"/>
+        <location filename="../src/bindermon.cpp" line="743"/>
+        <source>Target</source>
+        <translation>Ziel</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="741"/>
+        <source>the service manager of this domain (handle 0)</source>
+        <translation>der Service-Manager dieser Domäne (Handle 0)</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="743"/>
+        <source>node %1, handle %2 — not identified; the service list can name it</source>
+        <translation>Knoten %1, Handle %2 — nicht bestimmt; die Dienstliste kann ihn benennen</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="748"/>
+        <source>Driver answer</source>
+        <translation>Antwort des Treibers</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="750"/>
+        <source>unknown code</source>
+        <translation>unbekannter Code</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="757"/>
+        <source>What that means</source>
+        <translation>Was das bedeutet</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="759"/>
+        <source>Rate</source>
+        <translation>Rate</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="761"/>
+        <source>at least %1 per second</source>
+        <translation>mindestens %1 pro Sekunde</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="762"/>
+        <source>%1 per second</source>
+        <translation>%1 pro Sekunde</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="763"/>
+        <source>In the kernel ring</source>
+        <translation>Im Ring des Kernels</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="763"/>
+        <source>%1 of %2 entries</source>
+        <translation>%1 von %2 Einträgen</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="766"/>
+        <source>Threshold: every failing caller in the ring is reported; the level is raised when one caller holds half of its %1 entries. The ring is a snapshot, so a rate taken from it is a lower bound.</source>
+        <translation>Schwelle: jeder fehlschlagende Aufrufer im Ring wird gemeldet; die Stufe steigt, wenn ein Aufrufer die Hälfte seiner %1 Einträge hält. Der Ring ist eine Momentaufnahme, eine daraus gerechnete Rate ist deshalb eine Untergrenze.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="770"/>
+        <source>Failing binder calls</source>
+        <translation>Fehlschlagende Binder-Aufrufe</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="771"/>
+        <source>%1 calls into the %2 domain and the driver answers %3.</source>
+        <translation>%1 ruft in die Domäne %2, und der Treiber antwortet %3.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="774"/>
+        <source>with an error</source>
+        <translation>mit einem Fehler</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="788"/>
+        <location filename="../src/bindermon.cpp" line="825"/>
+        <location filename="../src/bindermon.cpp" line="841"/>
+        <source>Process</source>
+        <translation>Prozess</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="789"/>
+        <location filename="../src/bindermon.cpp" line="843"/>
+        <source>Binder threads</source>
+        <translation>Binder-Threads</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="789"/>
+        <source>%1 running, at most %2</source>
+        <translation>%1 laufend, höchstens %2</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="791"/>
+        <source>Ready for a call</source>
+        <translation>Bereit für einen Aufruf</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="791"/>
+        <location filename="../src/bindermon.cpp" line="871"/>
+        <source>not reported</source>
+        <translation>nicht gemeldet</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="794"/>
+        <source>Requested, not started</source>
+        <translation>Angefordert, nicht gestartet</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="795"/>
+        <location filename="../src/bindermon.cpp" line="842"/>
+        <source>Queued transactions</source>
+        <translation>Wartende Transaktionen</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="797"/>
+        <source>Binder thread pool exhausted</source>
+        <translation>Binder-Thread-Pool erschöpft</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="798"/>
+        <source>%1 runs every binder thread it is allowed and none is free to take a call.</source>
+        <translation>%1 führt jeden Binder-Thread aus, den er ausführen darf, und keiner ist frei, um einen Aufruf anzunehmen.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="801"/>
+        <source>Threshold: running threads at the maximum the process registered and ready threads at zero — both are the kernel&apos;s own counters.</source>
+        <translation>Schwelle: laufende Threads am Maximum, das der Prozess angemeldet hat, und bereite Threads bei null — beides sind Zähler des Kernels selbst.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="807"/>
+        <source>Binder thread requested</source>
+        <translation>Binder-Thread angefordert</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="808"/>
+        <source>The driver has asked %1 for another binder thread, has not got it yet, and meanwhile no thread of the pool is free.</source>
+        <translation>Der Treiber hat %1 um einen weiteren Binder-Thread gebeten, ihn noch nicht bekommen, und währenddessen ist kein Thread des Pools frei.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="811"/>
+        <source>Threshold: the kernel&apos;s &quot;requested threads&quot; counter above zero and no ready thread at the same time. The counter alone says nothing — on an idle device several processes carry one while a thread is free.</source>
+        <translation>Schwelle: der Zähler „requested threads“ des Kernels über null und gleichzeitig kein bereiter Thread. Der Zähler allein sagt nichts — auf einem leer laufenden Gerät tragen mehrere Prozesse eine offene Anforderung, während ein Thread frei ist.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="826"/>
+        <source>One-way buffer left</source>
+        <translation>Einwegpuffer frei</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="826"/>
+        <source>%1 bytes</source>
+        <translation>%1 Bytes</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="828"/>
+        <source>Buffers held</source>
+        <translation>Gehaltene Puffer</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="829"/>
+        <source>One-way buffer nearly full</source>
+        <translation>Einwegpuffer fast voll</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="830"/>
+        <source>%1 has little room left for one-way calls; when it runs out, the driver rejects them.</source>
+        <translation>%1 hat wenig Platz für Einwegaufrufe übrig; ist er aufgebraucht, weist der Treiber sie ab.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="833"/>
+        <source>Threshold: below 64 KiB free. That threshold is SysMetrics&apos;, not the kernel&apos;s — the kernel reports the figure and sets no limit of its own here.</source>
+        <translation>Schwelle: weniger als 64 KiB frei. Diese Schwelle ist die von SysMetrics, nicht die des Kernels — der Kernel meldet den Wert und setzt hier keine eigene Grenze.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="843"/>
+        <source>%1 running, %2 ready</source>
+        <translation>%1 laufend, %2 bereit</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="845"/>
+        <source>Binder work waiting</source>
+        <translation>Wartende Binder-Arbeit</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="846"/>
+        <source>%1 has work queued that it has not taken yet.</source>
+        <translation>%1 hat Arbeit in der Warteschlange, die er noch nicht angenommen hat.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="848"/>
+        <source>The kernel&apos;s &quot;pending transactions&quot; counter, reported from one upward.</source>
+        <translation>Der Zähler „pending transactions“ des Kernels, gemeldet ab eins.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="861"/>
+        <source>Waiting</source>
+        <translation>Wartet</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="863"/>
+        <source>Waiting for</source>
+        <translation>Wartet auf</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="867"/>
+        <location filename="../src/bindermon.cpp" line="894"/>
+        <source>Service</source>
+        <translation>Dienst</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="868"/>
+        <source>Transaction</source>
+        <translation>Transaktion</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="869"/>
+        <source>Method code</source>
+        <translation>Methodencode</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="872"/>
+        <source>%1 s</source>
+        <translation>%1 s</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="872"/>
+        <source>Waiting since</source>
+        <translation>Wartet seit</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="875"/>
+        <source>Binder call not returning</source>
+        <translation>Binder-Aufruf kommt nicht zurück</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="876"/>
+        <source>%1 has been waiting for %2 to answer.</source>
+        <translation>%1 wartet auf eine Antwort von %2.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="880"/>
+        <source>Reported when the same transaction is still in flight on the next refresh. A binder call normally finishes in microseconds; the figure is the time between the two readings, so it is a lower bound.</source>
+        <translation>Gemeldet, wenn dieselbe Transaktion bei der nächsten Aktualisierung noch unterwegs ist. Ein Binder-Aufruf ist normalerweise in Mikrosekunden fertig; die Zahl ist der Abstand zwischen den beiden Messungen und damit eine Untergrenze.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="896"/>
+        <source>Answer</source>
+        <translation>Antwort</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="896"/>
+        <source>none within 2 s</source>
+        <translation>keine innerhalb von 2 s</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="897"/>
+        <source>Service does not answer</source>
+        <translation>Dienst antwortet nicht</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="898"/>
+        <source>%1 is registered but did not answer a ping.</source>
+        <translation>%1 ist registriert, hat aber auf einen Ping nicht geantwortet.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="900"/>
+        <source>A ping is the liveness check every binder service must answer; it performs no action inside the service. Timeout: 2 s, set by SysMetrics.</source>
+        <translation>Ein Ping ist die Lebendprüfung, die jeder Binder-Dienst beantworten muss; im Dienst selbst richtet er nichts aus. Zeitgrenze: 2 s, von SysMetrics gesetzt.</translation>
+    </message>
+    <message>
+        <location filename="../src/bindermon.cpp" line="952"/>
+        <source>%1 +%2</source>
+        <translation>%1 +%2</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../src/bindermon.cpp" line="1000"/>
+        <source>%1 · %n service(s)</source>
+        <translation>
+            <numerusform>%1 · %n Dienst</numerusform>
+            <numerusform>%1 · %n Dienste</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>BinderPage</name>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="67"/>
+        <source>/s</source>
+        <translation>/s</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="83"/>
+        <source>proven by ping</source>
+        <translation>per Ping bewiesen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="84"/>
+        <source>from the node owner</source>
+        <translation>vom Eigentümer des Knotens</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="85"/>
+        <source>no answer</source>
+        <translation>keine Antwort</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="86"/>
+        <source>node gone</source>
+        <translation>Knoten fort</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="87"/>
+        <source>not established</source>
+        <translation>nicht belegt</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="107"/>
+        <source>Stop identifying</source>
+        <translation>Bestimmen abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="107"/>
+        <location filename="../qml/pages/BinderPage.qml" line="668"/>
+        <source>Identify services</source>
+        <translation>Dienste bestimmen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="119"/>
+        <source>Binder</source>
+        <translation>Binder</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="121"/>
+        <source>%1 processes · %2 calls/s</source>
+        <translation>%1 Prozesse · %2 Aufrufe/s</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="124"/>
+        <source>not readable</source>
+        <translation>nicht lesbar</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="134"/>
+        <source>Source</source>
+        <translation>Quelle</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="136"/>
+        <source>none found</source>
+        <translation>keine gefunden</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="139"/>
+        <source>Read as</source>
+        <translation>Gelesen als</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="140"/>
+        <source>root helper</source>
+        <translation>Root-Helfer</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="140"/>
+        <source>ordinary user</source>
+        <translation>gewöhnlicher Benutzer</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="144"/>
+        <source>Sampling interval</source>
+        <translation>Messabstand</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="163"/>
+        <source>What binder is, and what stands here</source>
+        <translation>Was Binder ist und was hier steht</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="175"/>
+        <source>What it is</source>
+        <translation>Was es ist</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="184"/>
+        <source>The IPC the Android side of this device is built on — what D-Bus is to the Sailfish side. Same purpose, different build: D-Bus relays through a daemon and copies every message twice, binder is a driver in the kernel that copies it once, straight into memory the receiver has mapped, and wakes one of its threads. Fast enough for every camera frame and every sensor reading — and the driver, sitting in the middle, counts all of it.</source>
+        <translation>Die IPC, auf der die Android-Seite dieses Geräts aufgebaut ist — das, was D-Bus auf der Sailfish-Seite ist. Gleicher Zweck, andere Bauart: D-Bus vermittelt über einen Dienst und kopiert jede Nachricht zweimal, Binder ist ein Treiber im Kernel, der sie einmal kopiert, direkt in Speicher, den der Empfänger eingeblendet hat, und dort einen seiner Threads weckt. Schnell genug für jeden Kamerarahmen und jede Sensormessung — und der Treiber, der dazwischensitzt, zählt alles davon.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="194"/>
+        <source>What runs over it</source>
+        <translation>Was darüber läuft</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="203"/>
+        <source>Two things. The hardware: camera, GPS, sensors, radio, lights and bluetooth are Android services from the device maker, and Sailfish reaches them through the gbinder library — without binder a port has no camera. And App Support, which brings domains of its own and carries the traffic of every Android app in them. Everything else on the phone runs on D-Bus and does not appear here.</source>
+        <translation>Zweierlei. Die Hardware: Kamera, GPS, Sensoren, Funk, Licht und Bluetooth sind Android-Dienste des Geräteherstellers, und Sailfish erreicht sie über die Bibliothek gbinder — ohne Binder hat eine Portierung keine Kamera. Und App Support, das eigene Domänen mitbringt und darin den Verkehr jeder Android-App trägt. Alles andere auf dem Telefon läuft über D-Bus und erscheint hier nicht.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="212"/>
+        <source>What this page shows</source>
+        <translation>Was diese Seite zeigt</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="221"/>
+        <source>Findings first — a failing caller, a thread pool with nothing free, a call that has not come back. Then the counters for the whole device, the domains and who declared them, the processes ranked by how much they call, and the failures grouped by caller and error code. Services can be identified on request; folded at the end are the orphaned nodes and the driver&apos;s own log lines.</source>
+        <translation>Zuerst die Befunde — ein Aufrufer, dem es fehlschlägt, ein Thread-Pool ohne freien Thread, ein Aufruf, der nicht zurückkam. Dann die Zähler für das ganze Gerät, die Domänen und wer sie deklariert hat, die Prozesse nach Aufrufmenge geordnet und die Fehlschläge nach Aufrufer und Fehlercode gruppiert. Dienste lassen sich auf Wunsch bestimmen; eingeklappt am Ende stehen die verwaisten Knoten und die Protokollzeilen des Treibers selbst.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="233"/>
+        <source>Every figure here is the kernel&apos;s own; wherever one is turned into a verdict, the threshold that did it stands beside it. Nothing on this page changes anything — it reads, it does not repair. Anything that leads to a process can be tapped.</source>
+        <translation>Jede Zahl hier ist die des Kernels; wo eine zu einer Bewertung wird, steht die Schwelle daneben, die das getan hat. Nichts auf dieser Seite verändert etwas — sie liest, sie repariert nicht. Alles, was zu einem Prozess führt, lässt sich antippen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="243"/>
+        <source>The glossary beside this page (swipe left) explains node, handle, service manager, thread pool and the error codes.</source>
+        <translation>Das Glossar neben dieser Seite (nach links wischen) erklärt Knoten, Handle, Service-Manager, Thread-Pool und die Fehlercodes.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="251"/>
+        <source>No binder log</source>
+        <translation>Kein Binder-Protokoll</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="252"/>
+        <source>The kernel keeps these figures only when it is built with the binder logs enabled.</source>
+        <translation>Der Kernel führt diese Zahlen nur, wenn er mit eingeschalteten Binder-Protokollen gebaut wurde.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="258"/>
+        <source>Findings</source>
+        <translation>Befunde</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="265"/>
+        <source>Nothing to report: no failing call in the kernel&apos;s ring, no exhausted thread pool, no call left unanswered between two readings.</source>
+        <translation>Nichts zu melden: kein fehlschlagender Aufruf im Ring des Kernels, kein erschöpfter Thread-Pool, kein Aufruf, der zwischen zwei Messungen unbeantwortet blieb.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="295"/>
+        <source>Across the whole device</source>
+        <translation>Über das ganze Gerät</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="305"/>
+        <source>Calls</source>
+        <translation>Aufrufe</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="308"/>
+        <location filename="../qml/pages/BinderPage.qml" line="314"/>
+        <location filename="../qml/pages/BinderPage.qml" line="320"/>
+        <location filename="../qml/pages/BinderPage.qml" line="328"/>
+        <source>%1 since boot</source>
+        <translation>%1 seit dem Start</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="311"/>
+        <source>Replies</source>
+        <translation>Antworten</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="317"/>
+        <source>Dead replies</source>
+        <translation>Tote Antworten</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="325"/>
+        <source>Refused transactions</source>
+        <translation>Abgewiesene Transaktionen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="333"/>
+        <source>Processes / threads</source>
+        <translation>Prozesse / Threads</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="339"/>
+        <source>Nodes / references</source>
+        <translation>Knoten / Referenzen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="345"/>
+        <source>In flight now</source>
+        <translation>Gerade unterwegs</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="350"/>
+        <source>Death notifications</source>
+        <translation>Todesmeldungen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="359"/>
+        <source>Domains</source>
+        <translation>Domänen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="372"/>
+        <source>A binder domain is one driver device with its own service registry; processes on different domains cannot reach each other. Which domain belongs to what is not read off its name but taken from the configuration file that declares it.</source>
+        <translation>Eine Binder-Domäne ist ein Treibergerät mit eigener Dienstregistratur; Prozesse verschiedener Domänen erreichen einander nicht. Welche Domäne wozu gehört, wird nicht am Namen abgelesen, sondern der Konfigurationsdatei entnommen, die sie deklariert.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="402"/>
+        <source>Device</source>
+        <translation>Gerät</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="405"/>
+        <source>not present in /dev</source>
+        <translation>nicht in /dev vorhanden</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="408"/>
+        <source>Protocol</source>
+        <translation>Protokoll</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="410"/>
+        <source>not declared</source>
+        <translation>nicht deklariert</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="413"/>
+        <source>Declared by</source>
+        <translation>Deklariert von</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="417"/>
+        <source>no configuration file names it</source>
+        <translation>keine Konfigurationsdatei nennt sie</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="420"/>
+        <source>Processes</source>
+        <translation>Prozesse</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="422"/>
+        <source>%1 services identified</source>
+        <translation>%1 Dienste bestimmt</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="426"/>
+        <source>Calls since boot</source>
+        <translation>Aufrufe seit dem Start</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="437"/>
+        <source>Busiest processes</source>
+        <translation>Aktivste Prozesse</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="444"/>
+        <source>Rates appear with the second reading, a moment from now.</source>
+        <translation>Raten erscheinen mit der zweiten Messung, gleich.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="489"/>
+        <source>%1 of %2 threads</source>
+        <translation>%1 von %2 Threads</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="510"/>
+        <source>incoming %1</source>
+        <translation>eingehend %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="527"/>
+        <source>Failing calls</source>
+        <translation>Fehlschlagende Aufrufe</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="537"/>
+        <source>The driver keeps the last 32 failed transactions. What stands here is that ring, grouped by caller and error code — a rate taken from it is a lower bound, never a total.</source>
+        <translation>Der Treiber behält die letzten 32 fehlgeschlagenen Transaktionen. Was hier steht, ist dieser Ring, gruppiert nach Aufrufer und Fehlercode — eine daraus gerechnete Rate ist eine Untergrenze, nie eine Gesamtzahl.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="573"/>
+        <source>service manager</source>
+        <translation>Service-Manager</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="574"/>
+        <location filename="../qml/pages/BinderPage.qml" line="708"/>
+        <location filename="../qml/pages/BinderPage.qml" line="779"/>
+        <source>node %1</source>
+        <translation>Knoten %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="583"/>
+        <source>code %1</source>
+        <translation>Code %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="593"/>
+        <source>PID %1 · %2 of %3 ring entries</source>
+        <translation>PID %1 · %2 von %3 Ring-Einträgen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="598"/>
+        <source>at least %1</source>
+        <translation>mindestens %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="617"/>
+        <source>Services</source>
+        <translation>Dienste</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="628"/>
+        <source>Which process serves which name is not guessed from the name. SysMetrics sends each service the ping every binder service must answer — a liveness check that performs no action inside it — and then reads back the kernel&apos;s own transaction log to see who answered. That log entry is the proof. It costs one ping per service and takes a moment.</source>
+        <translation>Welcher Prozess welchen Namen bedient, wird nicht aus dem Namen geraten. SysMetrics schickt jedem Dienst den Ping, den jeder Binder-Dienst beantworten muss — eine Lebendprüfung, die im Dienst nichts ausrichtet — und liest danach das Transaktionsprotokoll des Kernels, um zu sehen, wer geantwortet hat. Dieser Protokolleintrag ist der Beweis. Das kostet einen Ping je Dienst und dauert einen Moment.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="641"/>
+        <source>Not possible here: binder-list and binder-ping from the gbinder tools are not installed. The traffic figures above do not need them.</source>
+        <translation>Hier nicht möglich: binder-list und binder-ping aus den gbinder-Werkzeugen sind nicht installiert. Die Verkehrszahlen oben brauchen sie nicht.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="650"/>
+        <source>%1 of %2 · %3</source>
+        <translation>%1 von %2 · %3</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="668"/>
+        <source>Stop</source>
+        <translation>Stopp</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="705"/>
+        <source>owner unknown</source>
+        <translation>Eigentümer unbekannt</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="727"/>
+        <source>Orphaned nodes</source>
+        <translation>Verwaiste Knoten</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="744"/>
+        <source>A node whose owning process is gone while somebody still holds a reference to it. The processes listed under it are the ones that still believe they have that service: their next call over that reference comes back as a dead reply. Tap one to see it. Read on request only — the file this comes from dumps every node and every reference of every process and takes the driver&apos;s locks while doing it.</source>
+        <translation>Ein Knoten, dessen Eigentümerprozess fort ist, während ihn noch jemand referenziert. Die darunter genannten Prozesse sind die, die noch glauben, diesen Dienst zu haben: ihr nächster Aufruf über diese Referenz kommt als tote Antwort zurück. Zum Ansehen antippen. Nur auf Anforderung gelesen — die Datei, aus der das stammt, gibt jeden Knoten und jede Referenz jedes Prozesses aus und nimmt dabei die Sperren des Treibers.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="787"/>
+        <source>The state file names no holder for it.</source>
+        <translation>Die Zustandsdatei nennt keinen Halter dafür.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="811"/>
+        <source>process has ended</source>
+        <translation>Prozess ist beendet</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="819"/>
+        <source>still holds a reference</source>
+        <translation>hält noch eine Referenz</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="758"/>
+        <source>The state file could not be read.</source>
+        <translation>Die Zustandsdatei konnte nicht gelesen werden.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="103"/>
+        <source>Measure again</source>
+        <translation>Neu messen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="146"/>
+        <source>%1 s between the two readings the rates rest on — pull down to measure again</source>
+        <translation>%1 s zwischen den beiden Messungen, auf denen die Raten beruhen — zum Neumessen herunterziehen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="766"/>
+        <source>None — every node has a living owner.</source>
+        <translation>Keine — jeder Knoten hat einen lebenden Eigentümer.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="833"/>
+        <source>read from %1/state, %2 bytes</source>
+        <translation>gelesen aus %1/state, %2 Bytes</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="844"/>
+        <source>Kernel ring, verbatim</source>
+        <translation>Kernel-Ring, wörtlich</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/BinderPage.qml" line="862"/>
+        <source>The last 32 transactions and the last 32 failures, exactly as the driver prints them. Everything above was counted from these lines and from the counter file beside them.</source>
+        <translation>Die letzten 32 Transaktionen und die letzten 32 Fehlschläge, genau so, wie der Treiber sie ausgibt. Alles darüber ist aus diesen Zeilen und aus der Zählerdatei daneben gezählt.</translation>
+    </message>
+</context>
+<context>
     <name>BugReportPage</name>
     <message>
         <location filename="../qml/pages/BugReportPage.qml" line="32"/>
@@ -1332,6 +2095,14 @@ github.com/JimKnopfIoT/harbour-sysmetrics</translation>
     </message>
 </context>
 <context>
+    <name>FindingItem</name>
+    <message>
+        <location filename="../qml/components/FindingItem.qml" line="115"/>
+        <source>Show process %1</source>
+        <translation>Prozess %1 anzeigen</translation>
+    </message>
+</context>
+<context>
     <name>FingerprintPage</name>
     <message>
         <location filename="../qml/pages/FingerprintPage.qml" line="56"/>
@@ -1791,6 +2562,7 @@ github.com/JimKnopfIoT/harbour-sysmetrics</translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="95"/>
+        <location filename="../qml/pages/HelpPage.qml" line="186"/>
         <source>Node</source>
         <translation>Knoten</translation>
     </message>
@@ -2345,7 +3117,7 @@ Auf dem Jolla Phone nicht. Dessen MediaTek-Treiber battery-manager gibt 3760 mAh
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="174"/>
-        <location filename="../qml/pages/HelpPage.qml" line="305"/>
+        <location filename="../qml/pages/HelpPage.qml" line="328"/>
         <source>USB Power Delivery (PD)</source>
         <translation>USB Power Delivery (PD)</translation>
     </message>
@@ -2386,913 +3158,1058 @@ Auf dem Jolla Phone nicht. Dessen MediaTek-Treiber battery-manager gibt 3760 mAh
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="181"/>
+        <source>Binder</source>
+        <translation>Binder</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="185"/>
+        <source>Domain (context)</source>
+        <translation>Domäne (Kontext)</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="185"/>
+        <source>One binder device with a registry of its own. Processes on different domains cannot reach each other. The usual three are binder (framework), vndbinder (vendor) and hwbinder (hardware layers); App Support installs its own. Which domain is whose is read from the configuration files in /etc/gbinder.conf and /etc/gbinder.d — never guessed from the name.</source>
+        <translation>Ein Binder-Gerät mit eigener Registratur. Prozesse verschiedener Domänen erreichen einander nicht. Üblich sind die drei binder (Framework), vndbinder (Vendor) und hwbinder (Hardwareschichten); App Support installiert eigene. Welche Domäne wem gehört, wird aus den Konfigurationsdateien /etc/gbinder.conf und /etc/gbinder.d gelesen — nie aus dem Namen geschlossen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="186"/>
+        <source>A service object inside the process that owns it. The number is handed out by the driver and holds only until the next boot. It is the honest key to who serves what: the kernel prints every node in the section of its owner, so a node that moved to another process cannot keep an old claim.</source>
+        <translation>Ein Dienstobjekt in dem Prozess, dem es gehört. Die Nummer vergibt der Treiber, und sie gilt nur bis zum nächsten Start. Sie ist der ehrliche Schlüssel dazu, wer was bedient: der Kernel gibt jeden Knoten im Abschnitt seines Eigentümers aus, ein Knoten, der zu einem anderen Prozess gewandert ist, kann also keinen alten Anspruch behalten.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="187"/>
+        <source>Handle</source>
+        <translation>Handle</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="187"/>
+        <source>The number by which a caller addresses somebody else&apos;s node. The same service has a different handle in every process that holds it — which is why a handle alone never names a service.</source>
+        <translation>Die Nummer, unter der ein Aufrufer den Knoten eines anderen anspricht. Derselbe Dienst hat in jedem Prozess, der ihn hält, ein anderes Handle — deshalb benennt ein Handle allein nie einen Dienst.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="188"/>
+        <source>Service manager (handle 0)</source>
+        <translation>Service-Manager (Handle 0)</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="188"/>
+        <source>The phone book of a domain, always reachable at handle 0. A service registers its name there; a caller asks for a name and gets back a handle. It is the one address every process knows in advance, which is what makes the rest work. A dead reply on handle 0 therefore does not mean one service is missing — it means nothing is answering for the whole domain.</source>
+        <translation>Das Telefonbuch einer Domäne, immer unter Handle 0 erreichbar. Ein Dienst meldet dort seinen Namen an; ein Aufrufer fragt nach einem Namen und bekommt ein Handle zurück. Es ist die eine Adresse, die jeder Prozess vorher kennt, und daran hängt der Rest. Eine tote Antwort auf Handle 0 heißt deshalb nicht, dass ein Dienst fehlt — sie heißt, dass für die ganze Domäne niemand antwortet.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="189"/>
+        <source>Reference</source>
+        <translation>Referenz</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="189"/>
+        <source>A hold one process keeps on another process&apos;s node. The driver counts them and keeps the node alive as long as one is left. The nodes/references figure is that tally for the whole device: how many service objects exist, and how many holds there are on them.</source>
+        <translation>Ein Halt, den ein Prozess auf den Knoten eines anderen hat. Der Treiber zählt sie und hält den Knoten am Leben, solange einer übrig ist. Die Zahl „Knoten / Referenzen“ ist genau diese Bilanz für das ganze Gerät: wie viele Dienstobjekte es gibt und wie viele Halte darauf bestehen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="190"/>
+        <source>Transaction</source>
+        <translation>Transaktion</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="190"/>
+        <source>One call, or its reply. Normally it is finished in microseconds. A call that is still in flight on the next reading is reported as not returning — the time given for it is the gap between the two readings and therefore a lower bound.</source>
+        <translation>Ein Aufruf oder seine Antwort. Normalerweise ist er in Mikrosekunden erledigt. Ein Aufruf, der bei der nächsten Messung noch unterwegs ist, wird als nicht zurückkehrend gemeldet — die Zeit dazu ist der Abstand zwischen den beiden Messungen und damit eine Untergrenze.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="191"/>
+        <source>One-way call</source>
+        <translation>Einwegaufruf</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="191"/>
+        <source>A call the sender does not wait for. The driver parks it in a fixed buffer belonging to the receiver; when that buffer fills, further one-way calls are refused. The remaining space is the kernel&apos;s own figure, the point at which this app calls it tight (64 KiB) is not.</source>
+        <translation>Ein Aufruf, auf dessen Antwort der Absender nicht wartet. Der Treiber parkt ihn in einem festen Puffer des Empfängers; ist der voll, weist er weitere Einwegaufrufe ab. Der verbleibende Platz ist die Zahl des Kernels, die Grenze, ab der diese App ihn knapp nennt (64 KiB), ist es nicht.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="192"/>
+        <source>Thread pool</source>
+        <translation>Thread-Pool</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="192"/>
+        <source>Every process that answers binder calls keeps a pool of threads for them and tells the driver how large it may grow. Threads at that maximum with none ready means the next caller waits. The threads are named binder:&lt;pid&gt;_&lt;n&gt; after the process that owns the pool — that pid is what turns a spinning nameless thread into a process with a name.</source>
+        <translation>Jeder Prozess, der Binder-Aufrufe beantwortet, hält dafür einen Pool von Threads und sagt dem Treiber, wie groß er werden darf. Threads am Maximum und keiner bereit heißt: der nächste Aufrufer wartet. Die Threads heißen binder:&lt;pid&gt;_&lt;n&gt; nach dem Prozess, dem der Pool gehört — diese PID macht aus einem namenlos rotierenden Thread einen Prozess mit Namen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="193"/>
+        <source>Death notification</source>
+        <translation>Todesmeldung</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="193"/>
+        <source>A standing request to the driver: tell me when the process behind this handle dies. It is how a client learns that the service it holds is gone, instead of finding out at its next call. The counter says how many such requests are in force right now.</source>
+        <translation>Eine stehende Bitte an den Treiber: sag mir Bescheid, wenn der Prozess hinter diesem Handle stirbt. So erfährt ein Klient, dass sein Dienst fort ist, statt es erst beim nächsten Aufruf zu merken. Der Zähler sagt, wie viele solcher Bitten gerade gelten.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="194"/>
+        <source>The driver&apos;s answer when the target was gone or the handle was invalid: the call never reached a service. One of these now and then is ordinary; a steady rate of them is a caller talking to something that no longer exists.</source>
+        <translation>Die Antwort des Treibers, wenn das Ziel fort oder der Handle ungültig war: der Aufruf hat nie einen Dienst erreicht. Einer ab und zu ist gewöhnlich; eine stetige Rate davon ist ein Aufrufer, der mit etwas spricht, das es nicht mehr gibt.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="195"/>
+        <source>The driver refused the transaction before delivering it — a bad reference in the payload, a size the receiver would not take, a security check. The negative number beside it is the errno (-22 = EINVAL).</source>
+        <translation>Der Treiber hat die Transaktion abgewiesen, bevor er sie zustellte — eine falsche Referenz in der Nutzlast, eine Größe, die der Empfänger nicht nimmt, eine Sicherheitsprüfung. Die negative Zahl daneben ist die errno (-22 = EINVAL).</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="196"/>
+        <source>The target process is frozen, so the call was not taken. Expected while an App Support container sleeps.</source>
+        <translation>Der Zielprozess ist eingefroren, der Aufruf wurde also nicht angenommen. Erwartbar, während ein App-Support-Container schläft.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="197"/>
+        <source>Transaction ring</source>
+        <translation>Transaktionsring</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="197"/>
+        <source>The driver remembers the last 32 transactions and the last 32 failures, and nothing older. Every rate taken from it is therefore a lower bound, and this app says so wherever it prints one.</source>
+        <translation>Der Treiber merkt sich die letzten 32 Transaktionen und die letzten 32 Fehlschläge, nichts Älteres. Jede daraus gerechnete Rate ist deshalb eine Untergrenze, und diese App sagt das überall, wo sie eine ausgibt.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="198"/>
+        <source>Ping</source>
+        <translation>Ping</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="198"/>
+        <source>The liveness check every binder service must answer. It runs no code of the service beyond the answer, changes nothing, and is what makes it possible to say which process serves a name: the kernel logs the transaction, and the log entry — not the name — is the proof.</source>
+        <translation>Die Lebendprüfung, die jeder Binder-Dienst beantworten muss. Sie führt außer der Antwort keinen Code des Dienstes aus, ändert nichts, und sie ist es, die die Aussage möglich macht, welcher Prozess einen Namen bedient: der Kernel protokolliert die Transaktion, und der Protokolleintrag — nicht der Name — ist der Beweis.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="199"/>
+        <source>Orphaned node</source>
+        <translation>Verwaister Knoten</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="199"/>
+        <source>A node whose owning process has ended while another process still holds a reference to it. The next call on that reference gets a dead reply. Read on request only: it comes out of the driver state dump, which prints every node of every process and takes the driver locks while doing it.</source>
+        <translation>Ein Knoten, dessen Eigentümerprozess beendet ist, während ein anderer Prozess noch eine Referenz darauf hält. Der nächste Aufruf über diese Referenz bekommt eine tote Antwort. Nur auf Anforderung gelesen: er stammt aus dem Zustandsabzug des Treibers, der jeden Knoten jedes Prozesses ausgibt und dabei die Sperren des Treibers nimmt.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="200"/>
+        <source>Where the figures come from</source>
+        <translation>Woher die Zahlen kommen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="200"/>
+        <source>/dev/binderfs/binder_logs on a current port, where the files are world readable and no privilege is needed; /sys/kernel/debug/binder on older ones, where they usually belong to root and the helper reads them. Both carry the same figures, printed differently — a kernel from before binderfs names no domain and counts no pages.</source>
+        <translation>/dev/binderfs/binder_logs auf einer aktuellen Portierung, wo die Dateien weltlesbar sind und es keine Rechte braucht; /sys/kernel/debug/binder auf älteren, wo sie meist root gehören und der Helfer sie liest. Beide führen dieselben Zahlen, nur anders ausgegeben — ein Kernel von vor binderfs nennt keine Domäne und zählt keine Seiten.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="204"/>
         <source>Kernel surface</source>
         <translation>Kerneloberfläche</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="183"/>
+        <location filename="../qml/pages/HelpPage.qml" line="206"/>
         <source>Raw nodes</source>
         <translation>Rohe Knoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="183"/>
+        <location filename="../qml/pages/HelpPage.qml" line="206"/>
         <source>Everything a subsystem exports in sysfs or procfs, listed attribute by attribute exactly as the kernel wrote it. The sections above them are curated — each row there is a value whose meaning was established first. This is the remainder: the vendor additions nobody wrote a label for. Nothing in it is converted or interpreted.</source>
         <translation>Alles, was ein Teilsystem in sysfs oder procfs exportiert, Attribut für Attribut, genau so, wie der Kernel es geschrieben hat. Die Abschnitte darüber sind ausgewählt — dort ist jede Zeile ein Wert, dessen Bedeutung vorher feststand. Dies ist der Rest: die Zutaten des Herstellers, für die niemand eine Beschriftung geschrieben hat. Nichts davon wird umgerechnet oder gedeutet.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="184"/>
+        <location filename="../qml/pages/HelpPage.qml" line="207"/>
         <source>Units are not uniform</source>
         <translation>Die Einheiten sind nicht einheitlich</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="184"/>
+        <location filename="../qml/pages/HelpPage.qml" line="207"/>
         <source>The same attribute name can carry different units on different nodes of the same device. On the Jolla Phone (2026) the battery reports its current in microamps while the charger driver&apos;s ADC beside it reports milliamps — a factor of a thousand, with nothing in sysfs to announce it. That is why raw values are shown raw: a converted figure would have to guess, and a wrong unit is worse than none.</source>
         <translation>Derselbe Attributname kann auf verschiedenen Knoten desselben Geräts verschiedene Einheiten tragen. Auf dem Jolla Phone (2026) meldet der Akku seinen Strom in Mikroampere, während der ADC des Ladetreibers daneben Milliampere meldet — Faktor tausend, und nichts in sysfs kündigt es an. Deshalb stehen rohe Werte roh da: Eine Umrechnung müsste raten, und eine falsche Einheit ist schlimmer als keine.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="185"/>
+        <location filename="../qml/pages/HelpPage.qml" line="208"/>
         <source>On vendor charger nodes -1 usually means unset, not minus one. A driver that holds no override writes -1 rather than leaving the file empty.</source>
         <translation>Auf Ladeknoten des Herstellers heißt -1 meist „nicht gesetzt&quot;, nicht minus eins. Ein Treiber ohne Vorgabe schreibt -1, statt die Datei leer zu lassen.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="186"/>
+        <location filename="../qml/pages/HelpPage.qml" line="209"/>
         <source>Device tree</source>
         <translation>Gerätebaum</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="186"/>
+        <location filename="../qml/pages/HelpPage.qml" line="209"/>
         <source>The table the bootloader hands the kernel to describe the board. Every chip that gets a driver appears in it as a node with a compatible string — the vendor&apos;s own name for the part — which makes it the phone&apos;s parts list, and the only place some hardware is named at all: amplifiers on I2C, the fingerprint reader on SPI, the regulators inside each PMIC. Nodes marked disabled are silicon the SoC has and this device does not wire up.</source>
         <translation>Die Tabelle, die der Bootloader dem Kernel reicht, um die Platine zu beschreiben. Jeder Baustein, der einen Treiber bekommt, steht darin als Knoten mit einer Compatible-Zeichenkette — dem Namen, den der Hersteller dem Teil selbst gibt. Damit ist der Gerätebaum die Stückliste des Telefons und die einzige Stelle, an der manche Hardware überhaupt benannt wird: die Verstärker am I2C, der Fingerabdrucksensor am SPI, die Regler in jedem PMIC. Als „disabled&quot; markierte Knoten sind Silizium, das der SoC hat und dieses Gerät nicht verdrahtet.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="187"/>
+        <location filename="../qml/pages/HelpPage.qml" line="210"/>
         <source>Module version</source>
         <translation>Modulversion</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="187"/>
+        <location filename="../qml/pages/HelpPage.qml" line="210"/>
         <source>A kernel module may carry a version string of its own. For the Mali graphics driver it is the only place an ordinary process can read the driver release — the GPU device directory has no version node, and the call that would answer needs the GPU opened. That release name is what the GPU vendor&apos;s security advisories are written against.</source>
         <translation>Ein Kernelmodul kann eine eigene Versionszeichenkette tragen. Beim Mali-Grafiktreiber ist sie die einzige Stelle, an der ein gewöhnlicher Prozess den Treiberstand lesen kann — das Geräteverzeichnis der GPU hat keinen Versionsknoten, und der Aufruf, der antworten würde, verlangt eine geöffnete GPU. Genau auf diesen Standnamen sind die Sicherheitsmeldungen des GPU-Herstellers geschrieben.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="188"/>
+        <location filename="../qml/pages/HelpPage.qml" line="211"/>
         <source>Catalogue figures</source>
         <translation>Katalogangaben</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="188"/>
+        <location filename="../qml/pages/HelpPage.qml" line="211"/>
         <source>Specifications published by the chip vendor for the part, carried inside this app because the kernel does not hold them: the device tree names the SoC and stops. They are not measurements of this device, and every row says who published it. Where the vendor published nothing, the row says so instead of borrowing a number from a spec database.</source>
         <translation>Angaben, die der Chiphersteller zu diesem Teil veröffentlicht hat, in der App mitgeführt, weil der Kernel sie nicht hat: Der Gerätebaum nennt den SoC und hört auf. Es sind keine Messungen dieses Geräts, und jede Zeile sagt, wer sie veröffentlicht hat. Wo der Hersteller nichts veröffentlicht hat, sagt die Zeile das — statt sich eine Zahl aus einer Datenbank zu borgen.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="192"/>
+        <location filename="../qml/pages/HelpPage.qml" line="215"/>
         <source>Firmware &amp; risk</source>
         <translation>Firmware &amp; Risiko</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="194"/>
+        <location filename="../qml/pages/HelpPage.qml" line="217"/>
         <source>There is no one firmware version</source>
         <translation>Es gibt nicht die eine Firmwareversion</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="194"/>
+        <location filename="../qml/pages/HelpPage.qml" line="217"/>
         <source>A phone is a dozen computers. The kernel has a version, every kernel module may have one, every radio loads a blob of its own, and the storage, the charger, each USB device and the modem each run software inside their own controller with a release nobody else knows about. That is why these figures sit beside the hardware they belong to instead of on one page: the version of the Wi-Fi firmware is a fact about the Wi-Fi.</source>
         <translation>Ein Telefon ist ein Dutzend Rechner. Der Kernel hat eine Version, jedes Kernelmodul kann eine haben, jedes Funkteil lädt einen eigenen Klumpen, und im Massenspeicher, im Laderegler, in jedem USB-Gerät und im Modem läuft Software im eigenen Controller mit einem Stand, von dem sonst niemand weiß. Deshalb stehen diese Angaben neben der Hardware, zu der sie gehören, und nicht auf einer Sammelseite: Die Version der WLAN-Firmware ist eine Tatsache über das WLAN.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="195"/>
+        <location filename="../qml/pages/HelpPage.qml" line="218"/>
         <source>Driver version and build hash</source>
         <translation>Treiberversion und Bau-Prüfsumme</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="195"/>
+        <location filename="../qml/pages/HelpPage.qml" line="218"/>
         <source>A kernel module may state a release name, or only the hash of the source it was built from, or neither. The hash is worth showing: it cannot be read as a version, but it tells two builds apart, which is exactly the question when a vendor ships an update without renaming anything.</source>
         <translation>Ein Kernelmodul kann einen Standnamen nennen, nur die Prüfsumme der Quellen, aus denen es gebaut wurde, oder gar nichts. Die Prüfsumme lohnt die Anzeige: Als Version lesbar ist sie nicht, aber sie unterscheidet zwei Bauten — genau die Frage, wenn ein Hersteller eine Aktualisierung ausliefert, ohne etwas umzubenennen.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="196"/>
+        <location filename="../qml/pages/HelpPage.qml" line="219"/>
         <source>Out of tree, unsigned</source>
         <translation>Außerhalb des Baums, unsigniert</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="196"/>
+        <location filename="../qml/pages/HelpPage.qml" line="219"/>
         <source>What the kernel records about where a module came from. Out-of-tree means it is not part of the Linux source; unsigned means the kernel did not verify a signature on it. On a vendor phone kernel almost every driver is both, because that is how such kernels are built — it is the normal case here, not a fault, and it is shown because the kernel bothers to track it.</source>
         <translation>Was der Kernel darüber festhält, woher ein Modul stammt. „Außerhalb des Baums&quot; heißt: nicht Teil der Linux-Quellen; „unsigniert&quot; heißt: Der Kernel hat keine Signatur geprüft. In einem Hersteller-Telefonkernel ist fast jeder Treiber beides, weil solche Kernel so gebaut werden — hier ist das der Normalfall und kein Fehler, und es steht da, weil der Kernel sich die Mühe macht, es mitzuschreiben.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="197"/>
+        <location filename="../qml/pages/HelpPage.qml" line="220"/>
         <source>USB release number</source>
         <translation>USB-Ausgabenummer</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="197"/>
+        <location filename="../qml/pages/HelpPage.qml" line="220"/>
         <source>Every USB device reports a release number of its own, and it is the closest thing such a device has to a firmware version. It is the manufacturer&apos;s own numbering, not a date, so it means something only against another unit of the same product.</source>
         <translation>Jedes USB-Gerät meldet eine eigene Ausgabenummer, und das ist das Nächste, was ein solches Gerät an einer Firmwareversion hat. Es ist die Zählung des Herstellers, kein Datum — sie sagt also nur im Vergleich mit einem anderen Exemplar desselben Produkts etwas.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="198"/>
+        <location filename="../qml/pages/HelpPage.qml" line="221"/>
         <source>Controller firmware</source>
         <translation>Controller-Firmware</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="198"/>
+        <location filename="../qml/pages/HelpPage.qml" line="221"/>
         <source>Storage is a small computer. A UFS or eMMC part runs firmware inside the chip and reports a revision for it, which is separate from the health of the flash memory it manages — a controller update does not make worn cells young.</source>
         <translation>Massenspeicher ist ein kleiner Rechner. Ein UFS- oder eMMC-Baustein führt im Chip Firmware aus und meldet dafür einen Stand. Der hat mit dem Zustand des Flash-Speichers, den er verwaltet, nichts zu tun — eine Controller-Aktualisierung macht verbrauchte Zellen nicht jung.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="199"/>
+        <location filename="../qml/pages/HelpPage.qml" line="222"/>
         <source>Firmware files on disk</source>
         <translation>Firmwaredateien auf dem Datenträger</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="199"/>
+        <location filename="../qml/pages/HelpPage.qml" line="222"/>
         <source>The images the kernel would load into a radio, a signal processor or a sensor when it starts them. The names carry the chip family and the dates say when the vendor last touched them. Their presence says what is available to load; it is not proof that any of it was loaded.</source>
         <translation>Die Abbilder, die der Kernel beim Start in ein Funkteil, einen Signalprozessor oder einen Fühler laden würde. Die Namen tragen die Chipfamilie, die Daten sagen, wann der Hersteller sie zuletzt angefasst hat. Ihr Vorhandensein sagt, was zum Laden bereitliegt — nicht, dass etwas davon geladen wurde.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="200"/>
+        <location filename="../qml/pages/HelpPage.qml" line="223"/>
         <source>Security patch level</source>
         <translation>Sicherheitspatchstand</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="200"/>
+        <location filename="../qml/pages/HelpPage.qml" line="223"/>
         <source>The month of fixes the Android base under this system was built with. It matters because chipset advisories — the baseband and driver fixes a phone receives — land in that base and not in the system on top of it, and nothing on the device reports them one by one. Its age is shown rather than a verdict: a port is frozen at the base its maker built against, and a fix can be backported without moving the date.</source>
         <translation>Der Korrekturmonat, mit dem die Android-Basis unter diesem System gebaut wurde. Er zählt, weil Chipsatz-Meldungen — die Basisband- und Treiberkorrekturen eines Telefons — in dieser Basis landen und nicht im System darüber, und weil nichts auf dem Gerät sie einzeln meldet. Angezeigt wird das Alter statt eines Urteils: Eine Portierung friert auf ihrer Basis ein, und eine Korrektur kann übernommen werden, ohne das Datum zu bewegen.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="201"/>
+        <location filename="../qml/pages/HelpPage.qml" line="224"/>
         <source>How exposed the kernel is</source>
         <translation>Wie angreifbar der Kernel ist</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="201"/>
+        <location filename="../qml/pages/HelpPage.qml" line="224"/>
         <source>A handful of switches that each decide whether a whole class of local attack is available at all: whether kernel addresses are hidden, whether the kernel log can be read, whether one process may debug another, whether the address space is randomised. A phone distribution deliberately relaxes several of them so that ordinary tools keep working, so a value in amber means worth knowing, not broken. The safer setting is named beside each one.</source>
         <translation>Eine Handvoll Schalter, von denen jeder entscheidet, ob eine ganze Klasse lokaler Angriffe überhaupt zur Verfügung steht: ob Kerneladressen verborgen sind, ob das Kernelprotokoll lesbar ist, ob ein Prozess einen anderen untersuchen darf, ob der Adressraum zufällig angeordnet wird. Eine Telefondistribution lockert mehrere davon absichtlich, damit gewöhnliche Werkzeuge weiter funktionieren — ein bernsteinfarbener Wert heißt also wissenswert, nicht kaputt. Die sicherere Einstellung steht jeweils daneben.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="202"/>
+        <location filename="../qml/pages/HelpPage.qml" line="225"/>
         <source>World-writable control node</source>
         <translation>Für alle beschreibbarer Stellknoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="202"/>
+        <location filename="../qml/pages/HelpPage.qml" line="225"/>
         <source>A file in sysfs that any process on the device may write, where the rest of its directory belongs to root. This app never writes any of them; it reports them because a control over charging or power that anything can reach is worth knowing about, and the permission is a fact that can be read without touching anything.</source>
         <translation>Eine Datei in sysfs, die jeder Prozess auf dem Gerät beschreiben darf, während der Rest ihres Verzeichnisses root gehört. Diese App schreibt keine davon; sie meldet sie, weil eine Stellschraube für Laden oder Energie, an die alles herankommt, wissenswert ist — und weil das Recht selbst sich lesen lässt, ohne irgendetwas anzufassen.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="203"/>
+        <location filename="../qml/pages/HelpPage.qml" line="226"/>
         <source>A version is not a verdict</source>
         <translation>Eine Version ist kein Urteil</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="203"/>
+        <location filename="../qml/pages/HelpPage.qml" line="226"/>
         <source>Where this app places a driver release inside a published advisory range, it is saying exactly that and nothing more. Vendors fork drivers and backport fixes without renaming the release, so the name places the driver in the range while only the vendor&apos;s changelog can say whether the fix is in. The advisory, the range and the release are shown side by side so the reader can draw the conclusion.</source>
         <translation>Wo diese App einen Treiberstand in den Bereich einer veröffentlichten Meldung einordnet, sagt sie genau das und nichts weiter. Hersteller zweigen Treiber ab und übernehmen Korrekturen, ohne den Stand umzubenennen — der Name ordnet den Treiber also in den Bereich ein, und ob die Korrektur drin ist, sagt nur das Änderungsprotokoll des Herstellers. Meldung, Bereich und Stand stehen nebeneinander, damit der Leser den Schluss zieht.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="204"/>
+        <location filename="../qml/pages/HelpPage.qml" line="227"/>
         <source>Reads that are not reads</source>
         <translation>Lesevorgänge, die keine sind</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="204"/>
+        <location filename="../qml/pages/HelpPage.qml" line="227"/>
         <source>A few vendor files do work when they are read. One starts a memory test, one sleeps inside the kernel, one clears the fault latches of the camera flash controller — that last is how the chip is re-armed after it shuts itself off. An exhaustive dump has to know where to stop, so this app keeps a list of files it will never open, no matter what its permissions say.</source>
         <translation>Ein paar Herstellerdateien verrichten beim Lesen Arbeit. Eine startet einen Speichertest, eine schläft im Kernel, eine löscht die Fehlerriegel des Kamerablitz-Controllers — Letzteres ist genau der Weg, den Baustein wieder scharf zu schalten, nachdem er sich abgeschaltet hat. Eine vollständige Ausgabe muss wissen, wo sie aufhört; deshalb führt diese App eine Liste von Dateien, die sie nie öffnet, ganz gleich, was deren Rechte sagen.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="208"/>
+        <location filename="../qml/pages/HelpPage.qml" line="231"/>
         <source>Diagnosis</source>
         <translation>Diagnose</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="210"/>
+        <location filename="../qml/pages/HelpPage.qml" line="233"/>
         <source>Mitigation vs. Vulnerable</source>
         <translation>Mitigation vs. Vulnerable</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="210"/>
+        <location filename="../qml/pages/HelpPage.qml" line="233"/>
         <source>The kernel reports each speculative-execution issue per CPU: &apos;Mitigation: …&apos; names the active countermeasure (fix in place, shown green), &apos;Vulnerable&apos; means this kernel build carries no fix (red), &apos;Not affected&apos; means the CPU&apos;s microarchitecture cannot express the attack at all — such entries are not listed on the diagnosis card.</source>
         <translation>Der Kernel meldet jede Spekulations-Schwachstelle pro CPU: „Mitigation: …&quot; nennt die aktive Gegenmaßnahme (Fix aktiv, grün), „Vulnerable&quot; heißt, dieser Kernel enthält keinen Fix (rot), „Not affected&quot; heißt, die Mikroarchitektur der CPU kann den Angriff gar nicht ausführen — solche Einträge listet die Diagnose-Karte nicht.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="211"/>
+        <location filename="../qml/pages/HelpPage.qml" line="234"/>
         <source>Speculative execution runs code past unresolved branches and leaves traces in the caches. v1 (bounds-check bypass) tricks speculation past an array bounds check; v2 (branch target injection) poisons the branch predictor to steer speculation into attacker-chosen code. Both affect out-of-order ARM cores (A72, A76, A77 …); mitigations are pointer sanitization (v1) and predictor hardening/CSV2+BHB (v2).</source>
         <translation>Spekulative Ausführung rechnet über unentschiedene Verzweigungen hinaus und hinterlässt Spuren in den Caches. v1 (Bounds-Check-Bypass) trickst die Spekulation an einer Array-Grenzprüfung vorbei; v2 (Branch Target Injection) vergiftet den Sprungvorhersager und lenkt die Spekulation in vom Angreifer gewählten Code. Beides betrifft Out-of-Order-ARM-Kerne (A72, A76, A77 …); Gegenmaßnahmen sind Pointer-Sanitization (v1) und Predictor-Härtung/CSV2+BHB (v2).</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="212"/>
+        <location filename="../qml/pages/HelpPage.qml" line="235"/>
         <source>Spectre-BHB</source>
         <translation>Spectre-BHB</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="212"/>
+        <location filename="../qml/pages/HelpPage.qml" line="235"/>
         <source>A v2 refinement: the branch *history* buffer is poisoned instead of the target buffer, bypassing the first round of v2 hardware fixes. Affects newer ARM cores (Cortex-A77 and later); mitigated with history-clearing loop sequences in the kernel.</source>
         <translation>Eine v2-Verfeinerung: Statt des Sprungziel-Puffers wird der Verlaufs-Puffer (Branch History) vergiftet und umgeht so die erste Runde der v2-Hardwarefixes. Betrifft neuere ARM-Kerne (Cortex-A77 und später); Gegenmaßnahme sind History-leerende Schleifensequenzen im Kernel.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="213"/>
+        <location filename="../qml/pages/HelpPage.qml" line="236"/>
         <source>Speculative Store Bypass (v4)</source>
         <translation>Speculative Store Bypass (v4)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="213"/>
+        <location filename="../qml/pages/HelpPage.qml" line="236"/>
         <source>The CPU speculatively lets a load run before an older store to the same address is resolved, briefly exposing stale data. Mitigated per process (prctl/SSBS) rather than globally, because the global fix is expensive.</source>
         <translation>Die CPU lässt einen Ladezugriff spekulativ vor einem älteren Schreibzugriff auf dieselbe Adresse laufen und legt kurz veraltete Daten offen. Wird pro Prozess (prctl/SSBS) statt global abgesichert, weil der globale Fix teuer ist.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="214"/>
+        <location filename="../qml/pages/HelpPage.qml" line="237"/>
         <source>Rogue data cache load: on affected CPUs, a user-space access to kernel memory is only faulted *after* speculation already fetched the data into the cache. Broadly an Intel issue; among ARM cores essentially only Cortex-A75. In-order cores (A53, A55) and post-A75 designs (A76, A77 …) fault before the fetch — they are structurally not affected.</source>
         <translation>Rogue Data Cache Load: Auf betroffenen CPUs löst ein Userspace-Zugriff auf Kernel-Speicher den Fault erst aus, *nachdem* die Spekulation die Daten schon in den Cache geholt hat. Überwiegend ein Intel-Thema; unter den ARM-Kernen im Wesentlichen nur der Cortex-A75. In-Order-Kerne (A53, A55) und Nach-A75-Designs (A76, A77 …) faulten vor dem Laden — sie sind strukturell nicht betroffen.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="215"/>
+        <location filename="../qml/pages/HelpPage.qml" line="238"/>
         <source>x86-only classes (MDS, L1TF, TAA, SRBDS …)</source>
         <translation>x86-spezifische Klassen (MDS, L1TF, TAA, SRBDS …)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="215"/>
+        <location filename="../qml/pages/HelpPage.qml" line="238"/>
         <source>Several listed classes exploit Intel-specific microarchitecture and cannot occur on ARM SoCs: MDS/TAA sample stale data from fill/store buffers shared between hyper-threads (these SoCs have no SMT); L1TF abuses Intel&apos;s handling of not-present page-table entries; TAA needs the TSX transactional-memory extension (ARM has none); SRBDS leaks the on-chip RNG through a shared microcode buffer; iTLB multihit and MMIO stale data target Intel TLB and chipset behavior. The kernel prints &apos;Not affected&apos; for them; the diagnosis card therefore omits them.</source>
         <translation>Mehrere gelistete Klassen nutzen Intel-spezifische Mikroarchitektur aus und können auf ARM-SoCs nicht auftreten: MDS/TAA lesen veraltete Daten aus Fill-/Store-Puffern, die sich Hyper-Threads teilen (diese SoCs haben kein SMT); L1TF missbraucht Intels Behandlung nicht präsenter Seitentabellen-Einträge; TAA braucht die TSX-Transaktionsspeicher-Erweiterung (ARM hat keine); SRBDS leckt den On-Chip-RNG über einen geteilten Microcode-Puffer; iTLB-Multihit und MMIO Stale Data zielen auf Intel-TLB- und Chipsatz-Verhalten. Der Kernel meldet dafür „Not affected&quot;; die Diagnose-Karte lässt sie deshalb weg.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="219"/>
+        <location filename="../qml/pages/HelpPage.qml" line="242"/>
         <source>Monitoring</source>
         <translation>Überwachung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="221"/>
+        <location filename="../qml/pages/HelpPage.qml" line="244"/>
         <source>Sampling interval</source>
         <translation>Abtastintervall</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="221"/>
+        <location filename="../qml/pages/HelpPage.qml" line="244"/>
         <source>How often the app re-reads /proc and /sys. Shorter is more responsive but uses more CPU.</source>
         <translation>Wie oft die App /proc und /sys neu liest. Kürzer ist reaktionsschneller, braucht aber mehr CPU.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="222"/>
+        <location filename="../qml/pages/HelpPage.qml" line="245"/>
         <source>Record mode</source>
         <translation>Aufzeichnungsmodus</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="222"/>
+        <location filename="../qml/pages/HelpPage.qml" line="245"/>
         <source>Accumulates CPU time per process over a session and ranks the consumers, catching short-lived processes an instant view misses.</source>
         <translation>Summiert die CPU-Zeit pro Prozess über eine Sitzung und reiht die Verbraucher, auch kurzlebige Prozesse, die eine Momentaufnahme verpasst.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="223"/>
+        <location filename="../qml/pages/HelpPage.qml" line="246"/>
         <source>Root mode</source>
         <translation>Root-Modus</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="223"/>
+        <location filename="../qml/pages/HelpPage.qml" line="246"/>
         <source>An optional root helper that lets the app inspect processes of other users (system daemons) fully, read the kernel charger log and pull journal excerpts for a bug report. Reading is limited to a fixed list of files; signals and renice reach one named process, the same ones the process detail page offers without root.</source>
         <translation>Ein optionaler Root-Helfer, mit dem die App Prozesse anderer Nutzer (Systemdienste) vollständig einsehen, das Kernel-Ladeprotokoll lesen und Journalauszüge für einen Fehlerbericht ziehen kann. Gelesen wird nur aus einer festen Dateiliste; Signale und Renice erreichen genau einen benannten Prozess — dieselben, die die Prozess-Detailseite auch ohne Root anbietet.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="224"/>
+        <location filename="../qml/pages/HelpPage.qml" line="247"/>
         <source>Colour scale</source>
         <translation>Farbskala</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="224"/>
+        <location filename="../qml/pages/HelpPage.qml" line="247"/>
         <source>Green, amber and red are this app&apos;s grading, not a signal from the device. Processor load turns amber at 50 % and red at 80 %. A filesystem turns amber above 75 % and red above 90 %. Battery charge turns red below 20 %. State of health turns amber below 80 % and red below 65 %. Where a colour stands next to a figure, the figure is the evidence and the colour only the opinion about it.</source>
         <translation>Grün, Gelb und Rot sind die Einstufung dieser App, kein Signal des Geräts. Die Prozessorlast wird bei 50 % gelb und bei 80 % rot. Ein Dateisystem wird über 75 % gelb und über 90 % rot. Der Ladestand wird unter 20 % rot. Der Gesundheitszustand wird unter 80 % gelb und unter 65 % rot. Wo eine Farbe neben einer Zahl steht, ist die Zahl der Beleg und die Farbe nur die Meinung dazu.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="228"/>
+        <location filename="../qml/pages/HelpPage.qml" line="251"/>
         <source>Display</source>
         <translation>Bildschirm</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="230"/>
+        <location filename="../qml/pages/HelpPage.qml" line="253"/>
         <source>Panel</source>
         <translation>Panel</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="230"/>
+        <location filename="../qml/pages/HelpPage.qml" line="253"/>
         <source>The glass and its controller — an OLED or LCD module bought as a part, with a controller chip whose name (e.g. VTDR6126, NT36672E) is what identifies it. A phone model is often built with panels from more than one supplier, which is why the device tree lists several and only one of them is fitted.</source>
         <translation>Das Glas und sein Controller — ein OLED- oder LCD-Modul, das als Bauteil zugekauft wird und über den Namen seines Controller-Chips (z. B. VTDR6126, NT36672E) identifiziert ist. Ein Telefonmodell wird oft mit Panels mehrerer Zulieferer gebaut; deshalb führt der Gerätebaum mehrere auf, verbaut ist nur eines.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="231"/>
+        <location filename="../qml/pages/HelpPage.qml" line="254"/>
         <source>Panel driver</source>
         <translation>Paneltreiber</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="231"/>
+        <location filename="../qml/pages/HelpPage.qml" line="254"/>
         <source>The kernel driver the DSI host bound to the panel actually fitted. Its name is the most specific identity software can reach without root, and on a MediaTek adaptation it carries more than the part: how the panel is wired, the mode it runs in, the rate it was built for and often the glass maker.</source>
         <translation>Der Kerneltreiber, den der DSI-Host an das tatsächlich verbaute Panel gebunden hat. Sein Name ist die genaueste Kennung, die Software ohne Root erreicht, und trägt in einer MediaTek-Anpassung mehr als das Bauteil: wie das Panel angebunden ist, in welchem Modus es läuft, für welche Rate es gebaut wurde und oft den Glashersteller.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="232"/>
+        <location filename="../qml/pages/HelpPage.qml" line="255"/>
         <source>Display Serial Interface — the short, fast serial link from the SoC to the panel. Video mode (vdo) streams every frame continuously; command mode (cmd) writes into the panel&apos;s own memory and lets the link idle. D-PHY and C-PHY are the two physical layers it can run over.</source>
         <translation>Display Serial Interface — die kurze, schnelle serielle Strecke vom SoC zum Panel. Der Videomodus (vdo) überträgt jedes Bild fortlaufend; der Kommandomodus (cmd) schreibt in den eigenen Speicher des Panels und lässt die Strecke ruhen. D-PHY und C-PHY sind die beiden Übertragungsschichten, über die sie laufen kann.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="233"/>
+        <location filename="../qml/pages/HelpPage.qml" line="256"/>
         <source>connector</source>
         <translation>Anschluss</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="233"/>
+        <location filename="../qml/pages/HelpPage.qml" line="256"/>
         <source>The kernel&apos;s handle on one display output. Its status says whether anything is attached, its modes are the timings the driver will accept, and dpms says whether the output is powered right now.</source>
         <translation>Der Griff des Kernels an einen Bildschirmausgang. Sein status sagt, ob etwas angeschlossen ist, seine modes sind die Timings, die der Treiber annimmt, und dpms sagt, ob der Ausgang gerade bestromt ist.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="234"/>
+        <location filename="../qml/pages/HelpPage.qml" line="257"/>
         <source>The identification block an external monitor sends over its cable — maker, model, supported timings. A built-in phone panel has no cable and no EDID; its properties come from the device tree instead. An empty EDID here is normal, not a fault.</source>
         <translation>Der Kennungsblock, den ein externer Monitor über sein Kabel schickt — Hersteller, Modell, unterstützte Timings. Ein eingebautes Telefonpanel hat kein Kabel und kein EDID; seine Eigenschaften stehen stattdessen im Gerätebaum. Ein leeres EDID ist hier normal und kein Fehler.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="235"/>
+        <location filename="../qml/pages/HelpPage.qml" line="258"/>
         <source>Backlight steps</source>
         <translation>Helligkeitsstufen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="235"/>
+        <location filename="../qml/pages/HelpPage.qml" line="258"/>
         <source>The brightness figure is a step on the driver&apos;s own scale, and the scale differs per device — 2047 steps on one, 255 on another. It is shown against its own maximum. Nits are not readable from software: nothing in the kernel knows how much light the panel actually emits.</source>
         <translation>Der Helligkeitswert ist eine Stufe auf der Skala des Treibers, und die Skala unterscheidet sich je Gerät — 2047 Stufen auf dem einen, 255 auf dem anderen. Er wird gegen sein eigenes Maximum gezeigt. Nits sind aus Software nicht ablesbar: nichts im Kernel weiß, wie viel Licht das Panel tatsächlich abgibt.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="236"/>
+        <location filename="../qml/pages/HelpPage.qml" line="259"/>
         <source>Refresh rate</source>
         <translation>Bildwiederholrate</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="236"/>
+        <location filename="../qml/pages/HelpPage.qml" line="259"/>
         <source>How often the panel is redrawn per second. What the panel is doing at this moment is not exposed to an unprivileged process on either platform here — the figure shown is what the display host is configured to be able to switch to, which is a property of the wiring and says nothing about the rate on screen now.</source>
         <translation>Wie oft das Panel je Sekunde neu gezeichnet wird. Was das Panel in diesem Moment tut, ist einem unprivilegierten Prozess auf keiner der hier geprüften Plattformen zugänglich — die gezeigte Zahl ist das, worauf der Display-Host umschalten kann. Das ist eine Eigenschaft der Anbindung und sagt nichts über die Rate auf dem Bildschirm jetzt.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="240"/>
+        <location filename="../qml/pages/HelpPage.qml" line="263"/>
         <source>Buttons</source>
         <translation>Tasten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="242"/>
+        <location filename="../qml/pages/HelpPage.qml" line="265"/>
         <source>Input device</source>
         <translation>Eingabegerät</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="242"/>
+        <location filename="../qml/pages/HelpPage.qml" line="265"/>
         <source>Every button, switch and touch surface reaches the system as an input device with a name the driver chose. Buttons wired straight to a GPIO pin appear as one device, buttons on the power-management chip as another, and the fingerprint reader registers a third for its own gestures.</source>
         <translation>Jede Taste, jeder Schalter und jede Touchfläche erreicht das System als Eingabegerät mit einem Namen, den der Treiber vergeben hat. Tasten, die direkt an einem GPIO-Pin hängen, erscheinen als ein Gerät, Tasten am Power-Management-Chip als ein zweites, und der Fingerabdrucksensor meldet für seine eigenen Gesten ein drittes an.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="243"/>
+        <location filename="../qml/pages/HelpPage.qml" line="266"/>
         <source>Key code</source>
         <translation>Tastencode</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="243"/>
+        <location filename="../qml/pages/HelpPage.qml" line="266"/>
         <source>The number the kernel puts on the wire when a button is pressed, and the name it carries in the kernel&apos;s own list — 116 is POWER, 115 VOLUMEUP, 114 VOLUMEDOWN. What the system then does with it is a separate decision made further up.</source>
         <translation>Die Zahl, die der Kernel beim Tastendruck weitergibt, und der Name, den sie in der Liste des Kernels trägt — 116 ist POWER, 115 VOLUMEUP, 114 VOLUMEDOWN. Was das System damit anfängt, ist eine getrennte Entscheidung weiter oben.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="244"/>
+        <location filename="../qml/pages/HelpPage.qml" line="267"/>
         <source>Declared, not fitted</source>
         <translation>Angemeldet, nicht verbaut</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="244"/>
+        <location filename="../qml/pages/HelpPage.qml" line="267"/>
         <source>A driver registers every key code it could ever send, and a keypad driver registers its whole matrix. So a code listed here means the driver would send it — not that there is a button on this phone that does. Only a press proves a button exists; a code that stays unlit was not pressed, which is not the same as missing.</source>
         <translation>Ein Treiber meldet jeden Tastencode an, den er je senden könnte, und ein Tastenfeldtreiber seine ganze Matrix. Ein hier gelisteter Code heißt also: der Treiber würde ihn senden — nicht, dass es an diesem Telefon eine Taste dafür gibt. Nur ein Druck belegt eine Taste; ein Code, der dunkel bleibt, wurde nicht gedrückt, und das ist nicht dasselbe wie „fehlt“.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="245"/>
+        <location filename="../qml/pages/HelpPage.qml" line="268"/>
         <source>Switch</source>
         <translation>Schalter</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="245"/>
+        <location filename="../qml/pages/HelpPage.qml" line="268"/>
         <source>A state rather than an event: a lid open or shut, a headphone plug in or out, a cover closed. The kernel keeps the current position and reports every change, so its value can be read out at any time.</source>
         <translation>Ein Zustand statt eines Ereignisses: eine Klappe offen oder zu, ein Kopfhörerstecker drin oder draußen, eine Hülle geschlossen. Der Kernel hält die aktuelle Stellung und meldet jede Änderung, der Wert ist also jederzeit ablesbar.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="246"/>
+        <location filename="../qml/pages/HelpPage.qml" line="269"/>
         <source>Reading without taking</source>
         <translation>Mitlesen, nicht abfangen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="246"/>
+        <location filename="../qml/pages/HelpPage.qml" line="269"/>
         <source>The test opens the event nodes read-only and never grabs them, so every press still reaches the system as usual — volume still changes, the power key still blanks the screen. That is deliberate: the test proves the button reached the kernel, it does not take the button away.</source>
         <translation>Der Test öffnet die Ereignisknoten nur lesend und grabbt sie nie, jeder Druck erreicht das System also weiterhin wie gewohnt — die Lautstärke ändert sich, die Ein-/Aus-Taste schaltet den Bildschirm ab. Das ist Absicht: der Test belegt, dass die Taste im Kernel angekommen ist, er nimmt die Taste niemandem weg.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="250"/>
+        <location filename="../qml/pages/HelpPage.qml" line="273"/>
         <source>Fingerprint</source>
         <translation>Fingerabdruck</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="252"/>
+        <location filename="../qml/pages/HelpPage.qml" line="275"/>
         <source>Reader</source>
         <translation>Sensor</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="252"/>
+        <location filename="../qml/pages/HelpPage.qml" line="275"/>
         <source>A capacitive or optical sensor on its own SPI bus, named in the device tree by its maker (Goodix, FPC, Egis and others). The image never leaves it in the clear: matching happens inside the secure environment, and the system only learns yes or no.</source>
         <translation>Ein kapazitiver oder optischer Sensor an einem eigenen SPI-Bus, im Gerätebaum mit dem Namen seines Herstellers benannt (Goodix, FPC, Egis und andere). Das Bild verlässt ihn nie im Klartext: der Abgleich findet in der sicheren Umgebung statt, und das System erfährt nur Ja oder Nein.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="253"/>
+        <location filename="../qml/pages/HelpPage.qml" line="276"/>
         <source>Fingerprint daemon</source>
         <translation>Fingerabdruckdienst</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="253"/>
+        <location filename="../qml/pages/HelpPage.qml" line="276"/>
         <source>sailfish-fpd owns the reader and is the only way to it. Any application may ask it to identify a finger — that much its bus policy allows — but enrolling, removing and everything to do with the device lock stay out of reach.</source>
         <translation>sailfish-fpd besitzt den Sensor und ist der einzige Weg dorthin. Jede Anwendung darf ihn bitten, einen Finger zu erkennen — so weit reicht seine Bus-Richtlinie — aber Anlernen, Löschen und alles rund um die Gerätesperre bleiben unerreichbar.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="254"/>
+        <location filename="../qml/pages/HelpPage.qml" line="277"/>
         <source>Identify</source>
         <translation>Erkennen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="254"/>
+        <location filename="../qml/pages/HelpPage.qml" line="277"/>
         <source>Ask the reader whether the finger on it is one of the enrolled ones. The answer is a name or a no; nothing about the fingerprint itself is handed out, and nothing is unlocked by it.</source>
         <translation>Den Sensor fragen, ob der Finger auf ihm einer der hinterlegten ist. Die Antwort ist ein Name oder ein Nein; über den Fingerabdruck selbst wird nichts herausgegeben, und entsperrt wird damit nichts.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="255"/>
+        <location filename="../qml/pages/HelpPage.qml" line="278"/>
         <source>Enrolled fingers</source>
         <translation>Hinterlegte Finger</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="255"/>
+        <location filename="../qml/pages/HelpPage.qml" line="278"/>
         <source>The templates stored for this user. They are listed here by the names the daemon keeps them under. This page never adds one and never deletes one.</source>
         <translation>Die für diesen Nutzer gespeicherten Muster. Sie stehen hier unter den Namen, unter denen der Dienst sie führt. Diese Seite legt keines an und löscht keines.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="256"/>
+        <location filename="../qml/pages/HelpPage.qml" line="279"/>
         <source>Already identifying</source>
         <translation>Erkennt bereits</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="256"/>
+        <location filename="../qml/pages/HelpPage.qml" line="279"/>
         <source>When the lock screen is armed, the daemon is already identifying for it and answers a second request with a refusal. That refusal is itself proof the reader and the daemon are alive — but the finger goes to the lock screen, not to this test.</source>
         <translation>Wenn der Sperrbildschirm scharf ist, erkennt der Dienst bereits für ihn und beantwortet eine zweite Anfrage mit einer Ablehnung. Diese Ablehnung ist selbst der Beleg, dass Sensor und Dienst leben — aber der Finger geht an den Sperrbildschirm, nicht an diesen Test.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="260"/>
+        <location filename="../qml/pages/HelpPage.qml" line="283"/>
         <source>Sensors</source>
         <translation>Sensoren</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="262"/>
+        <location filename="../qml/pages/HelpPage.qml" line="285"/>
         <source>Accelerometer</source>
         <translation>Beschleunigungssensor</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="262"/>
+        <location filename="../qml/pages/HelpPage.qml" line="285"/>
         <source>Measures linear acceleration on three axes (m/s²), including gravity — how the device is tilted and moved.</source>
         <translation>Misst lineare Beschleunigung auf drei Achsen (m/s²), inklusive Schwerkraft — wie das Gerät geneigt und bewegt wird.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="263"/>
+        <location filename="../qml/pages/HelpPage.qml" line="286"/>
         <source>Gyroscope</source>
         <translation>Gyroskop</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="263"/>
+        <location filename="../qml/pages/HelpPage.qml" line="286"/>
         <source>Measures angular velocity (°/s) — how fast the device is rotating around each axis.</source>
         <translation>Misst die Winkelgeschwindigkeit (°/s) — wie schnell sich das Gerät um jede Achse dreht.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="264"/>
+        <location filename="../qml/pages/HelpPage.qml" line="287"/>
         <source>Magnetometer / Compass</source>
         <translation>Magnetometer / Kompass</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="264"/>
+        <location filename="../qml/pages/HelpPage.qml" line="287"/>
         <source>Measures the magnetic field (µT); combined with the accelerometer it yields the compass heading (azimuth).</source>
         <translation>Misst das Magnetfeld (µT); zusammen mit dem Beschleunigungssensor ergibt sich die Kompassrichtung (Azimut).</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="265"/>
+        <location filename="../qml/pages/HelpPage.qml" line="288"/>
         <source>Proximity</source>
         <translation>Näherung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="265"/>
+        <location filename="../qml/pages/HelpPage.qml" line="288"/>
         <source>A short-range sensor near the earpiece; reports near/far, used to blank the screen during calls.</source>
         <translation>Ein Nahbereichssensor am Hörer; meldet nah/fern, schaltet den Bildschirm bei Anrufen ab.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="266"/>
+        <location filename="../qml/pages/HelpPage.qml" line="289"/>
         <source>Ambient light</source>
         <translation>Umgebungslicht</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="266"/>
+        <location filename="../qml/pages/HelpPage.qml" line="289"/>
         <source>Measures surrounding brightness; drives automatic display brightness.</source>
         <translation>Misst die Umgebungshelligkeit; steuert die automatische Display-Helligkeit.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="267"/>
+        <location filename="../qml/pages/HelpPage.qml" line="290"/>
         <source>GPS fix / TTFF</source>
         <translation>GPS-Fix / TTFF</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="267"/>
+        <location filename="../qml/pages/HelpPage.qml" line="290"/>
         <source>A fix is a computed position from enough satellites. TTFF (time to first fix) is how long the receiver needed from cold start — seconds with a clear sky, longer indoors.</source>
         <translation>Ein Fix ist eine aus genügend Satelliten berechnete Position. TTFF (Zeit bis erstem Fix) ist die Dauer vom Kaltstart — Sekunden bei freiem Himmel, länger drinnen.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="268"/>
+        <location filename="../qml/pages/HelpPage.qml" line="291"/>
         <source>Accuracy</source>
         <translation>Genauigkeit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="268"/>
+        <location filename="../qml/pages/HelpPage.qml" line="291"/>
         <source>The estimated horizontal error radius of the position, in metres — smaller is better.</source>
         <translation>Der geschätzte horizontale Fehlerradius der Position in Metern — kleiner ist besser.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="272"/>
+        <location filename="../qml/pages/HelpPage.qml" line="295"/>
         <source>Camera</source>
         <translation>Kamera</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="274"/>
+        <location filename="../qml/pages/HelpPage.qml" line="297"/>
         <source>Image sensor</source>
         <translation>Bildsensor</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="274"/>
+        <location filename="../qml/pages/HelpPage.qml" line="297"/>
         <source>The photodiode array that converts light to charge. Identified here by part number (e.g. Sony IMX486) read from the vendor camera modules.</source>
         <translation>Die Fotodioden-Matrix, die Licht in Ladung wandelt. Hier über die Teilenummer (z. B. Sony IMX486) aus den Vendor-Kameramodulen identifiziert.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="275"/>
+        <location filename="../qml/pages/HelpPage.qml" line="298"/>
         <source>Bayer CFA (RGGB)</source>
         <translation>Bayer-CFA (RGGB)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="275"/>
+        <location filename="../qml/pages/HelpPage.qml" line="298"/>
         <source>Colour-filter array over the pixels: a repeating 2×2 of red, two greens, one blue. Each pixel captures one primary; the ISP interpolates the rest (demosaicing). Three primaries → full RGB.</source>
         <translation>Farbfilter-Matrix über den Pixeln: ein sich wiederholendes 2×2 aus Rot, zweimal Grün, einmal Blau. Jedes Pixel erfasst eine Grundfarbe; der ISP interpoliert den Rest (Demosaicing). Drei Grundfarben → volles RGB.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="276"/>
+        <location filename="../qml/pages/HelpPage.qml" line="299"/>
         <source>Bit depth</source>
         <translation>Bittiefe</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="276"/>
+        <location filename="../qml/pages/HelpPage.qml" line="299"/>
         <source>Bits per pixel in the raw readout, typically 10-bit (1024 levels per channel) on mobile sensors, before tone-mapping to 8-bit output.</source>
         <translation>Bits pro Pixel im Rohauslesen, bei Mobilsensoren typisch 10 Bit (1024 Stufen je Kanal), vor dem Tone-Mapping auf 8-Bit-Ausgabe.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="277"/>
+        <location filename="../qml/pages/HelpPage.qml" line="300"/>
         <source>Optical format</source>
         <translation>Optisches Format</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="277"/>
+        <location filename="../qml/pages/HelpPage.qml" line="300"/>
         <source>The sensor&apos;s diagonal size as a fraction of an inch (e.g. 1/2.9&quot;). With the pixel count it gives the pixel pitch. A datasheet spec of the part — not queryable from the device.</source>
         <translation>Die Diagonale des Sensors als Zollbruch (z. B. 1/2.9&quot;). Zusammen mit der Pixelzahl ergibt sich der Pixelabstand. Eine Datenblatt-Angabe des Bauteils — nicht vom Gerät abfragbar.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="278"/>
+        <location filename="../qml/pages/HelpPage.qml" line="301"/>
         <source>ISP</source>
         <translation>ISP</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="278"/>
+        <location filename="../qml/pages/HelpPage.qml" line="301"/>
         <source>Image Signal Processor — the SoC block that demosaics, denoises, white-balances and encodes the sensor stream.</source>
         <translation>Image Signal Processor — der SoC-Block, der den Sensorstrom demosaict, entrauscht, weißabgleicht und kodiert.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="279"/>
+        <location filename="../qml/pages/HelpPage.qml" line="302"/>
         <source>CAMSS / cam-req-mgr</source>
         <translation>CAMSS / cam-req-mgr</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="280"/>
+        <location filename="../qml/pages/HelpPage.qml" line="303"/>
         <source>EEPROM (calibration)</source>
         <translation>EEPROM (Kalibrierung)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="280"/>
+        <location filename="../qml/pages/HelpPage.qml" line="303"/>
         <source>A small memory beside each module holding per-unit factory calibration: lens shading, autofocus range, colour.</source>
         <translation>Ein kleiner Speicher neben jedem Modul mit der werkseitigen Einzelkalibrierung: Lens-Shading, Autofokus-Bereich, Farbe.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="281"/>
+        <location filename="../qml/pages/HelpPage.qml" line="304"/>
         <source>Capture mode</source>
         <translation>Aufnahmemodus</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="281"/>
+        <location filename="../qml/pages/HelpPage.qml" line="304"/>
         <source>A sensor output configuration (resolution + frame rate + binning). Modes live in the HAL and are enumerable only on a running camera, not via V4L2.</source>
         <translation>Eine Sensor-Ausgabekonfiguration (Auflösung + Bildrate + Binning). Modi liegen im HAL und sind nur an einer laufenden Kamera aufzählbar, nicht über V4L2.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="282"/>
+        <location filename="../qml/pages/HelpPage.qml" line="305"/>
         <source>Camera provider crash (Xperia 10 III)</source>
         <translation>Kamera-Provider-Absturz (Xperia 10 III)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="282"/>
+        <location filename="../qml/pages/HelpPage.qml" line="305"/>
         <source>Defect: stopping a video recording crashes the Android camera service — CamX dlopens libswregistrationalgo.so from /odm/lib64, which the Sailfish port does not ship (sonyxperiadev bug #761, known since 2022). Fix — extract the proprietary library from the device&apos;s own Android firmware, then one of two ways: (1) copy it straight into /odm/lib64 (remount rw; simple, but gone after a reflash of odm), or (2) keep it in /data and bind-mount it over /odm/lib64 via a boot unit (survives OS updates). Both are system-wide, every camera app benefits. Step-by-step details in the README (GitHub only):
 github.com/JimKnopfIoT/harbour-advanced-camera</source>
         <translation>Defekt: Das Stoppen einer Videoaufnahme lässt den Android-Kameradienst abstürzen — CamX lädt libswregistrationalgo.so per dlopen aus /odm/lib64, die der Sailfish-Port nicht mitliefert (sonyxperiadev Bug #761, bekannt seit 2022). Behebung — die proprietäre Bibliothek aus der Android-Firmware des eigenen Geräts extrahieren, dann einer von zwei Wegen: (1) direkt nach /odm/lib64 kopieren (remount rw; einfach, aber nach einem odm-Reflash weg) oder (2) in /data halten und per Boot-Unit über /odm/lib64 bind-mounten (überlebt OS-Updates). Beides wirkt systemweit, jede Kamera-App profitiert. Schritt-für-Schritt-Details im README (nur GitHub):
 github.com/JimKnopfIoT/harbour-advanced-camera</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="286"/>
+        <location filename="../qml/pages/HelpPage.qml" line="309"/>
         <source>Modem / SIM</source>
         <translation>Modem / SIM</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="288"/>
+        <location filename="../qml/pages/HelpPage.qml" line="311"/>
         <source>IMEI</source>
         <translation>IMEI</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="288"/>
+        <location filename="../qml/pages/HelpPage.qml" line="311"/>
         <source>International Mobile Equipment Identity — the modem&apos;s unique 15-digit hardware serial. Identifies the device on the network, independent of the SIM.</source>
         <translation>International Mobile Equipment Identity — die eindeutige 15-stellige Hardware-Seriennummer des Modems. Identifiziert das Gerät im Netz, unabhängig von der SIM.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="289"/>
+        <location filename="../qml/pages/HelpPage.qml" line="312"/>
         <source>IMSI</source>
         <translation>IMSI</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="289"/>
+        <location filename="../qml/pages/HelpPage.qml" line="312"/>
         <source>International Mobile Subscriber Identity — the subscriber ID stored on the SIM. Begins with the MCC+MNC of the home network.</source>
         <translation>International Mobile Subscriber Identity — die auf der SIM gespeicherte Teilnehmer-Kennung. Beginnt mit MCC+MNC des Heimnetzes.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="290"/>
+        <location filename="../qml/pages/HelpPage.qml" line="313"/>
         <source>ICCID</source>
         <translation>ICCID</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="290"/>
+        <location filename="../qml/pages/HelpPage.qml" line="313"/>
         <source>The SIM card&apos;s own serial number, printed on the card. Identifies the physical SIM, not the subscriber.</source>
         <translation>Die eigene Seriennummer der SIM-Karte, auf die Karte gedruckt. Identifiziert die physische SIM, nicht den Teilnehmer.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="291"/>
+        <location filename="../qml/pages/HelpPage.qml" line="314"/>
         <source>MCC / MNC</source>
         <translation>MCC / MNC</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="291"/>
+        <location filename="../qml/pages/HelpPage.qml" line="314"/>
         <source>Mobile Country Code + Mobile Network Code — together they name the operator (e.g. 262/01 = Germany, Telekom). Present both on the SIM (home) and from the network (serving).</source>
         <translation>Mobile Country Code + Mobile Network Code — zusammen benennen sie den Betreiber (z. B. 262/01 = Deutschland, Telekom). Vorhanden auf der SIM (Heimnetz) und vom Netz (Serving).</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="292"/>
+        <location filename="../qml/pages/HelpPage.qml" line="315"/>
         <source>APN</source>
         <translation>APN</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="292"/>
+        <location filename="../qml/pages/HelpPage.qml" line="315"/>
         <source>Access Point Name — the gateway name the modem uses to open a mobile-data (packet) connection to the operator.</source>
         <translation>Access Point Name — der Gateway-Name, mit dem das Modem eine Mobildaten-(Paket-)Verbindung zum Betreiber aufbaut.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="293"/>
+        <location filename="../qml/pages/HelpPage.qml" line="316"/>
         <source>Radio technology</source>
         <translation>Funktechnik</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="293"/>
+        <location filename="../qml/pages/HelpPage.qml" line="316"/>
         <source>The active air interface: GSM (2G), UMTS (3G), LTE (4G), NR (5G). Determines throughput and latency.</source>
         <translation>Die aktive Luftschnittstelle: GSM (2G), UMTS (3G), LTE (4G), NR (5G). Bestimmt Durchsatz und Latenz.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="294"/>
+        <location filename="../qml/pages/HelpPage.qml" line="317"/>
         <source>Cell ID / LAC / TAC</source>
         <translation>Cell ID / LAC / TAC</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="294"/>
+        <location filename="../qml/pages/HelpPage.qml" line="317"/>
         <source>The identifier of the serving base station cell, and the Location/Tracking Area it belongs to. Used for paging and, roughly, for locating the device.</source>
         <translation>Die Kennung der versorgenden Funkzelle sowie der Location/Tracking-Area, zu der sie gehört. Dient dem Paging und grob der Ortung des Geräts.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="295"/>
+        <location filename="../qml/pages/HelpPage.qml" line="318"/>
         <source>Signal strength</source>
         <translation>Signalstärke</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="295"/>
+        <location filename="../qml/pages/HelpPage.qml" line="318"/>
         <source>The received signal quality as a percentage from ofono. Underlying metric is RSRP/RSSI in dBm depending on technology.</source>
         <translation>Die empfangene Signalqualität als Prozentwert von ofono. Zugrunde liegt je nach Technik RSRP/RSSI in dBm.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="296"/>
+        <location filename="../qml/pages/HelpPage.qml" line="319"/>
         <source>PIN / PUK</source>
         <translation>PIN / PUK</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="296"/>
+        <location filename="../qml/pages/HelpPage.qml" line="319"/>
         <source>PIN locks the SIM at power-on; after three wrong PINs the SIM blocks and needs the longer PUK to unlock.</source>
         <translation>Die PIN sperrt die SIM beim Einschalten; nach drei falschen PINs blockiert die SIM und braucht den längeren PUK zum Entsperren.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="297"/>
+        <location filename="../qml/pages/HelpPage.qml" line="320"/>
         <source>ofono</source>
         <translation>ofono</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="297"/>
+        <location filename="../qml/pages/HelpPage.qml" line="320"/>
         <source>The telephony daemon on Sailfish OS. It talks to the modem over RIL and exposes modem, SIM, network and data state on D-Bus — the source of everything on this page.</source>
         <translation>Der Telefonie-Dienst von Sailfish OS. Er spricht über RIL mit dem Modem und stellt Modem-, SIM-, Netz- und Datenzustand auf D-Bus bereit — die Quelle für alles auf dieser Seite.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="301"/>
+        <location filename="../qml/pages/HelpPage.qml" line="324"/>
         <source>USB &amp; charging</source>
         <translation>USB &amp; Laden</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="303"/>
+        <location filename="../qml/pages/HelpPage.qml" line="326"/>
         <source>USB-C / CC</source>
         <translation>USB-C / CC</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="303"/>
+        <location filename="../qml/pages/HelpPage.qml" line="326"/>
         <source>The Configuration Channel pins on a USB-C plug. They detect attach, cable orientation and the advertised current, and carry the Power Delivery messages.</source>
         <translation>Die Configuration-Channel-Pins am USB-C-Stecker. Sie erkennen Anstecken, Kabelorientierung und den angebotenen Strom und tragen die Power-Delivery-Nachrichten.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="304"/>
+        <location filename="../qml/pages/HelpPage.qml" line="327"/>
         <source>Type-C current advertisement</source>
         <translation>Type-C-Stromangebot</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="304"/>
+        <location filename="../qml/pages/HelpPage.qml" line="327"/>
         <source>Before any negotiation, a resistor (Rp) on CC signals how much the port offers: 500 mA (default USB), 1.5 A or 3.0 A. Purely analog — no protocol.</source>
         <translation>Noch vor jeder Aushandlung signalisiert ein Widerstand (Rp) auf CC, wie viel der Port anbietet: 500 mA (Standard-USB), 1,5 A oder 3,0 A. Rein analog — kein Protokoll.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="305"/>
+        <location filename="../qml/pages/HelpPage.qml" line="328"/>
         <source>A negotiation protocol over CC: source and sink agree on a voltage/current contract (5–48 V, up to 240 W in PD 3.1). Governs fast charging on modern devices.</source>
         <translation>Ein Aushandlungsprotokoll über CC: Quelle und Senke einigen sich auf einen Spannungs-/Stromvertrag (5–48 V, bis 240 W in PD 3.1). Regelt das Schnellladen moderner Geräte.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="306"/>
+        <location filename="../qml/pages/HelpPage.qml" line="329"/>
         <source>Explicit / implicit contract</source>
         <translation>Expliziter / impliziter Vertrag</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="306"/>
+        <location filename="../qml/pages/HelpPage.qml" line="329"/>
         <source>The specification&apos;s word for the agreed supply — shown here as &quot;Negotiated&quot;, because that is what it says. Implicit: not a single PD message has been exchanged, 5 V applies from the CC resistors alone. Explicit: the source offered its objects, the sink requested one, the source accepted. Both sides are bound from then on — the source to deliver that voltage, the sink not to draw more than it asked for.</source>
         <translation>Das Wort der Spezifikation für die vereinbarte Versorgung — hier steht „Ausgehandelt“, weil es das bedeutet. Implizit: es wurde keine einzige PD-Nachricht gewechselt, 5 V gelten allein aus den Widerständen auf der CC-Leitung. Explizit: die Quelle hat ihre Objekte angeboten, die Senke eines angefordert, die Quelle angenommen. Danach sind beide Seiten gebunden — die Quelle liefert diese Spannung, die Senke zieht nicht mehr als angefordert.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="307"/>
+        <location filename="../qml/pages/HelpPage.qml" line="330"/>
         <source>Quick Charge</source>
         <translation>Quick Charge</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="307"/>
+        <location filename="../qml/pages/HelpPage.qml" line="330"/>
         <source>Qualcomm&apos;s proprietary fast-charge scheme. Older versions signal on the D+/D− data lines; QC4+ rides on PD. Negotiated between charger and PMIC.</source>
         <translation>Qualcomms proprietäres Schnellladeverfahren. Ältere Versionen signalisieren über die D+/D−-Datenleitungen; QC4+ setzt auf PD auf. Zwischen Ladegerät und PMIC ausgehandelt.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="308"/>
+        <location filename="../qml/pages/HelpPage.qml" line="331"/>
         <source>Data role (DFP/UFP/DRP)</source>
         <translation>Datenrolle (DFP/UFP/DRP)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="308"/>
+        <location filename="../qml/pages/HelpPage.qml" line="331"/>
         <source>DFP = host (downstream-facing), UFP = device (upstream-facing), DRP = dual-role that can be either. A phone is usually UFP to a PC and DFP to a stick.</source>
         <translation>DFP = Host (downstream-facing), UFP = Gerät (upstream-facing), DRP = Dual-Role, beides möglich. Ein Telefon ist meist UFP am PC und DFP am Stick.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="309"/>
+        <location filename="../qml/pages/HelpPage.qml" line="332"/>
         <source>VCONN</source>
         <translation>VCONN</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="309"/>
+        <location filename="../qml/pages/HelpPage.qml" line="332"/>
         <source>Power (on the unused CC2 pin) that feeds the active chip inside an electronically-marked cable, so it can answer identity queries.</source>
         <translation>Versorgung (auf dem ungenutzten CC2-Pin), die den aktiven Chip in einem elektronisch markierten Kabel speist, damit er Identitätsabfragen beantworten kann.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="310"/>
+        <location filename="../qml/pages/HelpPage.qml" line="333"/>
         <source>e-marker</source>
         <translation>e-Marker</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="310"/>
+        <location filename="../qml/pages/HelpPage.qml" line="333"/>
         <source>A chip built into higher-rated USB-C cables that declares the cable&apos;s current rating, data speed and a coarse length. Read over PD, not from the wires.</source>
         <translation>Ein Chip in höherwertigen USB-C-Kabeln, der Strombelastbarkeit, Datenrate und eine grobe Länge des Kabels angibt. Über PD gelesen, nicht aus den Adern.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="311"/>
+        <location filename="../qml/pages/HelpPage.qml" line="334"/>
         <source>SOP / SOP′ / SOP″</source>
         <translation>SOP / SOP′ / SOP″</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="311"/>
+        <location filename="../qml/pages/HelpPage.qml" line="334"/>
         <source>PD packet targets: SOP addresses the device at the far end, SOP′/SOP″ address the cable&apos;s plugs (the e-markers). Discover Identity on SOP′ reads the cable.</source>
         <translation>PD-Paketziele: SOP adressiert das Gerät am anderen Ende, SOP′/SOP″ die Kabelstecker (die e-Marker). Discover Identity auf SOP′ liest das Kabel.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="312"/>
+        <location filename="../qml/pages/HelpPage.qml" line="335"/>
         <source>TDR</source>
         <translation>TDR</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="312"/>
+        <location filename="../qml/pages/HelpPage.qml" line="335"/>
         <source>Time-Domain Reflectometry: send a fast edge and time its reflection to compute cable length and locate faults. Needs PHY support; phone USB PHYs expose none, so length is not measurable here.</source>
         <translation>Time-Domain-Reflektometrie: eine schnelle Flanke senden und ihre Reflexion messen, um Kabellänge zu berechnen und Fehler zu orten. Braucht PHY-Unterstützung; USB-PHYs im Telefon bieten keine, daher ist die Länge hier nicht messbar.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="313"/>
+        <location filename="../qml/pages/HelpPage.qml" line="336"/>
         <source>Cable data on this device</source>
         <translation>Kabeldaten auf diesem Gerät</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="314"/>
+        <location filename="../qml/pages/HelpPage.qml" line="337"/>
         <source>Open-ended cable</source>
         <translation>Offenes Kabel</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="314"/>
+        <location filename="../qml/pages/HelpPage.qml" line="337"/>
         <source>USB-C detects an attachment from the far end&apos;s CC resistors. A cable with nothing plugged into its other end is electrically invisible — the port reports no partner.</source>
         <translation>USB-C erkennt ein Anstecken an den CC-Widerständen der Gegenseite. Ein Kabel, dessen anderes Ende nirgends steckt, ist elektrisch unsichtbar — der Port meldet keinen Partner.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="315"/>
+        <location filename="../qml/pages/HelpPage.qml" line="338"/>
         <source>Readable PD/Type-C state</source>
         <translation>Lesbarer PD/Type-C-Zustand</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="315"/>
+        <location filename="../qml/pages/HelpPage.qml" line="338"/>
         <source>What this device does expose — the CC current advertisement, PD/Type-C revision and VCONN — appears under Battery → Charging when a charger is attached.</source>
         <translation>Was dieses Gerät offenlegt — CC-Stromangebot, PD-/Type-C-Revision und VCONN — erscheint unter Akku → Laden, wenn ein Ladegerät angeschlossen ist.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="319"/>
+        <location filename="../qml/pages/HelpPage.qml" line="342"/>
         <source>Storage</source>
         <translation>Speicher</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="321"/>
+        <location filename="../qml/pages/HelpPage.qml" line="344"/>
         <source>UFS</source>
         <translation>UFS</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="321"/>
+        <location filename="../qml/pages/HelpPage.qml" line="344"/>
         <source>Universal Flash Storage — the current phone storage standard. Full-duplex serial link, command queueing; faster than the older eMMC.</source>
         <translation>Universal Flash Storage — der aktuelle Speicherstandard für Telefone. Vollduplex-Seriellverbindung, Command-Queueing; schneller als das ältere eMMC.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="322"/>
+        <location filename="../qml/pages/HelpPage.qml" line="345"/>
         <source>SCSI / LUN</source>
         <translation>SCSI / LUN</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="322"/>
+        <location filename="../qml/pages/HelpPage.qml" line="345"/>
         <source>UFS speaks the SCSI command set. The chip presents several Logical Units (LUNs): one large user area plus small boot and RPMB units. The capacity shown is the user LUN.</source>
         <translation>UFS spricht den SCSI-Befehlssatz. Der Chip zeigt mehrere Logical Units (LUNs): einen großen Nutzbereich plus kleine Boot- und RPMB-Einheiten. Die angezeigte Kapazität ist die User-LUN.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="323"/>
+        <location filename="../qml/pages/HelpPage.qml" line="346"/>
         <source>Raw vs usable capacity</source>
         <translation>Roh- vs. Nutzkapazität</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="323"/>
+        <location filename="../qml/pages/HelpPage.qml" line="346"/>
         <source>Marketing capacity counts raw NAND in powers of ten (64 GB = 64·10⁹). The OS counts usable space in powers of two (GiB) after over-provisioning and metadata, so 64 GB shows as ~59.6 GiB.</source>
         <translation>Die Marketing-Kapazität zählt rohes NAND in Zehnerpotenzen (64 GB = 64·10⁹). Das OS zählt den nutzbaren Platz in Zweierpotenzen (GiB) nach Over-Provisioning und Metadaten, daher erscheinen 64 GB als ~59,6 GiB.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="324"/>
+        <location filename="../qml/pages/HelpPage.qml" line="347"/>
         <source>Over-provisioning</source>
         <translation>Over-Provisioning</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="324"/>
+        <location filename="../qml/pages/HelpPage.qml" line="347"/>
         <source>Spare NAND the controller keeps hidden for wear-levelling and bad-block replacement — part of why raw and usable differ.</source>
         <translation>Reserve-NAND, das der Controller für Wear-Levelling und Bad-Block-Ersatz versteckt hält — ein Grund, warum roh und nutzbar auseinandergehen.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="325"/>
+        <location filename="../qml/pages/HelpPage.qml" line="348"/>
         <source>Wear / lifetime</source>
         <translation>Verschleiß / Lebensdauer</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="325"/>
+        <location filename="../qml/pages/HelpPage.qml" line="348"/>
         <source>UFS and eMMC report a health estimate (bDeviceLifeTimeEst) from the program/erase cycles used — not a percentage, but a step: 0x01 is 0–10 % used, 0x0A is 90–100 %, and 0x0B means the estimated lifetime is exceeded, with no upper figure attached. The percentage shown is the lower edge of the reported band; the exceeded step is named instead of converted.</source>
         <translation>UFS und eMMC melden eine Zustandsschätzung (bDeviceLifeTimeEst) aus den verbrauchten Schreib-/Löschzyklen — keine Prozentzahl, sondern eine Stufe: 0x01 heißt 0–10 % verbraucht, 0x0A heißt 90–100 %, und 0x0B heißt, die geschätzte Lebensdauer ist überschritten, ohne Angabe wie weit. Die angezeigte Prozentzahl ist die Untergrenze der gemeldeten Stufe; die Überlaufstufe wird benannt statt umgerechnet.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="326"/>
+        <location filename="../qml/pages/HelpPage.qml" line="349"/>
         <source>Spare blocks (pre-EOL)</source>
         <translation>Reserveblöcke (Pre-EOL)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="326"/>
+        <location filename="../qml/pages/HelpPage.qml" line="349"/>
         <source>A second, independent register: the controller keeps reserve blocks to replace worn ones, and reports whether under 80 %, 80 % or 90 % of them are consumed. It is the more telling of the two — if the lifetime estimate claims to be exhausted while the spare blocks still read normal, the chip contradicts itself and the estimate should not be trusted.</source>
         <translation>Ein zweites, unabhängiges Register: der Controller hält Reserveblöcke bereit, um verschlissene zu ersetzen, und meldet, ob unter 80 %, 80 % oder 90 % davon verbraucht sind. Es ist das aussagekräftigere der beiden — meldet die Lebensdauerschätzung, sie sei erschöpft, während die Reserveblöcke normal sind, widerspricht sich der Chip selbst, und der Schätzung ist nicht zu trauen.</translation>
     </message>
@@ -3347,152 +4264,167 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
         <translation>Momentanstrom (mA) und Packspannung aus der Akku-Elektronik. Das Vorzeichen ist die Konvention des Treibers und keine Regel: auf beiden Telefonen, gegen die diese App gemessen wurde, ist es beim Entladen negativ und beim Laden positiv. Nimm die Richtung aus dem Zustand daneben, nicht aus dem Vorzeichen.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="279"/>
+        <location filename="../qml/pages/HelpPage.qml" line="183"/>
+        <source>The IPC the Android side of the system is built on — what D-Bus is to the Sailfish side. Same purpose, different build. D-Bus relays through a daemon in user space and copies every message twice; binder is a driver in the kernel. The caller makes one ioctl, the driver copies the message once, straight into a memory region the receiver mapped when it opened the device, and wakes one thread of its pool. That is why Android sends every camera frame and every sensor reading across it — and why the driver, sitting in the middle, can count every single call and hand the tally out for free. This page reads that tally and nothing else.</source>
+        <translation>Die IPC, auf der die Android-Seite des Systems aufgebaut ist — das, was D-Bus auf der Sailfish-Seite ist. Gleicher Zweck, andere Bauart. D-Bus vermittelt über einen Dienst im Nutzerland und kopiert jede Nachricht zweimal; Binder ist ein Treiber im Kernel. Der Aufrufer macht ein ioctl, der Treiber kopiert die Nachricht einmal, direkt in einen Speicherbereich, den der Empfänger beim Öffnen des Geräts eingeblendet hat, und weckt dort einen Thread seines Pools. Deshalb schickt Android jeden Kamerarahmen und jede Sensormessung darüber — und deshalb kann der Treiber, der dazwischensitzt, jeden einzelnen Aufruf zählen und die Bilanz kostenlos herausgeben. Diese Seite liest diese Bilanz und sonst nichts.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="184"/>
+        <source>What runs over it here</source>
+        <translation>Was hier darüber läuft</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="184"/>
+        <source>Two things that have nothing to do with each other. First the hardware: camera, GPS, sensors, radio, lights and bluetooth are Android services from the device maker, and Sailfish talks to them through the gbinder library — without binder a port has no camera. Second App Support, which brings binder domains of its own and carries the traffic of every Android app in them. Everything else on the phone — ofono, mce, the fingerprint daemon — runs on D-Bus and does not appear here at all.</source>
+        <translation>Zweierlei, das nichts miteinander zu tun hat. Erstens die Hardware: Kamera, GPS, Sensoren, Funk, Licht und Bluetooth sind Android-Dienste des Geräteherstellers, und Sailfish spricht über die Bibliothek gbinder mit ihnen — ohne Binder hat eine Portierung keine Kamera. Zweitens App Support, das eigene Binder-Domänen mitbringt und darin den Verkehr jeder Android-App trägt. Alles andere auf dem Telefon — ofono, mce, der Fingerabdruckdienst — läuft über D-Bus und erscheint hier überhaupt nicht.</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="302"/>
         <source>Qualcomm&apos;s camera subsystem in the kernel. It exposes control nodes (cam-req-mgr, cam_sync), not per-camera capture devices — capture runs through the userspace HAL (camx). Other chipsets name their nodes differently (MediaTek: camera-isp, camera-dip); the rule that the kernel shows control nodes and not cameras is the same.</source>
         <translation>Qualcomms Kamera-Subsystem im Kernel. Es stellt Steuerknoten bereit (cam-req-mgr, cam_sync), keine Aufnahmegeräte pro Kamera — die Aufnahme läuft über die HAL im Userspace (camx). Andere Chipsätze benennen ihre Knoten anders (MediaTek: camera-isp, camera-dip); die Regel, dass der Kernel Steuerknoten zeigt und keine Kameras, gilt genauso.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="313"/>
+        <location filename="../qml/pages/HelpPage.qml" line="336"/>
         <source>Where the charger stack exposes no cable node — the Qualcomm PMIC&apos;s qpnp-pdphy does not — an e-marker&apos;s rating, length and speed cannot be read, because Discover Identity/SOP′ is not surfaced. A kernel with the mainline tcpm driver has the typec class and shows what it knows; even there the cable directory is only present if the port driver populates it. For real cable data, a dedicated USB-C PD analyzer / cable tester reads the e-marker independently of the phone.</source>
         <translation>Wo der Ladestack keinen Kabelknoten bereitstellt — Qualcomms qpnp-pdphy im PMIC tut es nicht —, sind Belastbarkeit, Länge und Geschwindigkeit eines E-Markers nicht lesbar, weil Discover Identity/SOP′ nicht nach außen gereicht wird. Ein Kernel mit dem Mainline-tcpm-Treiber hat die typec-Klasse und zeigt, was er weiß; auch dort existiert das Kabelverzeichnis nur, wenn der Port-Treiber es füllt. Für echte Kabeldaten liest ein eigener USB-C-PD-Analysator den E-Marker unabhängig vom Telefon.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="327"/>
+        <location filename="../qml/pages/HelpPage.qml" line="350"/>
         <source>Assessment — our reading</source>
         <translation>Einschätzung — unsere Deutung</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="327"/>
+        <location filename="../qml/pages/HelpPage.qml" line="350"/>
         <source>Not a value the chip reports but this app&apos;s summary of the two registers above. Urgent when the chip calls its lifetime exceeded or 90 % of the spare blocks consumed; warning at 80 % of spare blocks or from wear step 8 of 11, which is 70 % of the estimated endurance; good below that. The two registers are the better evidence — this line only saves reading them.</source>
         <translation>Kein Wert des Chips, sondern die Zusammenfassung der beiden Register darüber durch diese App. Dringend, wenn der Chip seine Lebensdauer als überschritten meldet oder 90 % der Reserveblöcke verbraucht sind; Warnung bei 80 % der Reserveblöcke oder ab Verschleißstufe 8 von 11, also 70 % der geschätzten Lebensdauer; darunter gut. Aussagekräftiger sind die beiden Register selbst — diese Zeile erspart nur das Nachschlagen.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="328"/>
+        <location filename="../qml/pages/HelpPage.qml" line="351"/>
         <source>Block / erase block</source>
         <translation>Block / Löschblock</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="328"/>
+        <location filename="../qml/pages/HelpPage.qml" line="351"/>
         <source>NAND is read/written in pages but erased in larger blocks. Logical blocks (sectors, usually 4 KiB) are the unit the filesystem addresses.</source>
         <translation>NAND wird in Pages gelesen/geschrieben, aber in größeren Blöcken gelöscht. Logische Blöcke (Sektoren, meist 4 KiB) sind die Einheit, die das Dateisystem adressiert.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="329"/>
+        <location filename="../qml/pages/HelpPage.qml" line="352"/>
         <source>RPMB</source>
         <translation>RPMB</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="329"/>
+        <location filename="../qml/pages/HelpPage.qml" line="352"/>
         <source>Replay-Protected Memory Block — a small authenticated LUN for anti-rollback and secure counters, not general storage.</source>
         <translation>Replay-Protected Memory Block — eine kleine authentifizierte LUN für Anti-Rollback und sichere Zähler, kein allgemeiner Speicher.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="330"/>
+        <location filename="../qml/pages/HelpPage.qml" line="353"/>
         <source>Data moved</source>
         <translation>Bewegte Daten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="330"/>
+        <location filename="../qml/pages/HelpPage.qml" line="353"/>
         <source>Bytes read from and written to a storage device, counted by the kernel from the moment it registered that device — not from the start of the phone. For built-in storage the two are seconds apart; a memory card counts from when it was inserted, and starts again if it is taken out and put back. Only requests that reached the device are counted: anything served from the cache never appears, so the figure is lower than what programs asked for.</source>
         <translation>Bytes, die von einem Speichergerät gelesen und auf es geschrieben wurden, gezählt vom Kernel ab dem Moment, in dem er dieses Gerät registriert hat — nicht ab dem Start des Telefons. Beim eingebauten Speicher liegen beide Zeitpunkte Sekunden auseinander; eine Speicherkarte zählt ab dem Einlegen und beginnt von vorn, wenn sie entnommen und wieder eingesetzt wird. Gezählt werden nur Anfragen, die das Gerät erreicht haben: Was der Cache beantwortet hat, taucht nie auf, weshalb der Wert niedriger liegt als das, was die Programme angefordert haben.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="331"/>
+        <location filename="../qml/pages/HelpPage.qml" line="354"/>
         <source>Backup</source>
         <translation>Backup</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="331"/>
+        <location filename="../qml/pages/HelpPage.qml" line="354"/>
         <source>Better to have it and not need it than to need it and not have it. A regular backup — a copy of your data on a second medium — protects you from losing what matters when storage fails, the phone goes missing or something is deleted by mistake. Flash gives no warning before it goes; the copy has to exist beforehand.</source>
         <translation>Etwas zu haben und nicht zu brauchen ist besser als etwas zu brauchen und nicht zu haben. Eine regelmäßige Datensicherung — eine Kopie der Daten auf einem zweiten Medium — schützt davor, Wichtiges zu verlieren, wenn der Speicher ausfällt, das Telefon abhandenkommt oder etwas versehentlich gelöscht wird. Flash kündigt seinen Ausfall nicht an; die Kopie muss vorher existieren.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="335"/>
+        <location filename="../qml/pages/HelpPage.qml" line="358"/>
         <source>Since boot</source>
         <translation>Seit dem Start</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="337"/>
+        <location filename="../qml/pages/HelpPage.qml" line="360"/>
         <source>Uptime</source>
         <translation>Laufzeit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="337"/>
+        <location filename="../qml/pages/HelpPage.qml" line="360"/>
         <source>Time since the last start, deep sleep included — the phone counts it even while suspended.</source>
         <translation>Zeit seit dem letzten Start, Tiefschlaf eingerechnet — das Telefon zählt sie auch im Suspend weiter.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="338"/>
+        <location filename="../qml/pages/HelpPage.qml" line="361"/>
         <source>Awake</source>
         <translation>Wach</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="338"/>
+        <location filename="../qml/pages/HelpPage.qml" line="361"/>
         <source>The part of the uptime the system was really running. Two kernel clocks make it visible: one stops during suspend, the other keeps going, and the gap between them is sleep.</source>
         <translation>Der Teil der Laufzeit, in dem das System wirklich lief. Zwei Kernel-Uhren machen ihn sichtbar: die eine steht im Suspend still, die andere läuft weiter, und der Abstand zwischen beiden ist der Schlaf.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="339"/>
+        <location filename="../qml/pages/HelpPage.qml" line="362"/>
         <source>Deep sleep</source>
         <translation>Tiefschlaf</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="340"/>
+        <location filename="../qml/pages/HelpPage.qml" line="363"/>
         <source>Screen-on time</source>
         <translation>Bildschirmzeit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="340"/>
+        <location filename="../qml/pages/HelpPage.qml" line="363"/>
         <source>How long the display was up since the last start. MCE, the Sailfish power daemon, holds a wakelock for exactly that period and the kernel sums it — so the figure exists without anything recording it. It runs a few seconds over per switch-off, because the lock is released after the display is already dark.</source>
         <translation>Wie lange der Bildschirm seit dem letzten Start an war. MCE, der Energie-Dienst von Sailfish, hält genau für diese Dauer einen Wakelock, und der Kernel summiert ihn — der Wert existiert also, ohne dass etwas mitschreibt. Pro Abschaltvorgang läuft er einige Sekunden nach, weil der Wakelock erst losgelassen wird, wenn der Bildschirm schon dunkel ist.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="341"/>
+        <location filename="../qml/pages/HelpPage.qml" line="364"/>
         <source>Wakelock</source>
         <translation>Wakelock</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="341"/>
+        <location filename="../qml/pages/HelpPage.qml" line="364"/>
         <source>A request that keeps the system from suspending, held by a driver or a program for as long as it needs the phone awake. The kernel counts how often each one was taken and how long it was held.</source>
         <translation>Eine Anforderung, die das System am Einschlafen hindert, gehalten von einem Treiber oder einem Programm, solange es das Telefon wach braucht. Der Kernel zählt, wie oft jeder genommen und wie lange er gehalten wurde.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="342"/>
+        <location filename="../qml/pages/HelpPage.qml" line="365"/>
         <source>Wake source</source>
         <translation>Weckquelle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="342"/>
+        <location filename="../qml/pages/HelpPage.qml" line="365"/>
         <source>Hardware or a driver that can end deep sleep: an incoming packet, the modem, a timer, a key. The count says how often it did, not whether it was justified.</source>
         <translation>Hardware oder ein Treiber, die den Tiefschlaf beenden können: ein eintreffendes Paket, das Modem, ein Zeitgeber, eine Taste. Die Zahl sagt, wie oft das geschah, nicht ob es berechtigt war.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="343"/>
+        <location filename="../qml/pages/HelpPage.qml" line="366"/>
         <source>Suspend attempt</source>
         <translation>Einschlafversuch</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="343"/>
+        <location filename="../qml/pages/HelpPage.qml" line="366"/>
         <source>The kernel tries to go down whenever nothing holds it awake. Each try either succeeds or is abandoned — a wakeup arriving mid-attempt is enough to abort it, which is why failed attempts are ordinary and not a defect in themselves.</source>
         <translation>Der Kernel versucht einzuschlafen, sobald ihn nichts mehr wach hält. Jeder Versuch gelingt oder wird abgebrochen — ein Wecksignal mitten im Versuch genügt zum Abbruch, weshalb fehlgeschlagene Versuche gewöhnlich sind und für sich genommen kein Defekt.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="344"/>
+        <location filename="../qml/pages/HelpPage.qml" line="367"/>
         <source>Freezing tasks</source>
         <translation>Einfrieren der Prozesse</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="344"/>
+        <location filename="../qml/pages/HelpPage.qml" line="367"/>
         <source>First step of a suspend: all processes are halted at a safe point. If one refuses or a driver is still busy, the attempt stops right there and the step is recorded.</source>
         <translation>Erster Schritt eines Suspends: alle Prozesse werden an einer sicheren Stelle angehalten. Weigert sich einer oder ist ein Treiber noch beschäftigt, endet der Versuch genau dort, und der Schritt wird vermerkt.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="345"/>
+        <location filename="../qml/pages/HelpPage.qml" line="368"/>
         <source>EBUSY (-16)</source>
         <translation>EBUSY (-16)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="345"/>
+        <location filename="../qml/pages/HelpPage.qml" line="368"/>
         <source>The error a driver returns when it cannot be put to sleep at that moment because it is still working. It names the device that blocked the attempt.</source>
         <translation>Der Fehler, den ein Treiber zurückgibt, wenn er in diesem Moment nicht schlafen gelegt werden kann, weil er noch arbeitet. Er benennt das Gerät, das den Versuch blockiert hat.</translation>
     </message>
@@ -3532,17 +4464,17 @@ github.com/JimKnopfIoT/harbour-advanced-camera</translation>
         <translation>Strom mal Spannung aus der Akku-Elektronik, für das ganze Gerät. Während das Telefon lädt, ist das die Leistung in die Zelle und nicht der Verbrauch — die Zeile sagt das, indem sie ihre eigene Beschriftung wechselt. Einen Wert pro Prozess gibt es hier nicht: Watt einem Prozess zuzuschreiben hieße anzunehmen, ein Programm koste, was sein CPU-Anteil kostet, und das liegt für alles, was Bildschirm oder Funk beschäftigt, weit daneben.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="339"/>
+        <location filename="../qml/pages/HelpPage.qml" line="362"/>
         <source>The part of the uptime that passed with the system suspended. Which kind of suspend depends on the phone, and /sys/power/mem_sleep names it: with suspend-to-RAM (S3) the CPU is off and only a wakeup source brings it back; with suspend-to-idle (s2idle) the CPU stays powered in its deepest idle state while everything else is frozen. Both stop the clock this figure is measured with, the second saves less energy. Either way this is where a phone spends most of its day.</source>
         <translation>Der Teil der Laufzeit, der mit angehaltenem System verging. Welche Art von Suspend das ist, hängt vom Telefon ab, und /sys/power/mem_sleep benennt es: bei Suspend-to-RAM (S3) ist die CPU aus und nur eine Weckquelle holt sie zurück; bei Suspend-to-idle (s2idle) bleibt die CPU im tiefsten Ruhezustand bestromt, während alles andere eingefroren wird. Beide halten die Uhr an, mit der dieser Wert gemessen wird, das zweite spart weniger Energie. So oder so verbringt ein Telefon hier den größten Teil seines Tages.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="361"/>
+        <location filename="../qml/pages/HelpPage.qml" line="384"/>
         <source>Glossary</source>
         <translation>Glossar</translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="369"/>
+        <location filename="../qml/pages/HelpPage.qml" line="392"/>
         <source>Every figure the app shows, explained. Tap a term to reveal its details.</source>
         <translation>Jede Zahl, die die App zeigt, erklärt. Tippe einen Begriff an, um die Details zu sehen.</translation>
     </message>
@@ -7842,7 +8774,7 @@ In Benutzung kann immer nur genau ein Port sein, denn das ist der, den die Audio
         <translation>Verbindungen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="90"/>
+        <location filename="../qml/pages/MainPage.qml" line="97"/>
         <source>System overview</source>
         <translation>Systemübersicht</translation>
     </message>
@@ -7852,128 +8784,133 @@ In Benutzung kann immer nur genau ein Port sein, denn das ist der, den die Audio
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="100"/>
+        <location filename="../qml/pages/MainPage.qml" line="92"/>
+        <source>Binder</source>
+        <translation>Binder</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="107"/>
         <source>SysMetrics</source>
         <translation>SysMetrics</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="101"/>
+        <location filename="../qml/pages/MainPage.qml" line="108"/>
         <source>%1 processes · %2 threads</source>
         <translation>%1 Prozesse · %2 Threads</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="131"/>
-        <location filename="../qml/pages/MainPage.qml" line="233"/>
+        <location filename="../qml/pages/MainPage.qml" line="138"/>
+        <location filename="../qml/pages/MainPage.qml" line="240"/>
         <source>CPU</source>
         <translation>CPU</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="146"/>
+        <location filename="../qml/pages/MainPage.qml" line="153"/>
         <source>load %1  ·  %2 of %3 cores</source>
         <translation>Last %1  ·  %2 von %3 Kernen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="149"/>
+        <location filename="../qml/pages/MainPage.qml" line="156"/>
         <source>load %1  ·  %2 cores</source>
         <translation>Last %1  ·  %2 Kerne</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="177"/>
+        <location filename="../qml/pages/MainPage.qml" line="184"/>
         <source>Cores</source>
         <translation>Kerne</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="183"/>
+        <location filename="../qml/pages/MainPage.qml" line="190"/>
         <source>avg %1%</source>
         <translation>Ø %1 %</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="204"/>
+        <location filename="../qml/pages/MainPage.qml" line="211"/>
         <source>c%1</source>
         <translation>K%1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="205"/>
+        <location filename="../qml/pages/MainPage.qml" line="212"/>
         <source>offline</source>
         <translation>offline</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="217"/>
+        <location filename="../qml/pages/MainPage.qml" line="224"/>
         <source>Filter by name, cmdline or PID</source>
         <translation>Nach Name, Kommandozeile oder PID filtern</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="234"/>
+        <location filename="../qml/pages/MainPage.qml" line="241"/>
         <source>Memory</source>
         <translation>Speicher</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="235"/>
+        <location filename="../qml/pages/MainPage.qml" line="242"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="236"/>
+        <location filename="../qml/pages/MainPage.qml" line="243"/>
         <source>PID</source>
         <translation>PID</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="237"/>
+        <location filename="../qml/pages/MainPage.qml" line="244"/>
         <source>Threads</source>
         <translation>Threads</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="261"/>
+        <location filename="../qml/pages/MainPage.qml" line="268"/>
         <source>Apps only</source>
         <translation>Nur Apps</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="266"/>
+        <location filename="../qml/pages/MainPage.qml" line="273"/>
         <source>Kernel threads</source>
         <translation>Kernel-Threads</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="278"/>
+        <location filename="../qml/pages/MainPage.qml" line="285"/>
         <source>All processes (%1)</source>
         <translation>Alle Prozesse (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="279"/>
+        <location filename="../qml/pages/MainPage.qml" line="286"/>
         <source>Top consumers</source>
         <translation>Top-Verbraucher</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="326"/>
+        <location filename="../qml/pages/MainPage.qml" line="333"/>
         <source>Collapse</source>
         <translation>Einklappen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="327"/>
+        <location filename="../qml/pages/MainPage.qml" line="334"/>
         <source>Show all %1 processes</source>
         <translation>Alle %1 Prozesse anzeigen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="347"/>
+        <location filename="../qml/pages/MainPage.qml" line="354"/>
         <source>Since boot</source>
         <translation>Seit dem Start</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="349"/>
+        <location filename="../qml/pages/MainPage.qml" line="356"/>
         <source>uptime</source>
         <translation>Laufzeit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="363"/>
+        <location filename="../qml/pages/MainPage.qml" line="370"/>
         <source>Deep sleep</source>
         <translation>Tiefschlaf</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="373"/>
+        <location filename="../qml/pages/MainPage.qml" line="380"/>
         <source>Screen on</source>
         <translation>Bildschirm an</translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="384"/>
+        <location filename="../qml/pages/MainPage.qml" line="391"/>
         <source>Awake, screen off</source>
         <translation>Wach, Bildschirm aus</translation>
     </message>
@@ -8404,328 +9341,400 @@ In Benutzung kann immer nur genau ein Port sein, denn das ist der, den die Audio
 <context>
     <name>ProcessDetailPage</name>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="46"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="65"/>
         <source>Send SIGKILL</source>
         <translation>SIGKILL senden</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="48"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="67"/>
         <source>Killing %1</source>
         <translation>%1 wird abgeschossen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="52"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="71"/>
         <source>Send SIGTERM</source>
         <translation>SIGTERM senden</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="54"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="73"/>
         <source>Terminating %1</source>
         <translation>%1 wird beendet</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="58"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="77"/>
         <source>Continue (SIGCONT)</source>
         <translation>Fortsetzen (SIGCONT)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="58"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="77"/>
         <source>Stop (SIGSTOP)</source>
         <translation>Anhalten (SIGSTOP)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="71"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="90"/>
         <source>PID %1 · %2 · %3</source>
         <translation>PID %1 · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="78"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="97"/>
         <source>Process has exited</source>
         <translation>Prozess wurde beendet</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="113"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="132"/>
         <source>CPU</source>
         <translation>CPU</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="116"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="135"/>
         <source>%1 of %2 cores</source>
         <translation>%1 von %2 Kernen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="140"/>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="421"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="159"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="461"/>
         <source>c%1</source>
         <translation>K%1</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="152"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="171"/>
         <source>Share of busy CPU</source>
         <translation>Anteil an der CPU-Last</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="154"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="173"/>
         <source>CPU time</source>
         <translation>CPU-Zeit</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="156"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="175"/>
         <source>Context switches/s</source>
         <translation>Kontextwechsel/s</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="157"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="176"/>
         <source>%1 vol · %2 invol</source>
         <translation>%1 frw · %2 unfrw</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="159"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="178"/>
         <source>Wakeups/s</source>
         <translation>Aufwecken/s</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="161"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="180"/>
         <source>Page faults/s</source>
         <translation>Page-Faults/s</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="162"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="181"/>
         <source>%1 minor · %2 major</source>
         <translation>%1 minor · %2 major</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="164"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="183"/>
         <source>CPU affinity</source>
         <translation>CPU-Affinität</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="165"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="184"/>
         <source>Nice / priority</source>
         <translation>Nice / Priorität</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="174"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="193"/>
         <source>Memory</source>
         <translation>Speicher</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="180"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="199"/>
         <source>RSS (resident)</source>
         <translation>RSS (resident)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="182"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="201"/>
         <source>USS (private)</source>
         <translation>USS (privat)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="183"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="202"/>
         <source>Swapped</source>
         <translation>Ausgelagert</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="185"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="204"/>
         <source>Virtual</source>
         <translation>Virtuell</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="193"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="212"/>
         <source>I/O &amp; energy</source>
         <translation>I/O &amp; Energie</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="198"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="217"/>
         <source>Disk read/write</source>
         <translation>Datenträger lesen/schreiben</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="200"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="219"/>
         <source>Total read/write</source>
         <translation>Gesamt lesen/schreiben</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="206"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="225"/>
         <source>Access monitor</source>
         <translation>Zugriffs-Monitor</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="212"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="231"/>
         <source>Traced by</source>
         <translation>Verfolgt von</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="214"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="233"/>
         <source>no</source>
         <translation>nein</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="220"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="239"/>
         <source>Full access-monitor coverage needs root mode.</source>
         <translation>Vollständige Abdeckung des Zugriffs-Monitors erfordert den Root-Modus.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="236"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="255"/>
         <source>No other process holds handles into this process.</source>
         <translation>Kein anderer Prozess hält Handles in diesen Prozess.</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="246"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="265"/>
         <source>Devices (%1)</source>
         <translation>Geräte (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="261"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="280"/>
         <source>Node</source>
         <translation>Knoten</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="262"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="281"/>
         <source>Subsystem</source>
         <translation>Subsystem</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="263"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="282"/>
         <source>Driver</source>
         <translation>Treiber</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="264"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="283"/>
         <source>Vendor</source>
         <translation>Hersteller</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="265"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="284"/>
         <source>Serial</source>
         <translation>Seriennummer</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="267"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="286"/>
         <source>Size</source>
         <translation>Größe</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="278"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="297"/>
         <source>No device nodes open</source>
         <translation>Keine Geräteknoten geöffnet</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="290"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="309"/>
         <source>Network (%1)</source>
         <translation>Netzwerk (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="327"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="346"/>
         <source>local </source>
         <translation>lokal </translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="342"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="361"/>
         <source>No sockets open</source>
         <translation>Keine Sockets offen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="354"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="373"/>
         <source>Open files (%1)</source>
         <translation>Offene Dateien (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="369"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="388"/>
         <source>(deleted)</source>
         <translation>(gelöscht)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="386"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="405"/>
         <source>No regular files open</source>
         <translation>Keine regulären Dateien offen</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="398"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="417"/>
         <source>Threads (%1)</source>
         <translation>Threads (%1)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="444"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="487"/>
+        <source>Binder</source>
+        <translation>Binder</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="497"/>
+        <source>Domain</source>
+        <translation>Domäne</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="500"/>
+        <source>not reported by this kernel</source>
+        <translation>von diesem Kernel nicht gemeldet</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="503"/>
+        <source>Calls out</source>
+        <translation>Aufrufe hinaus</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="506"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="513"/>
+        <source>/s</source>
+        <translation>/s</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="507"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="514"/>
+        <source>%1 since boot</source>
+        <translation>%1 seit dem Start</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="510"/>
+        <source>Calls in</source>
+        <translation>Aufrufe herein</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="517"/>
+        <source>Binder threads</source>
+        <translation>Binder-Threads</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="518"/>
+        <source>%1 running, at most %2, %3 ready</source>
+        <translation>%1 laufend, höchstens %2, %3 bereit</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="526"/>
+        <source>Queued transactions</source>
+        <translation>Wartende Transaktionen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="531"/>
+        <source>Nodes / references</source>
+        <translation>Knoten / Referenzen</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="535"/>
+        <source>One-way buffer left</source>
+        <translation>Einwegpuffer frei</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="542"/>
+        <source>Serves</source>
+        <translation>Bedient</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="554"/>
+        <source>All binder traffic</source>
+        <translation>Aller Binder-Verkehr</translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="562"/>
         <source>Process</source>
         <translation>Prozess</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="449"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="567"/>
         <source>Command line</source>
         <translation>Kommandozeile</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="450"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="568"/>
         <source>Executable</source>
         <translation>Programmdatei</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="451"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="569"/>
         <source>Working dir</source>
         <translation>Arbeitsverzeichnis</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="452"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="570"/>
         <source>Parent</source>
         <translation>Elternprozess</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="454"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="572"/>
         <source>cgroup</source>
         <translation>cgroup</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="455"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="573"/>
         <source>Threads / fds</source>
         <translation>Threads / fds</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="457"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="575"/>
         <source>Timer fds</source>
         <translation>Timer-fds</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="458"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="576"/>
         <source>OOM score</source>
         <translation>OOM-Score</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="459"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="577"/>
         <source>Age</source>
         <translation>Alter</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="460"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="578"/>
         <source>Data source</source>
         <translation>Datenquelle</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="461"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="579"/>
         <source>root helper</source>
         <translation>Root-Helfer</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="462"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="580"/>
         <source>direct</source>
         <translation>direkt</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="463"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="581"/>
         <source>restricted — sandboxed, enable root mode</source>
         <translation>eingeschränkt — sandboxed, Root-Modus aktivieren</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="464"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="582"/>
         <source>limited (foreign user)</source>
         <translation>eingeschränkt (fremder Benutzer)</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="469"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="587"/>
         <source>Priority</source>
         <translation>Priorität</translation>
     </message>
     <message>
-        <location filename="../qml/pages/ProcessDetailPage.qml" line="476"/>
+        <location filename="../qml/pages/ProcessDetailPage.qml" line="594"/>
         <source>nice (lower = more CPU; needs privilege to lower)</source>
         <translation>Nice (niedriger = mehr CPU; Absenken erfordert Rechte)</translation>
     </message>
@@ -8733,7 +9742,7 @@ In Benutzung kann immer nur genau ein Port sein, denn das ist der, den die Audio
 <context>
     <name>ProcessRow</name>
     <message>
-        <location filename="../qml/components/ProcessRow.qml" line="52"/>
+        <location filename="../qml/components/ProcessRow.qml" line="59"/>
         <source>kernel</source>
         <translation>Kernel</translation>
     </message>

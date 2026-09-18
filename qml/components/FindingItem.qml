@@ -8,12 +8,22 @@ Column {
     id: item
     property var finding
     property bool expanded: false
+    // When the owner keeps the open/closed state (because its list is rebuilt
+    // under the delegates), it sets this and binds `expanded` itself; the tap
+    // then only reports. Callers that say nothing keep their own state, as
+    // before.
+    property bool externalState: false
+    signal toggled()
+    // Emitted when the reader taps the process a finding names. Findings that
+    // carry no pid (every caller before the binder page) never show the row,
+    // so this stays invisible where nobody connected it.
+    signal openProcess(int pid)
     width: parent ? parent.width : 0
 
     BackgroundItem {
         width: parent.width
         height: head.height + 2 * Theme.paddingMedium
-        onClicked: item.expanded = !item.expanded
+        onClicked: item.externalState ? item.toggled() : item.expanded = !item.expanded
 
         Row {
             id: head
@@ -92,6 +102,20 @@ Column {
             font.family: "monospace"
             color: Theme.secondaryColor
             wrapMode: Text.WrapAnywhere
+        }
+        // Everything this page knows about the process behind the finding is
+        // one tap away -- the finding names it, the process page shows it.
+        BackgroundItem {
+            width: parent.width
+            height: visible ? Theme.itemSizeExtraSmall : 0
+            visible: (item.finding.pid || 0) > 0
+            onClicked: item.openProcess(item.finding.pid)
+            Label {
+                anchors.verticalCenter: parent.verticalCenter
+                text: qsTr("Show process %1").arg(item.finding.pid || 0) + "  ›"
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: Diag.cyan
+            }
         }
         Item { width: 1; height: Theme.paddingMedium }
     }
