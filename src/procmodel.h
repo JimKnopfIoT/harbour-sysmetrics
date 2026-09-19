@@ -35,6 +35,29 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    // Sorting and filtering happen here, not in a proxy, and that is not a
+    // matter of taste. A proxy re-sort reaches the view as layoutChanged, and a
+    // QML ListView answers that by losing its scroll position -- it snaps back
+    // to the top. That is why the list used to stop re-sorting as soon as it was
+    // scrolled away from the top, and that in turn is why it showed fresh
+    // figures in an order that no longer matched them.
+    //
+    // Sorted here, the view never sees a re-ordering at all: row 3 is always
+    // rank 4, and only the figures in it change. What the view gets is
+    // dataChanged at stable indices, plus rows appended or dropped at the end
+    // when the process count moves. Neither disturbs the scroll position, so the
+    // list stays correct wherever the user happens to be looking.
+    void setSearch(const QString &s);
+    void setSortKey(const QString &k);
+    void setDescending(bool d);
+    void setShowKernel(bool v);
+    void setAppsOnly(bool v);
+
+    // While held, an incoming sample is parked instead of shown: with a finger
+    // on the list nothing may move, and holding the figures as well as the order
+    // keeps what is on screen one consistent sample.
+    void setHeld(bool v);
+
 public slots:
     void onProcesses(const QVector<ProcSample> &procs, qulonglong totalDeltaJiffies);
     void onSystem(const SysSnap &snap);
@@ -44,10 +67,22 @@ signals:
 
 private:
     QString userName(uint uid) const;
+    void rebuild();
+    bool accepts(const ProcSample &p) const;
+    bool orderBefore(const ProcSample &a, const ProcSample &b) const;
 
-    QVector<ProcSample> m_rows;
+    QVector<ProcSample> m_all;     // last sample, as read
+    QVector<ProcSample> m_rows;    // filtered and sorted, what the view shows
     mutable QHash<uint, QString> m_users;
     qulonglong m_memTotal = 0;
+    bool m_held = false;
+    bool m_haveSample = false;
+
+    QString m_search;
+    QString m_sortKey = QStringLiteral("cpu");
+    bool m_desc = true;
+    bool m_showKernel = false;
+    bool m_appsOnly = false;
 };
 
 class ProcProxy : public QSortFilterProxyModel
@@ -87,11 +122,11 @@ signals:
     void countChanged();
     void frozenChanged();
 
-protected:
-    bool filterAcceptsRow(int row, const QModelIndex &parent) const override;
-    bool lessThan(const QModelIndex &a, const QModelIndex &b) const override;
-
 private:
+    // The proxy is a pass-through: it neither sorts nor filters, it only carries
+    // the QML-facing properties through to the model. See the note there.
+    ProcModel *model() const;
+
     QString m_search;
     QString m_sortBy = QStringLiteral("cpu");
     bool m_desc = true;

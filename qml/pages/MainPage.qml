@@ -34,13 +34,19 @@ Page {
 
     DiagBackground {}
 
-    // Freeze row re-ordering while the user interacts with the list OR is
-    // scrolled away from the top, so rows never jump under the finger and a
-    // re-sort never yanks the view back to the top. Re-sorting resumes only when
-    // the list is idle at the top, where re-ordering is not visually disruptive.
+    // Freeze the list while the user has hold of it -- wiping, flicking, or a
+    // finger on a row -- so nothing moves under the finger. Order and figures
+    // are held together, so what stands still is one consistent sample rather
+    // than fresh numbers in a stale order.
+    //
+    // Being scrolled away from the top used to freeze as well, and that was the
+    // whole bug: the process list sits below the system overview, so it can only
+    // be read scrolled down. The list was therefore frozen for exactly as long
+    // as anyone looked at it. A re-sort does not move the view -- it arrives as
+    // changed data, not as a scroll -- so there was nothing to protect against.
     property bool rowPressed: false
     function _updateFreeze() {
-        if (list.moving || list.dragging || list.flicking || rowPressed || !list.atYBeginning) {
+        if (list.moving || list.dragging || list.flicking || rowPressed) {
             thawTimer.stop()
             procs.frozen = true
         } else {
@@ -63,7 +69,6 @@ Page {
         onMovingChanged: page._updateFreeze()
         onDraggingChanged: page._updateFreeze()
         onFlickingChanged: page._updateFreeze()
-        onAtYBeginningChanged: page._updateFreeze()
 
         PullDownMenu {
             MenuItem {
