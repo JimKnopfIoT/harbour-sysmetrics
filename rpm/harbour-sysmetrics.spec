@@ -7,7 +7,7 @@
 %bcond_with ultimate
 Name:       harbour-sysmetrics
 Summary:    System diagnostics for Sailfish OS
-Version:    0.3.8
+Version:    0.3.9
 Release:    1
 License:    GPL-3.0-or-later
 URL:        https://github.com/JimKnopfIoT/harbour-sysmetrics
