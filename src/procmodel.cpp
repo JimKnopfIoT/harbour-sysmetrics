@@ -2,6 +2,8 @@
 
 #include <pwd.h>
 
+#include <algorithm>
+
 ProcModel::ProcModel(QObject *parent)
     : QAbstractListModel(parent)
 {
@@ -79,44 +81,129 @@ void ProcModel::onProcesses(const QVector<ProcSample> &in, qulonglong)
     // on ranked the list well, but the milliamps put on it were a model, not a
     // measurement, and read like one. Nothing on these devices meters a
     // process; the list ranks by CPU time, which is what is actually counted.
-    const QVector<ProcSample> &procs = in;
+    m_all = in;
+    m_haveSample = true;
+    if (m_held)
+        return;        // a finger is on the list: park it, show it on release
+    rebuild();
+}
 
-    QHash<int, int> incoming;
-    incoming.reserve(procs.size());
-    for (int i = 0; i < procs.size(); ++i)
-        incoming.insert(procs.at(i).pid, i);
+void ProcModel::setHeld(bool v)
+{
+    if (m_held == v)
+        return;
+    m_held = v;
+    if (!m_held && m_haveSample)
+        rebuild();
+}
 
-    // removals, back to front
-    for (int row = m_rows.size() - 1; row >= 0; --row) {
-        if (!incoming.contains(m_rows.at(row).pid)) {
-            beginRemoveRows(QModelIndex(), row, row);
-            m_rows.remove(row);
-            endRemoveRows();
+void ProcModel::setSearch(const QString &s)
+{
+    if (m_search == s)
+        return;
+    m_search = s;
+    rebuild();
+}
+
+void ProcModel::setSortKey(const QString &k)
+{
+    if (m_sortKey == k)
+        return;
+    m_sortKey = k;
+    rebuild();
+}
+
+void ProcModel::setDescending(bool d)
+{
+    if (m_desc == d)
+        return;
+    m_desc = d;
+    rebuild();
+}
+
+void ProcModel::setShowKernel(bool v)
+{
+    if (m_showKernel == v)
+        return;
+    m_showKernel = v;
+    rebuild();
+}
+
+void ProcModel::setAppsOnly(bool v)
+{
+    if (m_appsOnly == v)
+        return;
+    m_appsOnly = v;
+    rebuild();
+}
+
+bool ProcModel::accepts(const ProcSample &p) const
+{
+    if (!m_showKernel && p.kernelThread)
+        return false;
+    if (m_appsOnly && p.uid < 100000)
+        return false;
+    if (m_search.isEmpty())
+        return true;
+    return p.name.contains(m_search, Qt::CaseInsensitive)
+        || p.cmdline.contains(m_search, Qt::CaseInsensitive)
+        || QString::number(p.pid) == m_search;
+}
+
+bool ProcModel::orderBefore(const ProcSample &x, const ProcSample &y) const
+{
+    // descending = swapped operands; keeps strict weak ordering intact
+    const ProcSample &a = m_desc ? y : x;
+    const ProcSample &b = m_desc ? x : y;
+
+    if (m_sortKey == QLatin1String("name")) {
+        const int c = QString::compare(a.name, b.name, Qt::CaseInsensitive);
+        if (c != 0)
+            return c < 0;
+    } else {
+        double va = 0, vb = 0;
+        if (m_sortKey == QLatin1String("mem")) {
+            va = (double)a.rssBytes;   vb = (double)b.rssBytes;
+        } else if (m_sortKey == QLatin1String("pid")) {
+            va = a.pid;                vb = b.pid;
+        } else if (m_sortKey == QLatin1String("threads")) {
+            va = a.threads;            vb = b.threads;
+        } else {
+            va = a.cpuPct;             vb = b.cpuPct;
         }
+        if (va != vb)
+            return va < vb;
+    }
+    return a.pid < b.pid;
+}
+
+void ProcModel::rebuild()
+{
+    QVector<ProcSample> next;
+    next.reserve(m_all.size());
+    for (const ProcSample &p : m_all)
+        if (accepts(p))
+            next.append(p);
+
+    std::sort(next.begin(), next.end(),
+              [this](const ProcSample &a, const ProcSample &b) { return orderBefore(a, b); });
+
+    // Length first, contents second. Rows are appended or dropped only at the
+    // end, where neither disturbs what the user is looking at; everything else
+    // is a value change at an index that keeps its meaning.
+    if (next.size() > m_rows.size()) {
+        beginInsertRows(QModelIndex(), m_rows.size(), next.size() - 1);
+        m_rows.resize(next.size());
+        endInsertRows();
+    } else if (next.size() < m_rows.size()) {
+        beginRemoveRows(QModelIndex(), next.size(), m_rows.size() - 1);
+        m_rows.resize(next.size());
+        endRemoveRows();
     }
 
-    // in-place updates
-    QVector<bool> used(procs.size(), false);
-    for (int row = 0; row < m_rows.size(); ++row) {
-        const int idx = incoming.value(m_rows.at(row).pid, -1);
-        if (idx >= 0) {
-            m_rows[row] = procs.at(idx);
-            used[idx] = true;
-        }
-    }
+    m_rows = next;
     if (!m_rows.isEmpty())
         emit dataChanged(index(0), index(m_rows.size() - 1));
-
-    // additions appended; proxy sorts
-    QVector<ProcSample> add;
-    for (int i = 0; i < procs.size(); ++i)
-        if (!used.at(i))
-            add.append(procs.at(i));
-    if (!add.isEmpty()) {
-        beginInsertRows(QModelIndex(), m_rows.size(), m_rows.size() + add.size() - 1);
-        m_rows += add;
-        endInsertRows();
-    }
 
     emit updated();
 }
@@ -124,11 +211,17 @@ void ProcModel::onProcesses(const QVector<ProcSample> &in, qulonglong)
 ProcProxy::ProcProxy(QObject *parent)
     : QSortFilterProxyModel(parent)
 {
-    setDynamicSortFilter(true);
+    // No sort(), no filter: both live in the model now, where re-ordering does
+    // not cost the view its scroll position. This proxy exists only to carry the
+    // QML-facing properties and to keep the QML side unchanged.
     connect(this, &QAbstractItemModel::rowsInserted, this, &ProcProxy::countChanged);
     connect(this, &QAbstractItemModel::rowsRemoved, this, &ProcProxy::countChanged);
     connect(this, &QAbstractItemModel::modelReset, this, &ProcProxy::countChanged);
-    sort(0);
+}
+
+ProcModel *ProcProxy::model() const
+{
+    return qobject_cast<ProcModel *>(sourceModel());
 }
 
 void ProcProxy::setSearch(const QString &s)
@@ -136,7 +229,8 @@ void ProcProxy::setSearch(const QString &s)
     if (m_search == s)
         return;
     m_search = s;
-    invalidateFilter();
+    if (ProcModel *m = model())
+        m->setSearch(s);
     emit filterChanged();
     emit countChanged();
 }
@@ -146,8 +240,8 @@ void ProcProxy::setSortBy(const QString &s)
     if (m_sortBy == s)
         return;
     m_sortBy = s;
-    invalidate();
-    sort(0);
+    if (ProcModel *m = model())
+        m->setSortKey(s);
     emit filterChanged();
 }
 
@@ -156,8 +250,8 @@ void ProcProxy::setDescending(bool d)
     if (m_desc == d)
         return;
     m_desc = d;
-    invalidate();
-    sort(0);
+    if (ProcModel *m = model())
+        m->setDescending(d);
     emit filterChanged();
 }
 
@@ -166,7 +260,8 @@ void ProcProxy::setShowKernel(bool v)
     if (m_showKernel == v)
         return;
     m_showKernel = v;
-    invalidateFilter();
+    if (ProcModel *m = model())
+        m->setShowKernel(v);
     emit filterChanged();
     emit countChanged();
 }
@@ -176,9 +271,23 @@ void ProcProxy::setAppsOnly(bool v)
     if (m_appsOnly == v)
         return;
     m_appsOnly = v;
-    invalidateFilter();
+    if (ProcModel *m = model())
+        m->setAppsOnly(v);
     emit filterChanged();
     emit countChanged();
+}
+
+void ProcProxy::setFrozen(bool v)
+{
+    if (m_frozen == v)
+        return;
+    m_frozen = v;
+    // Only while a finger is on the list. Nothing may move under it, so the
+    // model parks incoming samples until it is released -- figures and order
+    // together, so what stands still is one consistent sample.
+    if (ProcModel *m = model())
+        m->setHeld(v);
+    emit frozenChanged();
 }
 
 QVariantList ProcProxy::topByCpu(int n) const
@@ -212,65 +321,4 @@ QVariantList ProcProxy::topByCpu(int n) const
         out.append(r);
     }
     return out;
-}
-
-void ProcProxy::setFrozen(bool v)
-{
-    if (m_frozen == v)
-        return;
-    m_frozen = v;
-    // While frozen: keep the current row order (values still update in place via
-    // dataChanged) so the user can tap a row without it jumping. On thaw: catch up.
-    setDynamicSortFilter(!v);
-    if (!v) {
-        invalidate();
-        sort(0);
-    }
-    emit frozenChanged();
-}
-
-bool ProcProxy::filterAcceptsRow(int row, const QModelIndex &parent) const
-{
-    const QModelIndex i = sourceModel()->index(row, 0, parent);
-    if (!m_showKernel && i.data(ProcModel::KernelRole).toBool())
-        return false;
-    if (m_appsOnly && !i.data(ProcModel::AppRole).toBool())
-        return false;
-    if (!m_search.isEmpty()) {
-        return i.data(ProcModel::NameRole).toString().contains(m_search, Qt::CaseInsensitive)
-            || i.data(ProcModel::CmdlineRole).toString().contains(m_search, Qt::CaseInsensitive)
-            || i.data(ProcModel::PidRole).toString() == m_search;
-    }
-    return true;
-}
-
-bool ProcProxy::lessThan(const QModelIndex &ia, const QModelIndex &ib) const
-{
-    // descending = swapped operands; keeps strict weak ordering intact
-    const QModelIndex &a = m_desc ? ib : ia;
-    const QModelIndex &b = m_desc ? ia : ib;
-
-    int role = ProcModel::CpuRole;
-    bool numeric = true;
-    if (m_sortBy == QLatin1String("mem"))
-        role = ProcModel::MemRole;
-    else if (m_sortBy == QLatin1String("pid"))
-        role = ProcModel::PidRole;
-    else if (m_sortBy == QLatin1String("name")) {
-        role = ProcModel::NameRole;
-        numeric = false;
-    } else if (m_sortBy == QLatin1String("threads"))
-        role = ProcModel::ThreadsRole;
-
-    if (numeric) {
-        const double va = a.data(role).toDouble();
-        const double vb = b.data(role).toDouble();
-        if (va != vb)
-            return va < vb;
-    } else {
-        const int c = QString::compare(a.data(role).toString(), b.data(role).toString(), Qt::CaseInsensitive);
-        if (c != 0)
-            return c < 0;
-    }
-    return a.data(ProcModel::PidRole).toInt() < b.data(ProcModel::PidRole).toInt();
 }

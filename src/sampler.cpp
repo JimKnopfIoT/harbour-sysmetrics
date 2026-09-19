@@ -139,7 +139,9 @@ void Sampler::start()
 
 void Sampler::setIntervalMs(int ms)
 {
-    m_intervalMs = qBound(250, ms, 10000);
+    // upper bound matches the settings slider (30 s); a lower cap here would
+    // silently sample faster than the figure the user was shown
+    m_intervalMs = qBound(250, ms, 30000);
     if (m_timer)
         m_timer->start(m_intervalMs);
 }
