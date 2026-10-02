@@ -1758,8 +1758,12 @@ function tohKeyName(k) {
 function pogoPins() {
     var live = tohmon.readPins()
     var mem = tohmon.readMemory()
+    // From 5.2.0.18 the system's TOH service owns the bus, and what it says
+    // is all an unprivileged reader gets. Asked only when the chip itself
+    // stayed silent: the chip is the original, the service a second hand.
+    var tohd = mem.ok === true ? { ok: false } : tohmon.readDaemon()
     var s = []
-    s.push({ pogoPins: true, mem: mem })
+    s.push({ pogoPins: true, mem: mem, tohd: tohd })
 
     // ---- what the device says about its own contacts --------------------
     if (live.supported === true) {
@@ -1772,6 +1776,14 @@ function pogoPins() {
                     { right: qsTr("read from INT") }))
         pr.push(row(qsTr("Identify contact (ID)"), live.idMillivolt + " mV",
                     { right: qsTr("pin 3") }))
+        if (live.idClassKohm !== undefined)
+            pr.push(row(qsTr("Resistor class (maker's window)"),
+                        live.idClassKohm > 0 ? qsTr("nominal %1 kΩ").arg(live.idClassKohm)
+                      : live.idClassKohm < 0 ? qsTr("no resistor")
+                      : qsTr("outside every window"),
+                        { right: live.idClassKohm === 10 ? "800–999 mV"
+                               : live.idClassKohm === 15 ? "1000–1199 mV"
+                               : live.idClassKohm < 0 ? "≥ 1750 mV" : "" }))
         pr.push(row(qsTr("5 V output"),
                     live.powerOut ? qsTr("switched on") : qsTr("switched off"),
                     { right: qsTr("pin 7"), active: live.powerOut === 1 }))
@@ -1779,7 +1791,7 @@ function pogoPins() {
             pr.push(row(qsTr("Interrupts since boot"), live.interrupts,
                         { right: live.irq >= 0 ? qsTr("IRQ %1").arg(live.irq) : "" }))
         s.push({ title: qsTr("What the contacts report right now"),
-            note: qsTr("Measured by the phone's own pogo-pin controller. The maker's rule is that a cover ties INT to ground and releasing the line is how detaching is noticed, so “a cover is attached” is a reading of INT and not a contact of its own. What the voltage at ID means in ohms cannot be worked out here: the pull-up inside the phone is not published."),
+            note: qsTr("Measured by the phone's own pogo-pin controller. The maker's rule is that a cover ties INT to ground and releasing the line is how detaching is noticed, so “a cover is attached” is a reading of INT and not a contact of its own. The voltage at ID is not turned into ohms here — the pull-up inside the phone is not published. The resistor class is the maker's own: Symbiosis, the system's TOH service, sorts the voltage into fixed windows, and that sorting is shown as it stands, not as a measurement."),
             rows: pr })
     } else {
         s.push({ title: qsTr("What the contacts report right now"),
@@ -1829,9 +1841,47 @@ function pogoPins() {
                          qsTr("no published original for this ID")))
     } else if (mem.ok === true) {
         tr_.push(row(qsTr("Content"), qsTr("read, but not readable as a cover")))
+    } else if (tohd.ok === true) {
+        // Second hand, and said so on every line that matters. The service
+        // has no "not stated": an absent text arrives empty and an absent
+        // flag arrives as false, so empty texts are left out and the flags
+        // carry that caveat in the note below.
+        if (tohd.productName) tr_.push(row(qsTr("Calls itself"), tohd.productName))
+        if (tohd.vendorName) tr_.push(row(qsTr("Made by"), tohd.vendorName))
+        if (tohd.serialNumber) tr_.push(row(qsTr("Serial number"), tohd.serialNumber, { mono: true }))
+        tr_.push(row(qsTr("Vendor ID"), "0x" + hex4(tohd.vendorId)))
+        tr_.push(row(qsTr("Product ID"), "0x" + hex4(tohd.productId)))
+        if (tohd.schemaVersion !== undefined) tr_.push(row(qsTr("Schema version"), tohd.schemaVersion))
+        if (tohd.powerInputToh !== undefined)
+            tr_.push(row(qsTr("Can charge the phone"), tohd.powerInputToh ? qsTr("yes") : qsTr("no"),
+                         { active: tohd.powerInputToh === true }))
+        if (tohd.leavePowerOn !== undefined)
+            tr_.push(row(qsTr("Keeps 5 V after being read"), tohd.leavePowerOn ? qsTr("yes") : qsTr("no"),
+                         { active: tohd.leavePowerOn === true }))
+        if (tohd.vendorWebsite) tr_.push(row(qsTr("Vendor website"), tohd.vendorWebsite, { mono: true }))
+        if (tohd.productWebsite) tr_.push(row(qsTr("Product website"), tohd.productWebsite, { mono: true }))
+        if (tohd.extra) {
+            var ek = []
+            for (var e in tohd.extra) ek.push(e)
+            ek.sort()
+            for (var ei = 0; ei < ek.length; ++ei)
+                tr_.push(row(ek[ei], String(tohd.extra[ek[ei]]),
+                             { mono: true, right: qsTr("phone's configuration") }))
+        }
+        tr_.push(row(qsTr("Source"), qsTr("the system's TOH service"),
+                     { right: "org.sailfishos.tohd1" }))
+        if (tohd.configFiles && tohd.configFiles.length > 0) {
+            for (var ci = 0; ci < tohd.configFiles.length; ++ci)
+                tr_.push(row(ci === 0 ? qsTr("Configuration on this phone") : "",
+                             tohd.configFiles[ci], { mono: true }))
+        } else if (tohd.configDir) {
+            tr_.push(row(qsTr("Configuration on this phone"), qsTr("none for this ID")))
+        }
     }
     s.push({ title: qsTr("TOH"),
-        note: pl
+        note: (!pl && tohd.ok === true)
+              ? qsTr("As the system's TOH service (Symbiosis) reports it, not as read from the chip. The service merges the configuration files listed above over the chip's content, so a name or website may be the phone's and not the cover's; keys the chip's table does not have are the phone's alone. The service cannot say “not stated”: an absent text comes empty and is left out, an absent flag comes as “no”.")
+              : pl
               ? qsTr("What the cover says about itself. Every entry is optional, so a cover is as talkative as its maker wrote it — and the chip says nothing about what the cover actually does. A cover may carry far more than a memory chip: the bus, the interrupt line and both power contacts are there for it, and only the two flags above hint at any of that.")
               : (live.supported === true
                  ? qsTr("No cover has named itself. The phone powers the contacts only while it detects one, the bus belongs to root alone, and a cover without electronics has nothing to say — all three look the same from here.")
@@ -1923,9 +1973,11 @@ function pogoPins() {
             collapsed: true, rows: mr })
     } else if (mem.error) {
         s.push({ title: qsTr("I²C data"),
-            note: live.supported === true
-                  ? qsTr("Nothing answered at 0x50 on any bus that has no driver of its own.")
-                  : qsTr("Without the controller there is no bus to ask."),
+            note: live.supported !== true
+                  ? qsTr("Without the controller there is no bus to ask.")
+                  : tohd.available === true
+                  ? qsTr("Since Sailfish OS 5.2.0.18 the system's TOH service owns this bus. Its controller only answers for target addresses that were registered with it, 0x50 is not registered while this page looks, and the 5 V output is off. Reading the chip from here would mean registering the address or borrowing the bus from the service, which switches the 5 V on — both are acting on the hardware, so this page does neither. What the service read is shown under TOH.")
+                  : qsTr("Nothing answered at 0x50 on any bus that has no driver of its own."),
             rows: [row(qsTr("Result"), mem.error)] })
     }
 
