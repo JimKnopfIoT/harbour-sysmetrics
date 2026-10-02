@@ -2,6 +2,11 @@
 
 #include "rootclient.h"
 
+#include <QDBusArgument>
+#include <QDBusConnection>
+#include <QDBusConnectionInterface>
+#include <QDBusMessage>
+#include <QDBusVariant>
 #include <QDir>
 #include <QFile>
 #include <QCryptographicHash>
@@ -22,10 +27,22 @@ const char *CLASS_DIR   = "/sys/class/yft_pogo_pin";
 const char *OF_DIR      = "/sys/firmware/devicetree/base/yft_pogo_pin";
 const char *EINT_NAME   = "pogo_pin_eint";
 
-// The reader the platform ships (package csd-toh). It carries
+// The reader the platform shipped up to 5.2.0.17 (package csd-toh). It carries
 // cap_dac_override, which is why it can open the bus while the app cannot —
 // the app is not privileged and the i2c character devices are root-only.
+// 5.2.0.18 dropped it together with the rest of csd's own TOH handling.
 const char *CSD_READER  = "/usr/libexec/csd/toh-memory";
+
+// The controller the contacts' SCL and SDA are wired to. Symbiosis looks the
+// adapter up below this node (src/bus.rs) instead of trusting a number, and
+// the number did change: i2c-0 on 5.2.0.17, i2c-13 on 5.2.0.18.
+const char *TOH_I2C_NODE = "/sys/devices/platform/soc/11d00000.i2c";
+
+// The system's TOH service, from 5.2.0.18 on.
+const char *TOHD_SERVICE = "org.sailfishos.tohd1";
+const char *TOHD_PATH    = "/org/sailfishos/tohd1/toh";
+const char *TOHD_IFACE   = "org.sailfishos.tohd1.Toh";
+const char *TOHD_CONFIG  = "/usr/share/tohd-1/tohs";
 
 QByteArray slurp(const QString &path, int max = 65536)
 {
@@ -210,10 +227,14 @@ QStringList freeBuses()
         if (!busy)
             out << n;
     }
-    // On the Jolla Phone (2026) the platform's own reader holds /dev/i2c-0.
-    // Trying it first means the usual case needs one open, not six.
-    if (out.removeAll(QStringLiteral("0")) > 0)
-        out.prepend(QStringLiteral("0"));
+    // The adapter below the contacts' controller goes first, so the usual
+    // case needs one open, not a dozen. Found, not assumed: its number moves
+    // between releases.
+    const QStringList own = QDir(QString::fromLatin1(TOH_I2C_NODE))
+                                .entryList(QStringList() << QStringLiteral("i2c-*"), QDir::Dirs);
+    for (const QString &e : own)
+        if (out.removeAll(e.mid(4)) > 0)
+            out.prepend(e.mid(4));
     return out;
 }
 
@@ -396,6 +417,17 @@ void TohMon::refresh()
 
     m.insert(QStringLiteral("intState"), intState);
     m.insert(QStringLiteral("idMillivolt"), idMv);
+    // The maker's own sorting of that voltage into resistor classes, taken
+    // from Symbiosis (src/id.rs): 800–999 mV a nominal 10 kΩ, 1000–1199 mV
+    // 15 kΩ, from 1750 mV nothing there. It is their classification of a
+    // window, not a resistance measured here — the pull-up is still not
+    // published. 0 = between the windows, -1 = no resistor.
+    int idClass = 0;
+    if (idMv >= 800 && idMv <= 999)        idClass = 10;
+    else if (idMv >= 1000 && idMv <= 1199) idClass = 15;
+    else if (idMv >= 1750)                 idClass = -1;
+    if (idMv >= 0)
+        m.insert(QStringLiteral("idClassKohm"), idClass);
     m.insert(QStringLiteral("powerOut"), fiveVolt);
     // The maker's rule: a cover ties the interrupt line to ground, and the
     // line going high is how detaching is noticed. So this is a reading of
@@ -542,6 +574,122 @@ QVariantMap TohMon::readMemory()
             r.insert(QStringLiteral("officialMatch"), here == QLatin1String(o.sha256));
             break;
         }
+    }
+
+    r.insert(QStringLiteral("ok"), true);
+    return r;
+}
+
+namespace {
+
+// a{sv} nested inside a property arrives as a QDBusArgument; anything
+// further down the same way. Flattened to plain variants QML can read.
+QVariant plainVariant(const QVariant &v)
+{
+    if (v.userType() == qMetaTypeId<QDBusVariant>())
+        return plainVariant(v.value<QDBusVariant>().variant());
+    if (v.userType() != qMetaTypeId<QDBusArgument>())
+        return v;
+    const QDBusArgument arg = v.value<QDBusArgument>();
+    if (arg.currentType() != QDBusArgument::MapType)
+        return QVariant();
+    QVariantMap out;
+    arg.beginMap();
+    while (!arg.atEnd()) {
+        QString key;
+        QDBusVariant val;
+        arg.beginMapEntry();
+        arg >> key >> val;
+        arg.endMapEntry();
+        out.insert(key, plainVariant(val.variant()));
+    }
+    arg.endMap();
+    return out;
+}
+
+} // namespace
+
+QVariantMap TohMon::readDaemon()
+{
+    QVariantMap r;
+    r.insert(QStringLiteral("ok"), false);
+
+    QDBusConnection bus = QDBusConnection::systemBus();
+    QDBusConnectionInterface *dbus = bus.interface();
+    const QString service = QString::fromLatin1(TOHD_SERVICE);
+    // Running, or at least installed and startable on demand. Neither means
+    // there is no such service on this release, and the page says so.
+    bool present = dbus && dbus->isServiceRegistered(service).value();
+    if (!present && dbus) {
+        const QStringList activatable = dbus->call(QStringLiteral("ListActivatableNames"))
+                                            .arguments().value(0).toStringList();
+        present = activatable.contains(service);
+    }
+    r.insert(QStringLiteral("available"), present);
+    if (!present) {
+        r.insert(QStringLiteral("error"), tr("no TOH service on this system"));
+        return r;
+    }
+
+    QDBusMessage call = QDBusMessage::createMethodCall(
+        service, QString::fromLatin1(TOHD_PATH),
+        QStringLiteral("org.freedesktop.DBus.Properties"), QStringLiteral("GetAll"));
+    call << QString::fromLatin1(TOHD_IFACE);
+    const QDBusMessage reply = bus.call(call, QDBus::Block, 3000);
+    if (reply.type() != QDBusMessage::ReplyMessage || reply.arguments().isEmpty()) {
+        // The object only exists while a cover is attached and identified,
+        // so "unknown object" is the service's way of saying "none".
+        r.insert(QStringLiteral("error"),
+                 reply.errorName().contains(QLatin1String("UnknownObject"))
+                     || reply.errorName().contains(QLatin1String("UnknownInterface"))
+                     ? tr("the service names no cover")
+                     : reply.errorMessage());
+        return r;
+    }
+
+    const QVariantMap props = plainVariant(reply.arguments().first()).toMap();
+    if (props.isEmpty()) {
+        r.insert(QStringLiteral("error"), tr("the service names no cover"));
+        return r;
+    }
+
+    struct { const char *dbus; const char *key; } const names[] = {
+        { "VendorId",       "vendorId" },
+        { "ProductId",      "productId" },
+        { "SchemaVersion",  "schemaVersion" },
+        { "SerialNumber",   "serialNumber" },
+        { "VendorName",     "vendorName" },
+        { "ProductName",    "productName" },
+        { "VendorWebsite",  "vendorWebsite" },
+        { "ProductWebsite", "productWebsite" },
+        { "LeavePowerOn",   "leavePowerOn" },
+        { "PowerInputToh",  "powerInputToh" },
+        { "ExtraData",      "extra" },
+    };
+    for (const auto &n : names) {
+        const QString k = QString::fromLatin1(n.dbus);
+        if (props.contains(k))
+            r.insert(QString::fromLatin1(n.key), props.value(k));
+    }
+    // Numbers come as quint16/uchar; QML wants plain ints.
+    for (const char *k : { "vendorId", "productId", "schemaVersion" })
+        if (r.contains(QString::fromLatin1(k)))
+            r.insert(QString::fromLatin1(k), r.value(QString::fromLatin1(k)).toInt());
+
+    // Where an override could come from. The service merges these files over
+    // what the chip says, so a name on the page may be the phone's and not
+    // the cover's; listing them is how that stays visible.
+    const int vid = r.value(QStringLiteral("vendorId"), -1).toInt();
+    const int pid = r.value(QStringLiteral("productId"), -1).toInt();
+    if (vid >= 0 && pid >= 0) {
+        const QString dir = QStringLiteral("%1/%2/%3").arg(QString::fromLatin1(TOHD_CONFIG))
+                                .arg(vid, 4, 16, QLatin1Char('0')).arg(pid, 4, 16, QLatin1Char('0'));
+        QStringList files;
+        for (const QString &f : QDir(dir).entryList(QStringList() << QStringLiteral("*.yaml"),
+                                                      QDir::Files, QDir::Name))
+            files << dir + QLatin1Char('/') + f;
+        r.insert(QStringLiteral("configDir"), dir);
+        r.insert(QStringLiteral("configFiles"), files);
     }
 
     r.insert(QStringLiteral("ok"), true);

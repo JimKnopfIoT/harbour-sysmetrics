@@ -283,7 +283,7 @@ Page {
                         width: page.width
                         active: sec.pogoPins === true
                         sourceComponent: Component {
-                            PogoPinsBlock { width: page.width; mem: sec.mem }
+                            PogoPinsBlock { width: page.width; mem: sec.mem; tohd: sec.tohd }
                         }
                     }
 

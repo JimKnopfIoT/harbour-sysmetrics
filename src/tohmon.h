@@ -38,7 +38,7 @@
 namespace TohI2c {
 struct Reading {
     QByteArray data;     // bytes from offset 0, empty when nothing answered
-    QString bus;         // the adapter that answered, e.g. "i2c-0"
+    QString bus;         // the adapter that answered, e.g. "i2c-13"
     int blocks = 0;      // consecutive target addresses that answered, 0x50 up
     bool eightBit = false;  // the chip takes an 8-bit address
 };
@@ -60,7 +60,7 @@ public:
     bool supported() const { return m_supported; }
 
     // The live state of the contacts. Keys: supported, attached, intState,
-    // intText, idMillivolt, powerOut, interrupts, plus the controller's own
+    // intText, idMillivolt, idClassKohm, powerOut, interrupts, plus the controller's own
     // description (compatible, intGpio, powerGpio, adcChannel, irq).
     // `attached` follows the maker's rule that a cover pulls the interrupt
     // line low; it is a reading of intState, not a separate measurement.
@@ -75,6 +75,18 @@ public:
     // the vendor and product id name one of the maker's own covers —
     // blockSha256, officialName, officialSha256, officialMatch.
     Q_INVOKABLE QVariantMap readMemory();
+
+    // What the system's TOH service says about the attached cover. Since
+    // Sailfish OS 5.2.0.18 that is Symbiosis (org.sailfishos.tohd1 on the
+    // system bus); it owns the bus, and from then on it is the only reader
+    // an unprivileged app has. Keys: available (the service exists), ok
+    // (it named a cover), error, vendorId, productId, schemaVersion,
+    // serialNumber, vendorName, productName, vendorWebsite, productWebsite,
+    // leavePowerOn, powerInputToh, extra (QVariantMap), configFiles (the
+    // per-cover configuration on this phone that may override any of it).
+    // Only properties are read: the service's methods lend out the bus and
+    // switch the 5 V output, and this page touches neither.
+    Q_INVOKABLE QVariantMap readDaemon();
 
     // Start/stop the refresh of `pins`. A page that is not on screen has no
     // business reading sysfs four times a second.

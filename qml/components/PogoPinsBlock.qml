@@ -33,6 +33,7 @@ Column {
     // take anything from it: that a chip answered is a statement about SCL
     // and SDA, not about the cover.
     property var mem: undefined
+    property var tohd: undefined
 
     readonly property var live: tohmon.pins
     readonly property bool haveLive: live && live.supported === true
@@ -71,9 +72,12 @@ Column {
         // Nothing answered on the bus. "N/A" rather than a sentence: it is
         // the same in both languages and it fits the column, where "keine
         // Antwort" needed a second line of its own.
+        // Since 5.2.0.18 only the system's TOH service reaches the chip; when
+        // it named a cover, the bus worked — just not for this app.
         if (n === 5 || n === 6)
             return mem === undefined ? ""
-                 : (mem.ok === true ? qsTr("chip answers") : "N/A")
+                 : mem.ok === true ? qsTr("chip answers")
+                 : (tohd !== undefined && tohd.ok === true) ? "Symbiosis" : "N/A"
         return ""
     }
 
