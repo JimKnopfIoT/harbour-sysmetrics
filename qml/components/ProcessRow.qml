@@ -14,6 +14,9 @@ ListItem {
     // identified on the binder page -- an unidentified process shows nothing
     // rather than a name nobody checked.
     property string binderService: binder.serviceLabel(pid)
+    // Set by the background watch: this process redraws without cause for
+    // longer than the stated threshold. A judgement, so it says so in words.
+    readonly property bool redrawFlag: redraw.flaggedPid > 0 && redraw.flaggedPid === pid
 
     // load bar behind the row
     Rectangle {
@@ -52,7 +55,8 @@ ListItem {
                 text: name
                 truncationMode: TruncationMode.Fade
                 font.pixelSize: Theme.fontSizeSmall
-                color: row.highlighted ? Theme.highlightColor : Theme.primaryColor
+                color: row.highlighted ? Theme.highlightColor
+                                       : (row.redrawFlag ? Diag.amber : Theme.primaryColor)
             }
             Label {
                 width: parent.width
@@ -61,6 +65,14 @@ ListItem {
                 truncationMode: TruncationMode.Fade
                 font.pixelSize: Theme.fontSizeTiny
                 color: Theme.secondaryColor
+            }
+            Label {
+                visible: row.redrawFlag
+                width: parent.width
+                text: qsTr("redraws without cause · closer look worthwhile")
+                truncationMode: TruncationMode.Fade
+                font.pixelSize: Theme.fontSizeTiny
+                color: Diag.amber
             }
         }
 

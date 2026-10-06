@@ -32,4 +32,5 @@ private:
     void checkGpuDriverRelease(QVariantList &out) const;
     void checkChargerNodePermissions(QVariantList &out) const;
     void checkSecurityPatchAge(QVariantList &out) const;
+    void checkLipstickRedraw(QVariantList &out) const;
 };

@@ -116,6 +116,10 @@ static QStringList topicsFor(const QString &id)
 {
     if (id == QLatin1String("audio-bt-volume"))
         return QStringList() << QStringLiteral("bluetooth") << QStringLiteral("audio");
+    // A home screen that redraws every frame is a display fault that shows up
+    // as CPU load; readers look for it under both.
+    if (id == QLatin1String("gpu-lipstick-redraw"))
+        return QStringList() << QStringLiteral("gpu") << QStringLiteral("cpu");
     return QStringList() << topicFor(id);
 }
 
@@ -137,6 +141,7 @@ QVariantList Diagnostics::run(double cpuPct, double load1) const
     checkGpuDriverRelease(out);
     checkChargerNodePermissions(out);
     checkSecurityPatchAge(out);
+    checkLipstickRedraw(out);
     for (int i = 0; i < out.size(); ++i) {
         QVariantMap m = out[i].toMap();
         const QStringList t = topicsFor(m.value(QStringLiteral("id")).toString());
@@ -933,4 +938,92 @@ void Diagnostics::checkMicGain(QVariantList &out) const
             tr("Confirmed too low only on the Xperia 10 III so far. For this device the only test is listening to a video recording; if it is too quiet, raising the PulseAudio record-stream volume compensates — harbour-micgain does this system-wide (available on OpenRepos and GitHub)."),
             tr("harbour-micgain (OpenRepos & GitHub)"), kMicGainUrl));
     }
+}
+
+// A home screen that never stops drawing. The notification preview fades its
+// row of action buttons with a FadeAnimator, which runs on the render thread.
+// It is started just as the preview window disappears, on an item that is no
+// longer drawn, so it never completes -- and while it runs, lipstick redraws
+// every display frame. One notification with action buttons is enough
+// (a screenshot sends one, so does e-mail); it lasts until lipstick restarts.
+// Found by measurement on a JP2601 (5.2.0.18) and confirmed by swapping the
+// FadeAnimator for a FadeAnimation, the pattern the same file already uses for
+// its reply field. The check reads the file; it never changes it.
+void Diagnostics::checkLipstickRedraw(QVariantList &out) const
+{
+    const QString path = QStringLiteral(
+        "/usr/share/lipstick-jolla-home-qt5/notifications/NotificationActionRow.qml");
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+    const QStringList lines = QString::fromUtf8(f.readAll()).split(QLatin1Char('\n'));
+
+    // The behaviour that matters is the one on the button grid; the file has
+    // a second opacity behaviour (the reply field) that is already correct.
+    const QRegularExpression behaviour(
+        QStringLiteral("Behavior\\s+on\\s+opacity\\s*\\{\\s*(FadeAnimator|FadeAnimation)\\b"));
+    int grid = -1, line = -1, reference = -1;
+    QString kind;
+    for (int i = 0; i < lines.size(); ++i) {
+        if (grid < 0 && lines[i].contains(QLatin1String("id: buttonGrid")))
+            grid = i;
+        const QRegularExpressionMatch m = behaviour.match(lines[i]);
+        if (!m.hasMatch())
+            continue;
+        if (grid >= 0 && line < 0) {
+            line = i;
+            kind = m.captured(1);
+        } else if (m.captured(1) == QLatin1String("FadeAnimation") && reference < 0) {
+            reference = i;
+        }
+    }
+    if (line < 0)
+        return; // a layout this check does not know -- say nothing
+
+    const bool affected = kind == QLatin1String("FadeAnimator");
+    const QString found = lines[line].trimmed();
+    const QString fixed = QStringLiteral("Behavior on opacity { FadeAnimation {} }");
+
+    QVariantList det;
+    det.append(detail(tr("File"), path));
+    det.append(detail(tr("Line %1").arg(line + 1), found,
+                      affected ? QStringLiteral("bad") : QStringLiteral("ok")));
+    det.append(detail(tr("Trigger"), tr("a notification preview with action buttons (screenshot, e-mail, …)")));
+    det.append(detail(tr("Effect"), tr("lipstick redraws every display frame until it is restarted: needless CPU load and battery drain")));
+    det.append(detail(tr("Measured"), tr("Jolla JP2601, Sailfish OS 5.2.0.18: 92 frames/s, about 20 % of one core")));
+
+    const bool utilities = QFileInfo::exists(
+        QStringLiteral("/usr/share/jolla-settings/entries/utilities.json"));
+    const QString restart = utilities
+        ? tr("If the home screen is in that state, restarting it ends it: Settings → Utilities → Home Screen → Restart. This closes all running apps.")
+        : tr("If the home screen is in that state, restarting the device ends it.");
+
+    if (!affected) {
+        QVariantMap ok = finding(QStringLiteral("gpu-lipstick-redraw"),
+            tr("Notification preview fix is in place"), 0,
+            tr("The button row of the notification preview fades with a FadeAnimation. The known defect that kept the home screen redrawing after every notification with action buttons is corrected in this file."),
+            det,
+            tr("A package update of lipstick-jolla-home-qt5 replaces this file; if the update does not carry the fix, the defect returns."));
+        ok.insert(QStringLiteral("checkPage"), QStringLiteral("RedrawPage.qml"));
+        ok.insert(QStringLiteral("checkLabel"), tr("Check home screen redraw"));
+        out.append(ok);
+        return;
+    }
+
+    QString change = tr("File: %1").arg(path) + QStringLiteral("\n")
+        + tr("Line %1:").arg(line + 1) + QStringLiteral("\n    ") + found + QStringLiteral("\n")
+        + tr("change to:") + QStringLiteral("\n    ") + fixed;
+    if (reference >= 0)
+        change += QStringLiteral("\n") + tr("The same file already uses FadeAnimation at line %1.").arg(reference + 1);
+
+    QVariantMap m = finding(QStringLiteral("gpu-lipstick-redraw"),
+        tr("Notifications keep the home screen redrawing"), 2,
+        tr("The notification preview fades its action buttons with a FadeAnimator. It starts while the preview disappears and never finishes; from then on lipstick redraws every display frame although nothing on screen changes. One notification with action buttons is enough. For as long as it lasts, this costs CPU time for nothing, and with it battery."),
+        det,
+        restart + QStringLiteral("\n\n")
+            + tr("Changing the file needs root, and a package update replaces it. This app only reads it."));
+    m.insert(QStringLiteral("change"), change);
+    m.insert(QStringLiteral("checkPage"), QStringLiteral("RedrawPage.qml"));
+    m.insert(QStringLiteral("checkLabel"), tr("Check home screen redraw"));
+    out.append(m);
 }

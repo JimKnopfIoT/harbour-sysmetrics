@@ -13,6 +13,8 @@ Column {
     // then only reports. Callers that say nothing keep their own state, as
     // before.
     property bool externalState: false
+    // Off where the finding is shown on the very page it would lead to.
+    property bool showCheckLink: true
     signal toggled()
     // Emitted when the reader taps the process a finding names. Findings that
     // carry no pid (every caller before the binder page) never show the row,
@@ -84,6 +86,17 @@ Column {
                                                       : Theme.primaryColor
             }
         }
+        // The file and the exact edit that fixes a known defect. Named, never
+        // applied: the reader decides and makes the change.
+        Label {
+            visible: (item.finding.change || "").length > 0
+            text: item.finding.change || ""
+            width: parent.width
+            wrapMode: Text.WrapAnywhere
+            font.pixelSize: Theme.fontSizeExtraSmall
+            font.family: "monospace"
+            color: Diag.yellow
+        }
         Label {
             visible: item.finding.note.length > 0
             text: item.finding.note
@@ -102,6 +115,19 @@ Column {
             font.family: "monospace"
             color: Theme.secondaryColor
             wrapMode: Text.WrapAnywhere
+        }
+        // A finding that has its own check names the page; one tap away.
+        BackgroundItem {
+            width: parent.width
+            height: visible ? Theme.itemSizeExtraSmall : 0
+            visible: item.showCheckLink && (item.finding.checkPage || "").length > 0
+            onClicked: pageStack.push(Qt.resolvedUrl("../pages/" + item.finding.checkPage))
+            Label {
+                anchors.verticalCenter: parent.verticalCenter
+                text: (item.finding.checkLabel || "") + "  ›"
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: Diag.cyan
+            }
         }
         // Everything this page knows about the process behind the finding is
         // one tap away -- the finding names it, the process page shows it.

@@ -97,6 +97,27 @@ Page {
                 text: qsTr("Process has exited")
             }
 
+            // The background watch holds a suspicion against this process:
+            // say what was seen and lead to the step-by-step check.
+            BackgroundItem {
+                visible: redraw.flaggedPid > 0 && redraw.flaggedPid === page.pid
+                width: parent.width
+                height: visible ? redrawHint.height + 2 * Theme.paddingMedium : 0
+                onClicked: pageStack.push(Qt.resolvedUrl("RedrawPage.qml"))
+                Label {
+                    id: redrawHint
+                    x: Theme.horizontalPageMargin
+                    width: parent.width - 2 * Theme.horizontalPageMargin
+                    anchors.verticalCenter: parent.verticalCenter
+                    wrapMode: Text.Wrap
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    color: Diag.amber
+                    text: qsTr("Redraws without touch since %1, at %2 render wakeups/s. A closer look is worthwhile.")
+                          .arg(Qt.formatTime(new Date(redraw.watch.since || 0), "hh:mm:ss"))
+                          .arg((redraw.watch.renderWake || 0).toFixed(0)) + "  ›"
+                }
+            }
+
             // ---- assessment -------------------------------------------
             Column {
                 visible: d.notes.length > 0
@@ -446,6 +467,14 @@ Page {
                                         text: modelData.name
                                         font.pixelSize: Theme.fontSizeTiny
                                         truncationMode: TruncationMode.Fade
+                                    }
+                                    Label {
+                                        width: parent.width
+                                        visible: text.length > 0
+                                        text: redraw.threadRole(page.pid, modelData.tid, modelData.name)
+                                        font.pixelSize: Theme.fontSizeTiny
+                                        truncationMode: TruncationMode.Fade
+                                        color: Diag.cyan
                                     }
                                     Label {
                                         width: parent.width

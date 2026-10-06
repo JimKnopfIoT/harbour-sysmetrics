@@ -85,7 +85,28 @@ Page {
             SectionHeader { text: qsTr("Diagnosis") }
             Repeater {
                 model: page.findings
-                FindingItem { finding: modelData }
+                // The display page carries the link to the redraw check itself
+                // (below, visible with the findings folded too); a second one
+                // inside the finding would stand right above it.
+                FindingItem {
+                    finding: modelData
+                    showCheckLink: !(page.diagTopic === "gpu" && modelData.checkPage === "RedrawPage.qml")
+                }
+            }
+            // The step-by-step check belongs with the display: a reader who
+            // comes here about a busy home screen finds the way to measure it.
+            BackgroundItem {
+                visible: page.diagTopic === "gpu"
+                width: page.width
+                height: visible ? Theme.itemSizeExtraSmall : 0
+                onClicked: pageStack.push(Qt.resolvedUrl("RedrawPage.qml"))
+                Label {
+                    x: Theme.horizontalPageMargin
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: qsTr("Check home screen redraw") + "  ›"
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    color: Diag.cyan
+                }
             }
             ButtonLayout {
                 visible: typeof cve !== "undefined"

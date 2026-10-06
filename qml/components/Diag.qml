@@ -10,6 +10,8 @@ QtObject {
     readonly property color amber:  "#ffb44a"
     readonly property color red:    "#ff5a52"
     readonly property color violet: "#b58cff"
+    // A change the reader has to make by hand: file and exact edit.
+    readonly property color yellow: "#ffd166"
 
     readonly property color panel:   Qt.rgba(1, 1, 1, 0.045)
     readonly property color panelHi: Qt.rgba(1, 1, 1, 0.09)
