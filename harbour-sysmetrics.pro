@@ -44,6 +44,7 @@ HEADERS += \
     src/deviceinfo.h \
     src/detailmon.h \
     src/diagnostics.h \
+    src/redrawcheck.h \
     src/keymon.h \
     src/readtest.h \
     src/tohmon.h \
@@ -69,6 +70,7 @@ SOURCES += \
     src/deviceinfo.cpp \
     src/detailmon.cpp \
     src/diagnostics.cpp \
+    src/redrawcheck.cpp \
     src/keymon.cpp \
     src/fpmon.cpp \
     src/btinfo.cpp \

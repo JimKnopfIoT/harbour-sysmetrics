@@ -19,6 +19,22 @@ function row(k, v, opt) {
 // is a full dump rather than a figure one needs for an overview goes through
 // here — the page has to answer "what is this device" before it answers
 // "what does the kernel export".
+// Words the DRM connector (status, dpms) and mce (display status) use, read
+// out. Case differs between the sources; anything unknown stays as it came.
+function displayWord(raw) {
+    switch (("" + raw).toLowerCase()) {
+    case "connected":    return qsTr("connected")
+    case "disconnected": return qsTr("not connected")
+    case "unknown":      return qsTr("unknown")
+    case "on":           return qsTr("on")
+    case "off":          return qsTr("off")
+    case "standby":      return qsTr("standby")
+    case "suspend":      return qsTr("suspended")
+    case "dimmed":       return qsTr("dimmed")
+    default:             return raw
+    }
+}
+
 function folded(list) {
     for (var i = 0; i < list.length; ++i)
         list[i].collapsed = true
@@ -603,14 +619,17 @@ function displaySections() {
     for (var c = 0; c < conns.length; ++c) {
         var cn = conns[c]
         var cr = []
-        cr.push(row(qsTr("Status"), cn.status,
-                    { color: cn.status === "connected" ? "green" : undefined }))
+        // The kernel and mce spell their states differently ("On" against
+        // "on"); the reading goes in the value column, each source's own word
+        // stays beside it.
+        cr.push(row(qsTr("Status"), displayWord(cn.status),
+                    { color: cn.status === "connected" ? "green" : undefined, right: cn.status }))
         // dpms is what the kernel did to the panel; mce is what the system
         // asked for. They are two different statements and stay apart.
         if (cn.dpms)
-            cr.push(row(qsTr("Power state (kernel)"), cn.dpms))
+            cr.push(row(qsTr("Power state (kernel)"), displayWord(cn.dpms), { right: cn.dpms }))
         if (d.mceDisplay)
-            cr.push(row(qsTr("Display state (system)"), d.mceDisplay))
+            cr.push(row(qsTr("Display state (system)"), displayWord(d.mceDisplay), { right: d.mceDisplay }))
         cr.push(row(qsTr("Driver has it enabled"), cn.enabled))
         if (cn.bitsPerPixel)
             cr.push(row(qsTr("Colour depth"), qsTr("%1 bits per pixel").arg(cn.bitsPerPixel)))

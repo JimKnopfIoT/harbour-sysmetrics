@@ -19,6 +19,17 @@ recognise documented device issues and explain their fixes.
   Bluetooth connections (BlueZ).
 - Record mode: accumulates per-process CPU time over a session and ranks
   the consumers.
+- Home screen redraw check: whether lipstick keeps drawing on an idle
+  screen, and why. Measured from its own threads (render-thread wakeups,
+  main against render thread), display frames where an interrupt has been
+  seen at zero while idle, the composer's share and any app handing in
+  frames in step. A background watch marks lipstick in the process list when
+  it redraws without touch for longer than the stated threshold and lists
+  what came just before the onset (notifications with their sender and
+  number of buttons, never their text; screenshots). A guided counter-test
+  sends one notification without and one with action buttons and measures
+  after each. Known defects are matched with file, line and the exact edit;
+  the app never restarts or changes anything.
 - Diagnostics on every subsystem page (facts first, findings at the end):
   CPU hardware vulnerabilities (only issues that can affect this
   architecture; green = kernel mitigation active), cpufreq governor health

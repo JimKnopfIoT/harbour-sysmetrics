@@ -84,6 +84,10 @@ Page {
                 onClicked: pageStack.push(Qt.resolvedUrl("BugReportPage.qml"))
             }
             MenuItem {
+                text: qsTr("Home screen redraw")
+                onClicked: pageStack.push(Qt.resolvedUrl("RedrawPage.qml"))
+            }
+            MenuItem {
                 text: qsTr("Record load")
                 onClicked: pageStack.push(Qt.resolvedUrl("RecordPage.qml"))
             }

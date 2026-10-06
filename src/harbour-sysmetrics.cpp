@@ -16,6 +16,7 @@
 #include "btinfo.h"
 #include "detailmon.h"
 #include "diagnostics.h"
+#include "redrawcheck.h"
 #ifdef SYSMETRICS_ULTIMATE
 #include "cvelookup.h"
 #endif
@@ -150,6 +151,7 @@ int main(int argc, char *argv[])
     FpMon fpmon;
     ReadTest readtest;
     BinderMon binder;
+    RedrawCheck redraw;
 
     // First: rows are attributed against the frequencies of their own sample,
     // and the sampler emits the system snapshot before the process list.
@@ -168,6 +170,8 @@ int main(int argc, char *argv[])
                                   Q_ARG(bool, sysmon.foreground() || recorder.running()));
     };
     QObject::connect(&sysmon, &SysMon::foregroundChanged, &sysmon, updateProcSampling);
+    QObject::connect(&sysmon, &SysMon::foregroundChanged, &redraw,
+                     [&sysmon, &redraw]() { redraw.setForeground(sysmon.foreground()); });
     QObject::connect(&recorder, &Recorder::stateChanged, &recorder, updateProcSampling);
 
     // A pass over the thermal framework is 134 ms on the Jolla Phone (2026),
@@ -215,6 +219,7 @@ int main(int argc, char *argv[])
     view->rootContext()->setContextProperty(QStringLiteral("readtest"), &readtest);
     view->rootContext()->setContextProperty(QStringLiteral("tohmon"), &tohmon);
     view->rootContext()->setContextProperty(QStringLiteral("binder"), &binder);
+    view->rootContext()->setContextProperty(QStringLiteral("redraw"), &redraw);
 #ifdef SYSMETRICS_ULTIMATE
     // Ultimate only: the "cve" context property is the QML-side feature gate.
     CveLookup cvelookup;

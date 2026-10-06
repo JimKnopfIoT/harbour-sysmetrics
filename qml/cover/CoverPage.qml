@@ -12,7 +12,22 @@ CoverBackground {
         }
     }
 
+    // While the redraw check measures, the cover must not draw: every update
+    // here is a frame lipstick composes, and the check would measure itself.
+    // Hidden items are not rendered, so only the fixed text below remains.
+    Label {
+        visible: redraw.busy
+        anchors.centerIn: parent
+        width: parent.width - 2 * Theme.paddingLarge
+        horizontalAlignment: Text.AlignHCenter
+        wrapMode: Text.Wrap
+        font.pixelSize: Theme.fontSizeSmall
+        color: Diag.amber
+        text: redraw.coverText
+    }
+
     Column {
+        visible: !redraw.busy
         anchors {
             top: parent.top; left: parent.left; right: parent.right
             margins: Theme.paddingLarge
@@ -47,6 +62,7 @@ CoverBackground {
     }
 
     HistoryGraph {
+        visible: !redraw.busy
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         height: parent.height * 0.34
         values: sysmon.cpuHistory
@@ -57,6 +73,7 @@ CoverBackground {
     }
 
     CoverActionList {
+        enabled: !redraw.busy
         CoverAction {
             iconSource: sysmon.paused ? "image://theme/icon-cover-play"
                                       : "image://theme/icon-cover-pause"
