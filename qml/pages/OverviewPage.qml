@@ -582,6 +582,46 @@ Page {
                 }
             }
 
+            // ---- FM radio ----------------------------------------------
+            MetricCard {
+                width: page.width - 2 * Theme.horizontalPageMargin
+                x: Theme.horizontalPageMargin
+                visible: fmtest.present
+                title: qsTr("FM radio")
+                accent: Diag.violet
+                drilldown: true
+                onClicked: pageStack.push(Qt.resolvedUrl("FmTestPage.qml"))
+                Label {
+                    width: parent.width
+                    text: fmtest.supported ? qsTr("Built-in receiver — tap for a function test")
+                                           : qsTr("Built-in receiver — tap for details")
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    color: Theme.secondaryColor
+                    wrapMode: Text.Wrap
+                }
+            }
+
+            // ---- LEDs --------------------------------------------------
+            MetricCard {
+                width: page.width - 2 * Theme.horizontalPageMargin
+                x: Theme.horizontalPageMargin
+                visible: leds.leds.length > 0
+                title: qsTr("LEDs")
+                accent: Diag.violet
+                drilldown: true
+                onClicked: pageStack.push(Qt.resolvedUrl("LedPage.qml"))
+                Label {
+                    width: parent.width
+                    text: leds.indicatorCount > 0
+                          ? qsTr("%n indicator channel(s) — tap for a function test", "", leds.indicatorCount)
+                            + (leds.vibrator.length ? qsTr(", vibration motor") : "")
+                          : qsTr("No indicator LED — tap for details")
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    color: Theme.secondaryColor
+                    wrapMode: Text.Wrap
+                }
+            }
+
             Item { width: 1; height: Theme.paddingLarge }
         }
 

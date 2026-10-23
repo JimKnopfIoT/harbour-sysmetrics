@@ -160,3 +160,9 @@ bool RootClient::setNice(int pid, int nice)
 {
     return request("N " + QByteArray::number(pid) + ' ' + QByteArray::number(nice)) == "1";
 }
+
+bool RootClient::ledWrite(const QString &name, const QString &attr, int value)
+{
+    return request("E " + name.toLocal8Bit() + ' ' + attr.toLatin1() + ' '
+                   + QByteArray::number(value)) == "1";
+}

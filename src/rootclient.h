@@ -41,6 +41,10 @@ public:
     QStringList sockMap();              // "inode|pid|comm" per socket fd, system-wide
     bool sendSignal(int pid, int sig);
     bool setNice(int pid, int nice);
+    // One write to an indicator LED for the LED test, where brightness (or
+    // the chip's pattern switch) belongs to the system. The helper repeats
+    // every check of Leds::helperWrite itself.
+    bool ledWrite(const QString &name, const QString &attr, int value);
 
 signals:
     void activeChanged();

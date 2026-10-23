@@ -21,6 +21,8 @@
 #include "cvelookup.h"
 #endif
 #include "fpmon.h"
+#include "fmtest.h"
+#include "ledmon.h"
 #include "graphitem.h"
 #include "sysmetrics_version.h"
 #include "keymon.h"
@@ -149,6 +151,8 @@ int main(int argc, char *argv[])
     Diagnostics diagnostics;
     KeyMon keymon;
     FpMon fpmon;
+    FmTest fmtest;
+    LedMon leds;
     ReadTest readtest;
     BinderMon binder;
     RedrawCheck redraw;
@@ -216,6 +220,8 @@ int main(int argc, char *argv[])
     view->rootContext()->setContextProperty(QStringLiteral("diagnostics"), &diagnostics);
     view->rootContext()->setContextProperty(QStringLiteral("keymon"), &keymon);
     view->rootContext()->setContextProperty(QStringLiteral("fpmon"), &fpmon);
+    view->rootContext()->setContextProperty(QStringLiteral("fmtest"), &fmtest);
+    view->rootContext()->setContextProperty(QStringLiteral("leds"), &leds);
     view->rootContext()->setContextProperty(QStringLiteral("readtest"), &readtest);
     view->rootContext()->setContextProperty(QStringLiteral("tohmon"), &tohmon);
     view->rootContext()->setContextProperty(QStringLiteral("binder"), &binder);

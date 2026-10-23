@@ -38,7 +38,8 @@ Dialog {
                 text: qsTr("• list open files, sockets and watchers of processes belonging to other users\n"
                     + "• read the WLAN firmware counters in debugfs\n"
                     + "• read the kernel charger log\n"
-                    + "• pull journal and kernel-log excerpts for a bug report")
+                    + "• pull journal and kernel-log excerpts for a bug report\n"
+                    + "• switch indicator LEDs for the LED test")
             }
             Label {
                 x: Theme.horizontalPageMargin

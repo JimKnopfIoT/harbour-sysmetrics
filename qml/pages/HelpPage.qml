@@ -243,7 +243,7 @@ Page {
             items: [
                 { t: qsTr("Sampling interval"), d: qsTr("How often the app re-reads /proc and /sys. Shorter is more responsive but uses more CPU.") },
                 { t: qsTr("Record mode"), d: qsTr("Accumulates CPU time per process over a session and ranks the consumers, catching short-lived processes an instant view misses.") },
-                { t: qsTr("Root mode"), d: qsTr("An optional root helper that lets the app inspect processes of other users (system daemons) fully, read the kernel charger log and pull journal excerpts for a bug report. Reading is limited to a fixed list of files; signals and renice reach one named process, the same ones the process detail page offers without root.") },
+                { t: qsTr("Root mode"), d: qsTr("An optional root helper that lets the app inspect processes of other users (system daemons) fully, read the kernel charger log, pull journal excerpts for a bug report and switch indicator LEDs for the LED test where they belong to the system. Reading is limited to a fixed list of files; signals and renice reach one named process, the same ones the process detail page offers without root; LED writes reach indicator LEDs only, never one a trigger drives.") },
                 { t: qsTr("Colour scale"), d: qsTr("Green, amber and red are this app's grading, not a signal from the device. Processor load turns amber at 50 % and red at 80 %. A filesystem turns amber above 75 % and red above 90 %. Battery charge turns red below 20 %. State of health turns amber below 80 % and red below 65 %. Where a colour stands next to a figure, the figure is the evidence and the colour only the opinion about it.") }
             ]
         },
@@ -277,6 +277,28 @@ Page {
                 { t: qsTr("Identify"), d: qsTr("Ask the reader whether the finger on it is one of the enrolled ones. The answer is a name or a no; nothing about the fingerprint itself is handed out, and nothing is unlocked by it.") },
                 { t: qsTr("Enrolled fingers"), d: qsTr("The templates stored for this user. They are listed here by the names the daemon keeps them under. This page never adds one and never deletes one.") },
                 { t: qsTr("Already identifying"), d: qsTr("When the lock screen is armed, the daemon is already identifying for it and answers a second request with a refusal. That refusal is itself proof the reader and the daemon are alive — but the finger goes to the lock screen, not to this test.") }
+            ]
+        },
+        {
+            title: qsTr("FM radio"), key: "fmradio",
+            items: [
+                { t: qsTr("Receiver"), d: qsTr("On the Jolla Phone (2026) the FM receiver hangs off the same connectivity driver (conninfra) as Wi-Fi, Bluetooth and GPS, and is reached through /dev/fm.") },
+                { t: qsTr("Antenna"), d: qsTr("With nothing plugged in, no station was audible on the Jolla Phone (2026). There a USB-C cable plugged into the phone serves as the antenna, and only one that carries all wires: fully wired USB 3 and USB4 cables work, charging and USB 2.0 cables do not. Tested with a 1.3 m USB4 cable. Hanging straight it receives better than coiled; a laptop on the other end adds noise.") },
+                { t: qsTr("Sweep"), d: qsTr("The test powers the chip up muted, asks for the level of every 100 kHz channel from 87.5 to 108 MHz and powers it down again. The level is the chip's own figure: its raw value times 3/8 gives dBm, checked against the driver's single-channel reading to within 1 dB. No sound is played and no audio route is changed.") },
+                { t: qsTr("Floor and peaks"), d: qsTr("The floor is the level 20 % of the channels stay under. A peak is a channel at least 8 dB above it, or one the chip itself flags as a station. That flag is the chip's judgement, not ours, and it is shown as such.") },
+                { t: qsTr("In use"), d: qsTr("There is one chip, tuned to one frequency at a time, for every program that opens /dev/fm. If a radio app holds it, the test does not start, because switching the chip off at the end would cut that app off.") }
+            ]
+        },
+        {
+            title: qsTr("LEDs"), key: "leds",
+            items: [
+                { t: qsTr("Indicator LED"), d: qsTr("A node in /sys/class/leds whose name names a colour or a status light. The same class also holds the display backlight, the camera flash and, on some phones, the vibration motor; the test leaves those alone.") },
+                { t: qsTr("Trigger"), d: qsTr("A kernel source that drives the LED by itself, e.g. charging or storage activity. Writing brightness detaches it, and putting it back takes rights this app does not have — so the test skips a channel a trigger drives.") },
+                { t: qsTr("Test"), d: qsTr("Each channel lights alone at full brightness, then all together. Whether it lit is for the eye to judge. Afterwards the previous value is written back — unless another program, such as the notification service, wrote the channel during the test; then its newer value stays and the result says so.") },
+                { t: qsTr("Who may switch it"), d: qsTr("On the Jolla Phone (2026) brightness of red, green and blue is writable by every program, no root needed. On the Xperia 10 III it belongs to system and only the root helper can switch it.") },
+                { t: qsTr("Chip pattern"), d: qsTr("Some LED controllers run a pattern of their own once told to, in the chip and without the processor — the Awinic chip of the Jolla Phone (2026) through blink, the Qualcomm tri-led through breath. The switch belongs to root; with the root helper the test turns it on for 6 s and off again.") },
+                { t: qsTr("Vibration"), d: qsTr("Some phones list the vibration motor as an LED. The test sets duration to 150 ms and writes activate, three times, then puts duration back. Under the kernel's transient trigger, as on the Jolla Phone (2026), state must be 1 as well, or the pulse runs with the motor off; the test sets it and restores it afterwards. No root is needed where the files belong to the input group, of which the device user is a member.") },
+                { t: qsTr("What is not read"), d: qsTr("Attribute values beyond the maximum, the trigger and the brightness of indicator and backlight nodes. On some drivers reading is a register access, and a flash controller clears its fault latch when read. Owner and mode are shown instead.") }
             ]
         },
         {

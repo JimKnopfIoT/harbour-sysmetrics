@@ -9,6 +9,7 @@
 #include "roothelper.h"
 
 #include "chargerlog.h"
+#include "ledmon.h"
 #include "tohmon.h"
 
 #include <QCoreApplication>
@@ -299,7 +300,7 @@ QByteArray cmdTohMemory()
            + QByteArray::number(r.eightBit ? 8 : 16) + '\n' + r.data;
 }
 
-// The two write operations. Restricted to what the process detail page can
+// The write operations. Signal and renice are restricted to what the process detail page can
 // actually ask for: one existing process (never init, never a process group
 // or "all processes" via pid <= 0) and the four signals behind its buttons.
 bool targetOk(int pid)
@@ -317,6 +318,22 @@ QByteArray cmdSignal(const QByteArray &arg)
     if (sig != SIGTERM && sig != SIGKILL && sig != SIGSTOP && sig != SIGCONT)
         return "0";
     return ::kill(pid, sig) == 0 ? "1" : "0";
+}
+
+// The LED test, where brightness belongs to the system: "<led> <attr> <value>".
+// Leds::helperWrite takes indicator LEDs only, never one a trigger drives,
+// brightness within max_brightness and the pattern switch as 0 or 1.
+QByteArray cmdLed(const QByteArray &arg)
+{
+    const QList<QByteArray> a = arg.split(' ');
+    if (a.size() != 3)
+        return "0";
+    bool ok = false;
+    const int value = a.at(2).toInt(&ok);
+    if (!ok)
+        return "0";
+    return Leds::helperWrite(QString::fromLocal8Bit(a.at(0)), QString::fromLatin1(a.at(1)), value)
+               ? "1" : "0";
 }
 
 QByteArray cmdNice(const QByteArray &arg)
@@ -377,6 +394,8 @@ void serve(QLocalSocket *sock)
                 payload = cmdNice(arg);
             else if (cmd == "L")
                 payload = cmdBinderLog(arg);
+            else if (cmd == "E")
+                payload = cmdLed(arg);
             else
                 ok = false;
             if (ok)

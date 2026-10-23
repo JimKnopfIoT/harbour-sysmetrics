@@ -49,6 +49,8 @@ HEADERS += \
     src/readtest.h \
     src/tohmon.h \
     src/fpmon.h \
+    src/fmtest.h \
+    src/ledmon.h \
     src/btinfo.h \
     src/bindermon.h \
     src/netmon.h \
@@ -73,6 +75,8 @@ SOURCES += \
     src/redrawcheck.cpp \
     src/keymon.cpp \
     src/fpmon.cpp \
+    src/fmtest.cpp \
+    src/ledmon.cpp \
     src/btinfo.cpp \
     src/bindermon.cpp \
     src/netmon.cpp \
@@ -116,6 +120,8 @@ DISTFILES += \
     qml/pages/ConnectionsPage.qml \
     qml/pages/ConnectionDetailPage.qml \
     qml/pages/OverviewPage.qml \
+    qml/pages/FmTestPage.qml \
+    qml/pages/LedPage.qml \
     qml/pages/CvePage.qml \
     qml/pages/BugReportPage.qml \
     qml/components/FindingItem.qml \

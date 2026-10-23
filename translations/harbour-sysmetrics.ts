@@ -2282,6 +2282,167 @@ github.com/JimKnopfIoT/harbour-sysmetrics</source>
     </message>
 </context>
 <context>
+    <name>FmTest</name>
+    <message>
+        <location filename="../src/fmtest.cpp" line="135"/>
+        <source>%1 is using the FM chip. Close it and run the test again — the test switches the chip off when it ends.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/fmtest.cpp" line="167"/>
+        <source>%1 cannot be opened: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/fmtest.cpp" line="174"/>
+        <source>driver error %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/fmtest.cpp" line="179"/>
+        <source>The chip did not power up: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/fmtest.cpp" line="193"/>
+        <source>Measuring %1 MHz failed: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/fmtest.cpp" line="210"/>
+        <source>Cancelled — the chip is switched off again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/fmtest.cpp" line="213"/>
+        <source>The chip powered up, measured all %1 channels and was switched off again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FmTestPage</name>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="49"/>
+        <source>FM radio test</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="58"/>
+        <source>Device node</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="60"/>
+        <source>none</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="63"/>
+        <source>Driver</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="65"/>
+        <source>not one this test knows</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="69"/>
+        <source>Access</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="70"/>
+        <source>read and write</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="70"/>
+        <source>denied</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="74"/>
+        <source>In use by</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="76"/>
+        <source>nobody</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="82"/>
+        <source>Test</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="87"/>
+        <source>The antenna is the USB-C cable. For stations to come in, plug in a fully wired USB 3 or USB4 cable of at least one metre — charging and USB 2.0 cables lack the wires the antenna uses — let it hang straight and leave the other end free.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="104"/>
+        <source>Sweeping 87.5–108 MHz</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="111"/>
+        <source>Not started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="119"/>
+        <source>%1 s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="128"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="128"/>
+        <source>Sweep the band</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="138"/>
+        <source>The FM ioctls depend on the driver and on 32 or 64 bit. They were measured on the Jolla Phone (2026) only, so on this phone the node is shown and the test is not offered.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="146"/>
+        <source>Spectrum</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="229"/>
+        <source>Floor (dashed) %1 dBm — the level 20 % of the channels stay under.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="238"/>
+        <source>Peaks</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="253"/>
+        <source>chip: station</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="260"/>
+        <source>No channel stands 8 dB over the floor, and the chip flags none as a station.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/FmTestPage.qml" line="268"/>
+        <source>A peak is a channel at least 8 dB over the floor, or one the chip itself flags as a station. Without a cable the chip on the Jolla Phone (2026) still shows single peaks; in our measurements nothing audible was behind them. A quiet band means no antenna, not a broken chip.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FpMon</name>
     <message>
         <location filename="../src/fpmon.cpp" line="86"/>
@@ -3236,7 +3397,7 @@ On the Jolla Phone it does not. Its MediaTek battery-manager driver hands out 37
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="174"/>
-        <location filename="../qml/pages/HelpPage.qml" line="328"/>
+        <location filename="../qml/pages/HelpPage.qml" line="350"/>
         <source>USB Power Delivery (PD)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3681,11 +3842,6 @@ On the Jolla Phone it does not. Its MediaTek battery-manager driver hands out 37
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="246"/>
-        <source>An optional root helper that lets the app inspect processes of other users (system daemons) fully, read the kernel charger log and pull journal excerpts for a bug report. Reading is limited to a fixed list of files; signals and renice reach one named process, the same ones the process detail page offers without root.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../qml/pages/HelpPage.qml" line="247"/>
         <source>Colour scale</source>
         <translation type="unfinished"></translation>
@@ -3872,602 +4028,722 @@ On the Jolla Phone it does not. Its MediaTek battery-manager driver hands out 37
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="283"/>
-        <source>Sensors</source>
+        <source>FM radio</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="285"/>
-        <source>Accelerometer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="285"/>
-        <source>Measures linear acceleration on three axes (m/s²), including gravity — how the device is tilted and moved.</source>
+        <source>Receiver</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="286"/>
-        <source>Gyroscope</source>
+        <source>Antenna</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="286"/>
-        <source>Measures angular velocity (°/s) — how fast the device is rotating around each axis.</source>
+        <source>With nothing plugged in, no station was audible on the Jolla Phone (2026). There a USB-C cable plugged into the phone serves as the antenna, and only one that carries all wires: fully wired USB 3 and USB4 cables work, charging and USB 2.0 cables do not. Tested with a 1.3 m USB4 cable. Hanging straight it receives better than coiled; a laptop on the other end adds noise.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="287"/>
-        <source>Magnetometer / Compass</source>
+        <source>Sweep</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="287"/>
-        <source>Measures the magnetic field (µT); combined with the accelerometer it yields the compass heading (azimuth).</source>
+        <source>The test powers the chip up muted, asks for the level of every 100 kHz channel from 87.5 to 108 MHz and powers it down again. The level is the chip&apos;s own figure: its raw value times 3/8 gives dBm, checked against the driver&apos;s single-channel reading to within 1 dB. No sound is played and no audio route is changed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="288"/>
-        <source>Proximity</source>
+        <source>Floor and peaks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="288"/>
-        <source>A short-range sensor near the earpiece; reports near/far, used to blank the screen during calls.</source>
+        <source>The floor is the level 20 % of the channels stay under. A peak is a channel at least 8 dB above it, or one the chip itself flags as a station. That flag is the chip&apos;s judgement, not ours, and it is shown as such.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="289"/>
-        <source>Ambient light</source>
+        <source>In use</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="289"/>
-        <source>Measures surrounding brightness; drives automatic display brightness.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="290"/>
-        <source>GPS fix / TTFF</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="290"/>
-        <source>A fix is a computed position from enough satellites. TTFF (time to first fix) is how long the receiver needed from cold start — seconds with a clear sky, longer indoors.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="291"/>
-        <source>Accuracy</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/pages/HelpPage.qml" line="291"/>
-        <source>The estimated horizontal error radius of the position, in metres — smaller is better.</source>
+        <location filename="../qml/pages/HelpPage.qml" line="293"/>
+        <source>LEDs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/pages/HelpPage.qml" line="295"/>
+        <source>Indicator LED</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="295"/>
+        <source>A node in /sys/class/leds whose name names a colour or a status light. The same class also holds the display backlight, the camera flash and, on some phones, the vibration motor; the test leaves those alone.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="296"/>
+        <source>Trigger</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="296"/>
+        <source>A kernel source that drives the LED by itself, e.g. charging or storage activity. Writing brightness detaches it, and putting it back takes rights this app does not have — so the test skips a channel a trigger drives.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="297"/>
+        <source>Test</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="297"/>
+        <source>Each channel lights alone at full brightness, then all together. Whether it lit is for the eye to judge. Afterwards the previous value is written back — unless another program, such as the notification service, wrote the channel during the test; then its newer value stays and the result says so.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="298"/>
+        <source>Who may switch it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="298"/>
+        <source>On the Jolla Phone (2026) brightness of red, green and blue is writable by every program, no root needed. On the Xperia 10 III it belongs to system and only the root helper can switch it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="299"/>
+        <source>Chip pattern</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="299"/>
+        <source>Some LED controllers run a pattern of their own once told to, in the chip and without the processor — the Awinic chip of the Jolla Phone (2026) through blink, the Qualcomm tri-led through breath. The switch belongs to root; with the root helper the test turns it on for 6 s and off again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="300"/>
+        <source>Vibration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="300"/>
+        <source>Some phones list the vibration motor as an LED. The test sets duration to 150 ms and writes activate, three times, then puts duration back. Under the kernel&apos;s transient trigger, as on the Jolla Phone (2026), state must be 1 as well, or the pulse runs with the motor off; the test sets it and restores it afterwards. No root is needed where the files belong to the input group, of which the device user is a member.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="301"/>
+        <source>What is not read</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="301"/>
+        <source>Attribute values beyond the maximum, the trigger and the brightness of indicator and backlight nodes. On some drivers reading is a register access, and a flash controller clears its fault latch when read. Owner and mode are shown instead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="305"/>
+        <source>Sensors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="307"/>
+        <source>Accelerometer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="307"/>
+        <source>Measures linear acceleration on three axes (m/s²), including gravity — how the device is tilted and moved.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="308"/>
+        <source>Gyroscope</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="308"/>
+        <source>Measures angular velocity (°/s) — how fast the device is rotating around each axis.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="309"/>
+        <source>Magnetometer / Compass</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="309"/>
+        <source>Measures the magnetic field (µT); combined with the accelerometer it yields the compass heading (azimuth).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="310"/>
+        <source>Proximity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="310"/>
+        <source>A short-range sensor near the earpiece; reports near/far, used to blank the screen during calls.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="311"/>
+        <source>Ambient light</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="311"/>
+        <source>Measures surrounding brightness; drives automatic display brightness.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="312"/>
+        <source>GPS fix / TTFF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="312"/>
+        <source>A fix is a computed position from enough satellites. TTFF (time to first fix) is how long the receiver needed from cold start — seconds with a clear sky, longer indoors.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="313"/>
+        <source>Accuracy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="313"/>
+        <source>The estimated horizontal error radius of the position, in metres — smaller is better.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="317"/>
         <source>Camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="297"/>
+        <location filename="../qml/pages/HelpPage.qml" line="319"/>
         <source>Image sensor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="297"/>
+        <location filename="../qml/pages/HelpPage.qml" line="319"/>
         <source>The photodiode array that converts light to charge. Identified here by part number (e.g. Sony IMX486) read from the vendor camera modules.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="298"/>
+        <location filename="../qml/pages/HelpPage.qml" line="320"/>
         <source>Bayer CFA (RGGB)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="298"/>
+        <location filename="../qml/pages/HelpPage.qml" line="320"/>
         <source>Colour-filter array over the pixels: a repeating 2×2 of red, two greens, one blue. Each pixel captures one primary; the ISP interpolates the rest (demosaicing). Three primaries → full RGB.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="299"/>
+        <location filename="../qml/pages/HelpPage.qml" line="321"/>
         <source>Bit depth</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="299"/>
+        <location filename="../qml/pages/HelpPage.qml" line="321"/>
         <source>Bits per pixel in the raw readout, typically 10-bit (1024 levels per channel) on mobile sensors, before tone-mapping to 8-bit output.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="300"/>
+        <location filename="../qml/pages/HelpPage.qml" line="322"/>
         <source>Optical format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="300"/>
+        <location filename="../qml/pages/HelpPage.qml" line="322"/>
         <source>The sensor&apos;s diagonal size as a fraction of an inch (e.g. 1/2.9&quot;). With the pixel count it gives the pixel pitch. A datasheet spec of the part — not queryable from the device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="301"/>
+        <location filename="../qml/pages/HelpPage.qml" line="323"/>
         <source>ISP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="301"/>
+        <location filename="../qml/pages/HelpPage.qml" line="323"/>
         <source>Image Signal Processor — the SoC block that demosaics, denoises, white-balances and encodes the sensor stream.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="302"/>
+        <location filename="../qml/pages/HelpPage.qml" line="324"/>
         <source>CAMSS / cam-req-mgr</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="303"/>
+        <location filename="../qml/pages/HelpPage.qml" line="325"/>
         <source>EEPROM (calibration)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="303"/>
+        <location filename="../qml/pages/HelpPage.qml" line="325"/>
         <source>A small memory beside each module holding per-unit factory calibration: lens shading, autofocus range, colour.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="304"/>
+        <location filename="../qml/pages/HelpPage.qml" line="326"/>
         <source>Capture mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="304"/>
+        <location filename="../qml/pages/HelpPage.qml" line="326"/>
         <source>A sensor output configuration (resolution + frame rate + binning). Modes live in the HAL and are enumerable only on a running camera, not via V4L2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="305"/>
+        <location filename="../qml/pages/HelpPage.qml" line="327"/>
         <source>Camera provider crash (Xperia 10 III)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="305"/>
+        <location filename="../qml/pages/HelpPage.qml" line="327"/>
         <source>Defect: stopping a video recording crashes the Android camera service — CamX dlopens libswregistrationalgo.so from /odm/lib64, which the Sailfish port does not ship (sonyxperiadev bug #761, known since 2022). Fix — extract the proprietary library from the device&apos;s own Android firmware, then one of two ways: (1) copy it straight into /odm/lib64 (remount rw; simple, but gone after a reflash of odm), or (2) keep it in /data and bind-mount it over /odm/lib64 via a boot unit (survives OS updates). Both are system-wide, every camera app benefits. Step-by-step details in the README (GitHub only):
 github.com/JimKnopfIoT/harbour-advanced-camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="309"/>
+        <location filename="../qml/pages/HelpPage.qml" line="331"/>
         <source>Modem / SIM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="311"/>
+        <location filename="../qml/pages/HelpPage.qml" line="333"/>
         <source>IMEI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="311"/>
+        <location filename="../qml/pages/HelpPage.qml" line="333"/>
         <source>International Mobile Equipment Identity — the modem&apos;s unique 15-digit hardware serial. Identifies the device on the network, independent of the SIM.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="312"/>
+        <location filename="../qml/pages/HelpPage.qml" line="334"/>
         <source>IMSI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="312"/>
+        <location filename="../qml/pages/HelpPage.qml" line="334"/>
         <source>International Mobile Subscriber Identity — the subscriber ID stored on the SIM. Begins with the MCC+MNC of the home network.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="313"/>
+        <location filename="../qml/pages/HelpPage.qml" line="335"/>
         <source>ICCID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="313"/>
+        <location filename="../qml/pages/HelpPage.qml" line="335"/>
         <source>The SIM card&apos;s own serial number, printed on the card. Identifies the physical SIM, not the subscriber.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="314"/>
+        <location filename="../qml/pages/HelpPage.qml" line="336"/>
         <source>MCC / MNC</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="314"/>
+        <location filename="../qml/pages/HelpPage.qml" line="336"/>
         <source>Mobile Country Code + Mobile Network Code — together they name the operator (e.g. 262/01 = Germany, Telekom). Present both on the SIM (home) and from the network (serving).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="315"/>
+        <location filename="../qml/pages/HelpPage.qml" line="337"/>
         <source>APN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="315"/>
+        <location filename="../qml/pages/HelpPage.qml" line="337"/>
         <source>Access Point Name — the gateway name the modem uses to open a mobile-data (packet) connection to the operator.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="316"/>
+        <location filename="../qml/pages/HelpPage.qml" line="338"/>
         <source>Radio technology</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="316"/>
+        <location filename="../qml/pages/HelpPage.qml" line="338"/>
         <source>The active air interface: GSM (2G), UMTS (3G), LTE (4G), NR (5G). Determines throughput and latency.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="317"/>
+        <location filename="../qml/pages/HelpPage.qml" line="339"/>
         <source>Cell ID / LAC / TAC</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="317"/>
+        <location filename="../qml/pages/HelpPage.qml" line="339"/>
         <source>The identifier of the serving base station cell, and the Location/Tracking Area it belongs to. Used for paging and, roughly, for locating the device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="318"/>
+        <location filename="../qml/pages/HelpPage.qml" line="340"/>
         <source>Signal strength</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="318"/>
+        <location filename="../qml/pages/HelpPage.qml" line="340"/>
         <source>The received signal quality as a percentage from ofono. Underlying metric is RSRP/RSSI in dBm depending on technology.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="319"/>
+        <location filename="../qml/pages/HelpPage.qml" line="341"/>
         <source>PIN / PUK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="319"/>
+        <location filename="../qml/pages/HelpPage.qml" line="341"/>
         <source>PIN locks the SIM at power-on; after three wrong PINs the SIM blocks and needs the longer PUK to unlock.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="320"/>
+        <location filename="../qml/pages/HelpPage.qml" line="342"/>
         <source>ofono</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="320"/>
+        <location filename="../qml/pages/HelpPage.qml" line="342"/>
         <source>The telephony daemon on Sailfish OS. It talks to the modem over RIL and exposes modem, SIM, network and data state on D-Bus — the source of everything on this page.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="324"/>
+        <location filename="../qml/pages/HelpPage.qml" line="346"/>
         <source>USB &amp; charging</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="326"/>
+        <location filename="../qml/pages/HelpPage.qml" line="348"/>
         <source>USB-C / CC</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="326"/>
+        <location filename="../qml/pages/HelpPage.qml" line="348"/>
         <source>The Configuration Channel pins on a USB-C plug. They detect attach, cable orientation and the advertised current, and carry the Power Delivery messages.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="327"/>
+        <location filename="../qml/pages/HelpPage.qml" line="349"/>
         <source>Type-C current advertisement</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="327"/>
+        <location filename="../qml/pages/HelpPage.qml" line="349"/>
         <source>Before any negotiation, a resistor (Rp) on CC signals how much the port offers: 500 mA (default USB), 1.5 A or 3.0 A. Purely analog — no protocol.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="328"/>
+        <location filename="../qml/pages/HelpPage.qml" line="350"/>
         <source>A negotiation protocol over CC: source and sink agree on a voltage/current contract (5–48 V, up to 240 W in PD 3.1). Governs fast charging on modern devices.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="329"/>
+        <location filename="../qml/pages/HelpPage.qml" line="351"/>
         <source>Explicit / implicit contract</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="329"/>
+        <location filename="../qml/pages/HelpPage.qml" line="351"/>
         <source>The specification&apos;s word for the agreed supply — shown here as &quot;Negotiated&quot;, because that is what it says. Implicit: not a single PD message has been exchanged, 5 V applies from the CC resistors alone. Explicit: the source offered its objects, the sink requested one, the source accepted. Both sides are bound from then on — the source to deliver that voltage, the sink not to draw more than it asked for.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="330"/>
+        <location filename="../qml/pages/HelpPage.qml" line="352"/>
         <source>Quick Charge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="330"/>
+        <location filename="../qml/pages/HelpPage.qml" line="352"/>
         <source>Qualcomm&apos;s proprietary fast-charge scheme. Older versions signal on the D+/D− data lines; QC4+ rides on PD. Negotiated between charger and PMIC.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="331"/>
+        <location filename="../qml/pages/HelpPage.qml" line="353"/>
         <source>Data role (DFP/UFP/DRP)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="331"/>
+        <location filename="../qml/pages/HelpPage.qml" line="353"/>
         <source>DFP = host (downstream-facing), UFP = device (upstream-facing), DRP = dual-role that can be either. A phone is usually UFP to a PC and DFP to a stick.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="332"/>
+        <location filename="../qml/pages/HelpPage.qml" line="354"/>
         <source>VCONN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="332"/>
+        <location filename="../qml/pages/HelpPage.qml" line="354"/>
         <source>Power (on the unused CC2 pin) that feeds the active chip inside an electronically-marked cable, so it can answer identity queries.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="333"/>
+        <location filename="../qml/pages/HelpPage.qml" line="355"/>
         <source>e-marker</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="333"/>
+        <location filename="../qml/pages/HelpPage.qml" line="355"/>
         <source>A chip built into higher-rated USB-C cables that declares the cable&apos;s current rating, data speed and a coarse length. Read over PD, not from the wires.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="334"/>
+        <location filename="../qml/pages/HelpPage.qml" line="356"/>
         <source>SOP / SOP′ / SOP″</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="334"/>
+        <location filename="../qml/pages/HelpPage.qml" line="356"/>
         <source>PD packet targets: SOP addresses the device at the far end, SOP′/SOP″ address the cable&apos;s plugs (the e-markers). Discover Identity on SOP′ reads the cable.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="335"/>
+        <location filename="../qml/pages/HelpPage.qml" line="357"/>
         <source>TDR</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="335"/>
+        <location filename="../qml/pages/HelpPage.qml" line="357"/>
         <source>Time-Domain Reflectometry: send a fast edge and time its reflection to compute cable length and locate faults. Needs PHY support; phone USB PHYs expose none, so length is not measurable here.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="336"/>
+        <location filename="../qml/pages/HelpPage.qml" line="358"/>
         <source>Cable data on this device</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="337"/>
+        <location filename="../qml/pages/HelpPage.qml" line="359"/>
         <source>Open-ended cable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="337"/>
+        <location filename="../qml/pages/HelpPage.qml" line="359"/>
         <source>USB-C detects an attachment from the far end&apos;s CC resistors. A cable with nothing plugged into its other end is electrically invisible — the port reports no partner.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="338"/>
+        <location filename="../qml/pages/HelpPage.qml" line="360"/>
         <source>Readable PD/Type-C state</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="338"/>
+        <location filename="../qml/pages/HelpPage.qml" line="360"/>
         <source>What this device does expose — the CC current advertisement, PD/Type-C revision and VCONN — appears under Battery → Charging when a charger is attached.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="342"/>
+        <location filename="../qml/pages/HelpPage.qml" line="364"/>
         <source>Storage</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="344"/>
+        <location filename="../qml/pages/HelpPage.qml" line="366"/>
         <source>UFS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="344"/>
+        <location filename="../qml/pages/HelpPage.qml" line="366"/>
         <source>Universal Flash Storage — the current phone storage standard. Full-duplex serial link, command queueing; faster than the older eMMC.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="345"/>
+        <location filename="../qml/pages/HelpPage.qml" line="367"/>
         <source>SCSI / LUN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="345"/>
+        <location filename="../qml/pages/HelpPage.qml" line="367"/>
         <source>UFS speaks the SCSI command set. The chip presents several Logical Units (LUNs): one large user area plus small boot and RPMB units. The capacity shown is the user LUN.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="346"/>
+        <location filename="../qml/pages/HelpPage.qml" line="368"/>
         <source>Raw vs usable capacity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="346"/>
+        <location filename="../qml/pages/HelpPage.qml" line="368"/>
         <source>Marketing capacity counts raw NAND in powers of ten (64 GB = 64·10⁹). The OS counts usable space in powers of two (GiB) after over-provisioning and metadata, so 64 GB shows as ~59.6 GiB.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="347"/>
+        <location filename="../qml/pages/HelpPage.qml" line="369"/>
         <source>Over-provisioning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="347"/>
+        <location filename="../qml/pages/HelpPage.qml" line="369"/>
         <source>Spare NAND the controller keeps hidden for wear-levelling and bad-block replacement — part of why raw and usable differ.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="348"/>
+        <location filename="../qml/pages/HelpPage.qml" line="370"/>
         <source>Wear / lifetime</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="348"/>
+        <location filename="../qml/pages/HelpPage.qml" line="370"/>
         <source>UFS and eMMC report a health estimate (bDeviceLifeTimeEst) from the program/erase cycles used — not a percentage, but a step: 0x01 is 0–10 % used, 0x0A is 90–100 %, and 0x0B means the estimated lifetime is exceeded, with no upper figure attached. The percentage shown is the lower edge of the reported band; the exceeded step is named instead of converted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="349"/>
+        <location filename="../qml/pages/HelpPage.qml" line="371"/>
         <source>Spare blocks (pre-EOL)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="349"/>
+        <location filename="../qml/pages/HelpPage.qml" line="371"/>
         <source>A second, independent register: the controller keeps reserve blocks to replace worn ones, and reports whether under 80 %, 80 % or 90 % of them are consumed. It is the more telling of the two — if the lifetime estimate claims to be exhausted while the spare blocks still read normal, the chip contradicts itself and the estimate should not be trusted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="350"/>
+        <location filename="../qml/pages/HelpPage.qml" line="372"/>
         <source>Assessment — our reading</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="350"/>
+        <location filename="../qml/pages/HelpPage.qml" line="372"/>
         <source>Not a value the chip reports but this app&apos;s summary of the two registers above. Urgent when the chip calls its lifetime exceeded or 90 % of the spare blocks consumed; warning at 80 % of spare blocks or from wear step 8 of 11, which is 70 % of the estimated endurance; good below that. The two registers are the better evidence — this line only saves reading them.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="351"/>
+        <location filename="../qml/pages/HelpPage.qml" line="373"/>
         <source>Block / erase block</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="351"/>
+        <location filename="../qml/pages/HelpPage.qml" line="373"/>
         <source>NAND is read/written in pages but erased in larger blocks. Logical blocks (sectors, usually 4 KiB) are the unit the filesystem addresses.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="352"/>
+        <location filename="../qml/pages/HelpPage.qml" line="374"/>
         <source>RPMB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="352"/>
+        <location filename="../qml/pages/HelpPage.qml" line="374"/>
         <source>Replay-Protected Memory Block — a small authenticated LUN for anti-rollback and secure counters, not general storage.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="353"/>
+        <location filename="../qml/pages/HelpPage.qml" line="375"/>
         <source>Data moved</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="353"/>
+        <location filename="../qml/pages/HelpPage.qml" line="375"/>
         <source>Bytes read from and written to a storage device, counted by the kernel from the moment it registered that device — not from the start of the phone. For built-in storage the two are seconds apart; a memory card counts from when it was inserted, and starts again if it is taken out and put back. Only requests that reached the device are counted: anything served from the cache never appears, so the figure is lower than what programs asked for.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="354"/>
+        <location filename="../qml/pages/HelpPage.qml" line="376"/>
         <source>Backup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="354"/>
+        <location filename="../qml/pages/HelpPage.qml" line="376"/>
         <source>Better to have it and not need it than to need it and not have it. A regular backup — a copy of your data on a second medium — protects you from losing what matters when storage fails, the phone goes missing or something is deleted by mistake. Flash gives no warning before it goes; the copy has to exist beforehand.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="358"/>
+        <location filename="../qml/pages/HelpPage.qml" line="380"/>
         <source>Since boot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="360"/>
+        <location filename="../qml/pages/HelpPage.qml" line="382"/>
         <source>Uptime</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="360"/>
+        <location filename="../qml/pages/HelpPage.qml" line="382"/>
         <source>Time since the last start, deep sleep included — the phone counts it even while suspended.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="361"/>
+        <location filename="../qml/pages/HelpPage.qml" line="383"/>
         <source>Awake</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="361"/>
+        <location filename="../qml/pages/HelpPage.qml" line="383"/>
         <source>The part of the uptime the system was really running. Two kernel clocks make it visible: one stops during suspend, the other keeps going, and the gap between them is sleep.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="362"/>
+        <location filename="../qml/pages/HelpPage.qml" line="384"/>
         <source>Deep sleep</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="363"/>
+        <location filename="../qml/pages/HelpPage.qml" line="385"/>
         <source>Screen-on time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="363"/>
+        <location filename="../qml/pages/HelpPage.qml" line="385"/>
         <source>How long the display was up since the last start. MCE, the Sailfish power daemon, holds a wakelock for exactly that period and the kernel sums it — so the figure exists without anything recording it. It runs a few seconds over per switch-off, because the lock is released after the display is already dark.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="364"/>
+        <location filename="../qml/pages/HelpPage.qml" line="386"/>
         <source>Wakelock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="364"/>
+        <location filename="../qml/pages/HelpPage.qml" line="386"/>
         <source>A request that keeps the system from suspending, held by a driver or a program for as long as it needs the phone awake. The kernel counts how often each one was taken and how long it was held.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="365"/>
+        <location filename="../qml/pages/HelpPage.qml" line="387"/>
         <source>Wake source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="365"/>
+        <location filename="../qml/pages/HelpPage.qml" line="387"/>
         <source>Hardware or a driver that can end deep sleep: an incoming packet, the modem, a timer, a key. The count says how often it did, not whether it was justified.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="366"/>
+        <location filename="../qml/pages/HelpPage.qml" line="388"/>
         <source>Suspend attempt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="366"/>
+        <location filename="../qml/pages/HelpPage.qml" line="388"/>
         <source>The kernel tries to go down whenever nothing holds it awake. Each try either succeeds or is abandoned — a wakeup arriving mid-attempt is enough to abort it, which is why failed attempts are ordinary and not a defect in themselves.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="367"/>
+        <location filename="../qml/pages/HelpPage.qml" line="389"/>
         <source>Freezing tasks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="367"/>
+        <location filename="../qml/pages/HelpPage.qml" line="389"/>
         <source>First step of a suspend: all processes are halted at a safe point. If one refuses or a driver is still busy, the attempt stops right there and the step is recorded.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="368"/>
+        <location filename="../qml/pages/HelpPage.qml" line="390"/>
         <source>EBUSY (-16)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="368"/>
+        <location filename="../qml/pages/HelpPage.qml" line="390"/>
         <source>The error a driver returns when it cannot be put to sleep at that moment because it is still working. It names the device that blocked the attempt.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4552,27 +4828,42 @@ github.com/JimKnopfIoT/harbour-advanced-camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="302"/>
+        <location filename="../qml/pages/HelpPage.qml" line="246"/>
+        <source>An optional root helper that lets the app inspect processes of other users (system daemons) fully, read the kernel charger log, pull journal excerpts for a bug report and switch indicator LEDs for the LED test where they belong to the system. Reading is limited to a fixed list of files; signals and renice reach one named process, the same ones the process detail page offers without root; LED writes reach indicator LEDs only, never one a trigger drives.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="285"/>
+        <source>On the Jolla Phone (2026) the FM receiver hangs off the same connectivity driver (conninfra) as Wi-Fi, Bluetooth and GPS, and is reached through /dev/fm.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="289"/>
+        <source>There is one chip, tuned to one frequency at a time, for every program that opens /dev/fm. If a radio app holds it, the test does not start, because switching the chip off at the end would cut that app off.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/HelpPage.qml" line="324"/>
         <source>Qualcomm&apos;s camera subsystem in the kernel. It exposes control nodes (cam-req-mgr, cam_sync), not per-camera capture devices — capture runs through the userspace HAL (camx). Other chipsets name their nodes differently (MediaTek: camera-isp, camera-dip); the rule that the kernel shows control nodes and not cameras is the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="336"/>
+        <location filename="../qml/pages/HelpPage.qml" line="358"/>
         <source>Where the charger stack exposes no cable node — the Qualcomm PMIC&apos;s qpnp-pdphy does not — an e-marker&apos;s rating, length and speed cannot be read, because Discover Identity/SOP′ is not surfaced. A kernel with the mainline tcpm driver has the typec class and shows what it knows; even there the cable directory is only present if the port driver populates it. For real cable data, a dedicated USB-C PD analyzer / cable tester reads the e-marker independently of the phone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="362"/>
+        <location filename="../qml/pages/HelpPage.qml" line="384"/>
         <source>The part of the uptime that passed with the system suspended. Which kind of suspend depends on the phone, and /sys/power/mem_sleep names it: with suspend-to-RAM (S3) the CPU is off and only a wakeup source brings it back; with suspend-to-idle (s2idle) the CPU stays powered in its deepest idle state while everything else is frozen. Both stop the clock this figure is measured with, the second saves less energy. Either way this is where a phone spends most of its day.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="384"/>
+        <location filename="../qml/pages/HelpPage.qml" line="406"/>
         <source>Glossary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/HelpPage.qml" line="392"/>
+        <location filename="../qml/pages/HelpPage.qml" line="414"/>
         <source>Every figure the app shows, explained. Tap a term to reveal its details.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -8935,6 +9226,249 @@ Exactly one port can be the one in use, because that is what the audio policy se
     </message>
 </context>
 <context>
+    <name>LedMon</name>
+    <message>
+        <location filename="../src/ledmon.cpp" line="311"/>
+        <source>No indicator LED this app may switch.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ledmon.cpp" line="341"/>
+        <source>Writing %1 of %2 was refused.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ledmon.cpp" line="386"/>
+        <source>Done. %1 was changed by another program during the test and keeps that value.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ledmon.cpp" line="390"/>
+        <source>Done. The previous values are back.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ledmon.cpp" line="407"/>
+        <source>The vibration motor cannot be switched by this app.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ledmon.cpp" line="446"/>
+        <source>Three pulses of 150 ms sent. Whether they were felt is for the hand to judge.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ledmon.cpp" line="447"/>
+        <source>Writing to %1 was refused.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>LedPage</name>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="57"/>
+        <source>indicator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="58"/>
+        <source>backlight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="59"/>
+        <source>vibration motor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="60"/>
+        <source>camera flash</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="61"/>
+        <source>other</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="84"/>
+        <source>LEDs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="87"/>
+        <source>Indicator test</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="92"/>
+        <source>Each indicator channel lights alone at full brightness for 1.5 s, then all together. Watch the LED; the circle below shows what should be on. Afterwards the previous values are written back.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="120"/>
+        <source>all channels</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="121"/>
+        <source>the chip&apos;s own pattern</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="135"/>
+        <source>Not started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="142"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="142"/>
+        <source>Test the colours</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="148"/>
+        <source>Chip pattern</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="158"/>
+        <source>No indicator LED found. The test only switches LEDs whose name names a colour or a status light; flash, backlight and vibration motor are left alone.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="173"/>
+        <source>Root helper active</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="173"/>
+        <source>With the root helper</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="180"/>
+        <source>brightness of %1 belongs to the system. The helper switches it for the test; without it these channels are left out.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="190"/>
+        <source>“Chip pattern” starts the LED controller&apos;s own blinking on %1 for 6 s. It runs in the chip, without the processor. The switch for it belongs to root.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="200"/>
+        <source>Settings → Use the root helper.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="208"/>
+        <source>Vibration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="215"/>
+        <source>Three short pulses written straight to %1. This goes past the feedback service and the profile, so the motor runs even with vibration switched off in the settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="234"/>
+        <source>Vibrate 3× briefly</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="243"/>
+        <source>activate and duration of %1 are not writable for this app.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="250"/>
+        <source>/sys/class/leds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="284"/>
+        <source>Driver</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="290"/>
+        <source>Device tree</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="296"/>
+        <source>Device</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="302"/>
+        <source>Brightness</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="304"/>
+        <source>%1 of %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="305"/>
+        <source>max. %1 · not read</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="308"/>
+        <source>Trigger</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="311"/>
+        <source>none selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="312"/>
+        <source>%1 available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="317"/>
+        <source>Switchable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="319"/>
+        <source>no — a trigger drives it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="320"/>
+        <source>yes, without root</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="321"/>
+        <source>root helper only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/pages/LedPage.qml" line="332"/>
+        <source>%n attribute(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/LedPage.qml" line="353"/>
+        <source>Attribute values are not read here: on some drivers a read is a register access, and flash controllers clear their fault latch on reading. Shown are owner and mode; amber marks a file any program may write.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MainPage</name>
     <message>
         <location filename="../qml/pages/MainPage.qml" line="79"/>
@@ -9477,6 +10011,43 @@ Exactly one port can be the one in use, because that is what the audio policy se
     <message>
         <location filename="../qml/pages/OverviewPage.qml" line="576"/>
         <source>paired</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/OverviewPage.qml" line="590"/>
+        <source>FM radio</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/OverviewPage.qml" line="596"/>
+        <source>Built-in receiver — tap for a function test</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/OverviewPage.qml" line="597"/>
+        <source>Built-in receiver — tap for details</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/OverviewPage.qml" line="609"/>
+        <source>LEDs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/pages/OverviewPage.qml" line="616"/>
+        <source>%n indicator channel(s) — tap for a function test</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/OverviewPage.qml" line="617"/>
+        <source>, vibration motor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/OverviewPage.qml" line="618"/>
+        <source>No indicator LED — tap for details</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -10671,16 +11242,17 @@ Do not touch</source>
         <source>• list open files, sockets and watchers of processes belonging to other users
 • read the WLAN firmware counters in debugfs
 • read the kernel charger log
-• pull journal and kernel-log excerpts for a bug report</source>
+• pull journal and kernel-log excerpts for a bug report
+• switch indicator LEDs for the LED test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/RootConfirmDialog.qml" line="49"/>
+        <location filename="../qml/pages/RootConfirmDialog.qml" line="50"/>
         <source>Journal excerpts come from the whole system and can contain sensitive data. Read them before passing them on.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/RootConfirmDialog.qml" line="57"/>
+        <location filename="../qml/pages/RootConfirmDialog.qml" line="58"/>
         <source>The helper stops itself once the app is gone. It is never started at boot.</source>
         <translation type="unfinished"></translation>
     </message>
