@@ -138,7 +138,7 @@ affected or fixed (rpm changelog names the CVE, or the installed version
 lies above the affected range stated in the CVE), ✘ probably affected
 (version inside the range, or the package predates the CVE), ▢ unknown.
 
-AI assisted development
+LLM assisted development
 
 ## License
 
