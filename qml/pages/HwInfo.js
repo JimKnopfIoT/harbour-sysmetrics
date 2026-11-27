@@ -1818,6 +1818,42 @@ function pogoPins() {
             rows: [] })
     }
 
+    // ---- which bus the contacts can carry -------------------------------
+    // The boot loader classifies the board the contacts sit on and the kernel
+    // publishes that. The first generation is "i2c": the controller itself is
+    // I3C-capable, but on that board the bus works as I2C only. Any other
+    // value is shown as it stands rather than read as a promise.
+    var bus = live.bus
+    if (bus && bus.boardType !== undefined) {
+        var br = []
+        br.push(row(qsTr("Bus on the contacts"),
+                    bus.boardType === "i2c" ? qsTr("I²C only")
+                  : bus.boardType === "i3c" ? qsTr("I²C and I³C")
+                  : bus.boardType,
+                    { right: bus.boardType === "i2c" ? qsTr("first board generation") : "",
+                      active: bus.boardType === "i3c" }))
+        br.push(row(qsTr("Reported by"),
+                    bus.boardTypeSource === "sysfs" ? qsTr("the boot loader, via yft_sub_board")
+                                                    : qsTr("the boot loader"),
+                    { right: "yft_sub_board_type=" + bus.boardType }))
+        if (bus.controller !== undefined)
+            br.push(row(qsTr("Controller"), bus.controller, { mono: true }))
+        if (bus.i3cBus !== undefined)
+            br.push(row(qsTr("Kernel I³C bus"), bus.i3cBus + (bus.i3cMode ? " · " + bus.i3cMode : ""),
+                        { mono: true }))
+        if (bus.i3cHz !== undefined)
+            br.push(row(qsTr("I³C clock, configured"), (bus.i3cHz / 1e6) + " MHz"))
+        if (bus.i2cHz !== undefined)
+            br.push(row(qsTr("I²C clock, configured"), (bus.i2cHz / 1000) + " kHz"))
+        s.push({ title: qsTr("Accessory bus"),
+            note: bus.boardType === "i2c"
+                  ? qsTr("Only I²C is read on this board; I³C is not supported.")
+                  : bus.boardType === "i3c"
+                  ? qsTr("This board supports I²C and I³C.")
+                  : qsTr("Board type as reported."),
+            rows: br })
+    }
+
     // ---- the cover itself, in words -------------------------------------
     // The heading the reader is looking for. A cover is not a memory chip:
     // the chip only lets it say who it is. What it does beyond that — charge

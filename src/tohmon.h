@@ -61,7 +61,9 @@ public:
 
     // The live state of the contacts. Keys: supported, attached, intState,
     // intText, idMillivolt, idClassKohm, powerOut, interrupts, plus the controller's own
-    // description (compatible, intGpio, powerGpio, adcChannel, irq).
+    // description (compatible, intGpio, powerGpio, adcChannel, irq), and
+    // `bus`: boardType ("i2c" = first generation, I2C only), boardTypeSource,
+    // controller, i3cBus, i3cMode, i3cHz, i2cHz — whichever exist.
     // `attached` follows the maker's rule that a cover pulls the interrupt
     // line low; it is a reading of intState, not a separate measurement.
     QVariantMap pins() const;
@@ -97,8 +99,10 @@ signals:
 
 private:
     void refresh();
+    void readBus();
 
     bool m_supported = false;
+    QVariantMap m_bus;
     QVariantMap m_pins;
     int m_timer = 0;
 

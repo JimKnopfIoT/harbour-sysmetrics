@@ -38,6 +38,14 @@ const char *CSD_READER  = "/usr/libexec/csd/toh-memory";
 // the number did change: i2c-0 on 5.2.0.17, i2c-13 on 5.2.0.18.
 const char *TOH_I2C_NODE = "/sys/devices/platform/soc/11d00000.i2c";
 
+// Which generation of the board carrying the contacts this phone has. The boot
+// loader tells the kernel on its command line (yft_sub_board_type=…) and the
+// driver yft_sub_board republishes it here. "i2c" marks the first generation,
+// on which the bus runs as I2C only; I3C does not work on it. The file is
+// world-writable on the device — it is only ever read.
+const char *SUB_BOARD_TYPE = "/sys/class/yft_sub_board/type";
+const char *CMDLINE_KEY    = "yft_sub_board_type=";
+
 // The system's TOH service, from 5.2.0.18 on.
 const char *TOHD_SERVICE = "org.sailfishos.tohd1";
 const char *TOHD_PATH    = "/org/sailfishos/tohd1/toh";
@@ -368,7 +376,58 @@ TohMon::TohMon(QObject *parent)
 {
     m_supported = QFile::exists(QString::fromLatin1(CLASS_DIR)
                                 + QLatin1String("/yft_pogo_pin_int_state"));
+    readBus();
     refresh();
+}
+
+// The bus behind the contacts. Fixed from boot on, so read once: what the
+// boot loader classified the board as, and what the controller and the
+// kernel's I3C core say about themselves.
+void TohMon::readBus()
+{
+    QString type = textOf(QString::fromLatin1(SUB_BOARD_TYPE));
+    QString source;
+    if (!type.isEmpty()) {
+        source = QStringLiteral("sysfs");
+    } else {
+        // The driver may be missing while the boot loader still said it.
+        const QString cmd = QString::fromLatin1(slurp(QStringLiteral("/proc/cmdline"), 8192));
+        const QStringList words = cmd.split(QLatin1Char(' '), QString::SkipEmptyParts);
+        for (const QString &w : words) {
+            if (w.startsWith(QLatin1String(CMDLINE_KEY))) {
+                type = w.mid(int(qstrlen(CMDLINE_KEY))).trimmed();
+                source = QStringLiteral("cmdline");
+            }
+        }
+    }
+    if (!type.isEmpty()) {
+        m_bus.insert(QStringLiteral("boardType"), type.toLower());
+        m_bus.insert(QStringLiteral("boardTypeSource"), source);
+    }
+
+    const QString node = QString::fromLatin1(TOH_I2C_NODE);
+    const QString compat = QString::fromLatin1(slurp(node + QLatin1String("/of_node/compatible"), 256))
+                               .replace(QLatin1Char('\0'), QLatin1Char(' ')).trimmed();
+    if (!compat.isEmpty())
+        m_bus.insert(QStringLiteral("controller"), compat);
+
+    // The kernel's I3C core registers a bus below the controller when the
+    // I3C master driver bound to it; its mode says how it drives the lines.
+    const QStringList i3c = QDir(node).entryList(QStringList() << QStringLiteral("i3c-*"),
+                                                 QDir::Dirs | QDir::NoDotAndDotDot);
+    if (!i3c.isEmpty()) {
+        const QString b = node + QLatin1Char('/') + i3c.first() + QLatin1Char('/');
+        m_bus.insert(QStringLiteral("i3cBus"), i3c.first());
+        const QString mode = textOf(b + QLatin1String("mode"));
+        if (!mode.isEmpty())
+            m_bus.insert(QStringLiteral("i3cMode"), mode);
+        const int hz = intOf(b + QLatin1String("i3c_scl_frequency"));
+        if (hz > 0)
+            m_bus.insert(QStringLiteral("i3cHz"), hz);
+        const int i2cHz = intOf(b + QLatin1String("i2c_scl_frequency"));
+        if (i2cHz > 0)
+            m_bus.insert(QStringLiteral("i2cHz"), i2cHz);
+    }
 }
 
 void TohMon::setWatching(bool on)
@@ -405,6 +464,8 @@ void TohMon::refresh()
 {
     QVariantMap m;
     m.insert(QStringLiteral("supported"), m_supported);
+    if (!m_bus.isEmpty())
+        m.insert(QStringLiteral("bus"), m_bus);
     if (!m_supported) {
         if (m_pins != m) { m_pins = m; emit pinsChanged(); }
         return;

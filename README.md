@@ -65,6 +65,8 @@ recognise documented device issues and explain their fixes.
   interrupt line, the voltage at the identify contact and the 5 V output,
   read live from the pogo-pin controller and drawn onto the connector —
   grey is what a contact is for, orange what the device reports right now.
+  Whether the board carrying the contacts supports I²C only or I³C as well,
+  as the boot loader reports it (yft_sub_board_type).
   The memory chip in an attached cover is read over I²C and taken apart:
   vendor and product, the CBOR payload naming the cover, the checksum
   recomputed, the chip's size and address width measured on the bus, the
